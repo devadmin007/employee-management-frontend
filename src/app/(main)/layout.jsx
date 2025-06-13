@@ -2,6 +2,8 @@
 import React from "react";
 import Box from "@mui/material/Box";
 import { styled, useTheme } from "@mui/material/styles";
+import Sidebar from "@/layout/Sidebar/page";
+import Header from "@/layout/header/page";
 
 const MainWrapper = styled(Box)(({ theme }) => ({
   height: "100vh",
@@ -18,7 +20,6 @@ const SidebarWrapper = styled(Box)(({ theme }) => ({
 const BodyWrapper = styled(Box)(({ theme }) => ({
   width: "80%",
   height: "100%",
-  backgroundColor: "red",
 }));
 
 const HeaderWrapper = styled(Box)(({ theme }) => ({
@@ -39,9 +40,13 @@ const ContentWrapper = styled(Box)(({ theme }) => ({
 const MainLayout = ({ children }) => {
   return (
     <MainWrapper>
-      <SidebarWrapper>{/* <Sidebar /> */}</SidebarWrapper>
+      <SidebarWrapper>
+        <Sidebar />
+      </SidebarWrapper>
       <BodyWrapper>
-        <HeaderWrapper>{/* <Header /> */}</HeaderWrapper>
+        <HeaderWrapper>
+          <Header />
+        </HeaderWrapper>
         <ContentWrapper>{children}</ContentWrapper>
       </BodyWrapper>
     </MainWrapper>
