@@ -3,6 +3,10 @@
   padding: 0;
   box-sizing: border-box;
 }
-#basic-button{
+#basic-button {
   width: 40px;
 }
+.signUpText {
+  text-align: center;
+}
+

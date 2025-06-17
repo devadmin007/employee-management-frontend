@@ -2,10 +2,10 @@ import { Box, styled, Typography } from "@mui/material";
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { GroupsRounded } from "@mui/icons-material";
+import { usePathname } from "next/navigation";
 
 const SidebarMenuContainerItemText = styled(Typography)(({ theme }) => ({
-  fontSize: "20px",
+  fontSize: "18px",
 }));
 const SidebarContent = styled(Box)(({ theme }) => ({
   height: "100vh",
@@ -15,7 +15,6 @@ const SidebarContent = styled(Box)(({ theme }) => ({
 
 const SidebarLogo = styled(Box)(({ theme }) => ({
   height: "70px",
-  //   backgroundColor: "red",
   width: "100%",
   alignItems: "center",
   justifyContent: "center",
@@ -28,28 +27,42 @@ const SidebarMenuContainer = styled(Box)(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
   color: "white",
-  padding: "30px",
+  paddingInline: "30px",
+  paddingBlock: "17px",
 }));
 
-const SidebarMenuContainerItem = styled(Link)(({ theme }) => ({
+const SidebarMenuContainerItem = styled(Link, {
+  shouldForwardProp: (prop) => prop !== "active",
+})(({ theme, active }) => ({
   color: "white",
+  backgroundColor: active ? "orange" : "#15283C",
   textDecoration: "none",
-  fontSize: "22px",
-  marginBlock: "10px",
+  height: "55px",
+  fontSize: "20px",
   fontFamily: theme.typography.fontFamily,
   alignItems: "center",
   display: "flex",
   gap: 15,
+  paddingLeft: theme.spacing(2),
+  paddingRight: theme.spacing(2),
+  borderRadius: 8,
+  transition: "all 0.3s ease",
+  "&:hover": {
+    backgroundColor: active ? "orange" : "#173351",
+    color: "white",
+  },
 }));
 
 const Sidebar = () => {
+  const pathname = usePathname();
+
   return (
     <SidebarContent>
       <Link href="/dashboard">
         <SidebarLogo>
           <Image
             src="/assets/technithunder-logo2.svg"
-            width={290}
+            width={270}
             height={70}
             alt="Picture of the author"
           />
@@ -57,17 +70,59 @@ const Sidebar = () => {
       </Link>
 
       <SidebarMenuContainer>
-        <SidebarMenuContainerItem href="leave">
-          <Image src="/icons/leave.svg" height={25} width={25}></Image>
-          <SidebarMenuContainerItemText>Leave</SidebarMenuContainerItemText>
+        <SidebarMenuContainerItem
+          href="/dashboard"
+          active={pathname === "/dashboard"}
+        >
+          <Image
+            src="/icons/dashboard.svg"
+            height={22}
+            width={22}
+            alt="Leave icon"
+          />
+          <Typography>Dashboard</Typography>
         </SidebarMenuContainerItem>
-        <SidebarMenuContainerItem href="/employee">
-          <GroupsRounded />
-          <SidebarMenuContainerItemText>Employee</SidebarMenuContainerItemText>
+        <SidebarMenuContainerItem href="/leave" active={pathname === "/leave"}>
+          <Image
+            src="/icons/leave.svg"
+            height={22}
+            width={22}
+            alt="Leave icon"
+          />
+          <Typography>Leave</Typography>
         </SidebarMenuContainerItem>
-        <SidebarMenuContainerItem href="/holidays">
-          <Image src="/icons/holiday.svg" height={25} width={25}></Image>
+        <SidebarMenuContainerItem
+          href="/employee"
+          active={pathname === "/employee"}
+        >
+          <Image
+            src="/icons/employees.svg"
+            height={22}
+            width={22}
+            alt=""
+          ></Image>
+          <SidebarMenuContainerItemText>Employees</SidebarMenuContainerItemText>
+        </SidebarMenuContainerItem>
+        <SidebarMenuContainerItem
+          href="/holidays"
+          active={pathname === "/holidays"}
+        >
+          <Image src="/icons/holiday.svg" height={22} width={22} alt=""></Image>
           <SidebarMenuContainerItemText>Holidays</SidebarMenuContainerItemText>
+        </SidebarMenuContainerItem>
+        <SidebarMenuContainerItem
+          href="/customizations/teams"
+          active={pathname === "/customizations/teams"}
+        >
+          <Image
+            src="/icons/Customizations.svg"
+            height={22}
+            width={22}
+            alt=""
+          ></Image>
+          <SidebarMenuContainerItemText>
+            Customizations
+          </SidebarMenuContainerItemText>
         </SidebarMenuContainerItem>
       </SidebarMenuContainer>
     </SidebarContent>
