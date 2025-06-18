@@ -6,50 +6,6 @@ const page = () => {
   return (
     <div>
       <Typography>welcome</Typography>
-      <Typography>welcome</Typography>
-      <Typography>welcome</Typography>
-      <Typography>welcome</Typography>
-      <Typography>welcome</Typography>
-      <Typography>welcome</Typography>
-      <Typography>welcome</Typography>
-      <Typography>welcome</Typography>
-      <Typography>welcome</Typography>
-      <Typography>welcome</Typography>
-      <Typography>welcome</Typography>
-      <Typography>welcome</Typography>
-      <Typography>welcome</Typography>
-      <Typography>welcome</Typography>
-      <Typography>welcome</Typography>
-      <Typography>welcome</Typography>
-      <Typography>welcome</Typography>
-      <Typography>welcome</Typography>
-      <Typography>welcome</Typography>
-      <Typography>welcome</Typography>
-      <Typography>welcome</Typography>
-      <Typography>welcome</Typography>
-      <Typography>welcome</Typography>
-      <Typography>welcome</Typography>
-      <Typography>welcome</Typography>
-      <Typography>welcome</Typography>
-      <Typography>welcome</Typography>
-      <Typography>welcome</Typography>
-      <Typography>welcome</Typography>
-      <Typography>welcome</Typography>
-      <Typography>welcome</Typography>
-      <Typography>welcome</Typography>
-      <Typography>welcome</Typography>
-      <Typography>welcome</Typography>
-      <Typography>welcome</Typography>
-      <Typography>welcome</Typography>
-      <Typography>welcome</Typography>
-      <Typography>welcome</Typography>
-      <Typography>welcome</Typography>
-      <Typography>welcome</Typography>
-      <Typography>welcome</Typography>
-      <Typography>welcome</Typography>
-      <Typography>welcome</Typography>
-      <Typography>welcome</Typography>
-      <Typography>welcome</Typography>
     </div>
   );
 };

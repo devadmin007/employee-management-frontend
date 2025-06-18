@@ -8,13 +8,15 @@ import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { styled } from "@mui/material/styles";
-import { loginApi } from "@/api";
-import { useRouter } from "next/navigation";
+import { signUpApi } from "@/api";
+import { MenuItem, Select } from "@mui/material";
 import { toast } from "react-toastify";
+import { useRouter } from "next/navigation";
 
-const loginSchema = yup.object().shape({
+const signupSchema = yup.object().shape({
   username: yup.string().required("Required"),
   password: yup.string().required("Required"),
+  role: yup.string().required("Required"),
 });
 
 const SignupMainContainer = styled(Box)(({ theme }) => ({
@@ -44,7 +46,9 @@ const SignupContainer = styled(Box)(({ theme }) => ({
   },
 }));
 
-const Login = () => {
+const roles = ["HR", "EMPLOYEE", "ADMIN", "PROJECT_MANAGER"];
+
+const SignUP = () => {
   const router = useRouter();
   const {
     control,
@@ -54,19 +58,19 @@ const Login = () => {
     defaultValues: {
       username: "",
       password: "",
+      role: "",
     },
-    resolver: yupResolver(loginSchema),
+    resolver: yupResolver(signupSchema),
   });
   const [isLoading, setIsLoading] = useState(false);
 
   const onSubmit = async (data) => {
     setIsLoading(true);
     try {
-      const response = await loginApi(data);
-      console.log(response);
-      if (response?.data?.status == "success") {
-        toast.success(response.data.message);
-        router.push("/dashboard");
+      const response = await signUpApi(data);
+      if (response?.data?.status === "success") {
+        toast.success(response?.data.message);
+        router.push("/login");
       }
     } catch (e) {
       console.log(e);
@@ -89,7 +93,7 @@ const Login = () => {
             },
           }}
         >
-          Login
+          SignUp
         </Typography>
 
         <Typography
@@ -104,7 +108,7 @@ const Login = () => {
             textAlign: "center",
           }}
         >
-          Welcome user, please login to continue
+          Welcome user, please sign up to continue
         </Typography>
         <form onSubmit={handleSubmit(onSubmit)}>
           <Box sx={{ my: 3 }}>
@@ -131,7 +135,6 @@ const Login = () => {
               <Controller
                 name="password"
                 control={control}
-                defaultValue=""
                 render={({ field }) => (
                   <TextField
                     {...field}
@@ -142,6 +145,28 @@ const Login = () => {
                     error={Boolean(errors.password)}
                     helperText={errors.password?.message}
                   />
+                )}
+              />
+
+              <Typography variant="subtitle1" sx={{ mt: 2 }}>
+                Role
+              </Typography>
+              <Controller
+                name="role"
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    fullWidth
+                    {...field}
+                    error={Boolean(errors.role)}
+                    helperText={errors.role?.message}
+                  >
+                    {roles.map((option, index) => (
+                      <MenuItem key={index} value={option}>
+                        {option}
+                      </MenuItem>
+                    ))}
+                  </Select>
                 )}
               />
             </Box>
@@ -164,9 +189,8 @@ const Login = () => {
                   "linear-gradient(90deg, rgb(239, 131, 29) 0%, rgb(245, 134, 55) 27%, rgb(244, 121, 56) 100%)",
                 textTransform: "none",
               }}
-              // onClick={handleLogin}
             >
-              Login
+              sign up
             </Button>
           </Box>
         </form>
@@ -175,4 +199,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default SignUP;
