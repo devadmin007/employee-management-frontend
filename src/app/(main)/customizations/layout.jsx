@@ -10,13 +10,13 @@ const CustomizationMainWrapper = styled(Box)(({ theme }) => ({
 }));
 
 const CustomizationSidebar = styled(Box)(({ theme }) => ({
-  width: "23%",
+  width: "20%",
   height: "100%",
   backgroundColor: "white",
 }));
 
 const CustomizationContent = styled(Box)(({ theme }) => ({
-  width: "77%",
+  width: "80%",
   height: "100%",
 }));
 

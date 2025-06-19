@@ -10,6 +10,7 @@ import {
   Paper,
   Stack,
   TextField,
+  Typography,
 } from "@mui/material";
 import React, { useState } from "react";
 import { DataGrid } from "@mui/x-data-grid";
@@ -47,11 +48,32 @@ const Page = () => {
   };
 
   const columns = [
-    { field: "id", headerName: "ID", width: 70 },
-    { field: "name", headerName: "Name", width: 130 },
-    { field: "createdDate", headerName: "Created Date", width: 150 },
-    { field: "edit", headerName: "Edit", width: 130 },
-    { field: "delete", headerName: "Delete", width: 130 },
+    { field: "id", headerName: "ID", flex: 1, minWidth: 140 },
+    {
+      field: "name",
+      headerName: "Name",
+      flex: 1,
+      minWidth: 140,
+      // renderCell: (params) => {
+      //   return <Typography fontWeight={"900"}>{params?.row?.name}</Typography>;
+      // },
+    },
+    {
+      field: "createdDate",
+      headerName: "Created Date",
+
+      flex: 1,
+      minWidth: 140,
+    },
+    {
+      field: "actions",
+      headerName: "Actions",
+      flex: 1,
+      minWidth: 140,
+      renderCell: (params) => {
+        return <Button>Hello</Button>;
+      },
+    },
   ];
 
   const paginationModel = { page: 0, pageSize: 7 };
@@ -98,7 +120,10 @@ const Page = () => {
             />
           </DialogContent>
           <DialogActions>
-            <Button onClick={handleClose} sx={{ fontSize: "16px", color: "black" }}>
+            <Button
+              onClick={handleClose}
+              sx={{ fontSize: "16px", color: "black" }}
+            >
               Cancel
             </Button>
             <Button
@@ -123,6 +148,9 @@ const Page = () => {
           <DataGrid
             rows={rows}
             columns={columns}
+            disableColumnFilter
+            disableColumnSorting
+            disableColumnMenu
             initialState={{ pagination: { paginationModel } }}
             pageSizeOptions={[5, 10]}
             sx={{ border: 0 }}
