@@ -7,6 +7,7 @@ const customizationsArray = [
   { title: "skills", url: "/customizations/skills" },
   { title: "Departments", url: "/customizations/departments" },
   { title: "Designations", url: "/customizations/designations" },
+  { title: "manager", url: "/customizations/manager" },
   { title: "Teams", url: "/customizations/teams" },
 ];
 

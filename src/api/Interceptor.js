@@ -8,11 +8,10 @@ const axiosInstanceApi = axios.create({
 
 axiosInstanceApi.interceptors.request.use(
   async (config) => {
-    // const token = store.getState().auth.user?.token;
-    // if (token) {
-    //     config.headers.Authorization = `Bearer ${token}`;
-    //     console.log('token', token);
-    // }
+    const token = localStorage.getItem("token");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
     if (config.data instanceof FormData) {
       config.headers["Content-Type"] = "multipart/form-data";
     } else {

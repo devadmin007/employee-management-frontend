@@ -65,6 +65,8 @@ const Login = () => {
       const response = await loginApi(data);
       console.log(response);
       if (response?.data?.status == "success") {
+        // console.log(response?.data?.data);
+        localStorage.setItem("token", response?.data?.data?.token);
         toast.success(response.data.message);
         router.push("/dashboard");
       }
