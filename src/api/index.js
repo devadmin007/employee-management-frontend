@@ -74,11 +74,11 @@ export const updateManagerApi = async (id, updatedManager) => {
   return result;
 };
 
-export const getAllTeamApi = async (page = 1, limit = 5, search = "") => {
+export const getAllTeamApi = async (page, limit, search) => {
   let result;
   try {
     result = await axiosInstanceApi.get(
-      `/teams?limit=${limit}&page=${page}${search && `&${search}`}`
+      `/teams?page=${page}&itemsPerPage=${limit}${search && `&search=${search}`}&pagination=true`
     );
   } catch (e) {
     result = e;
@@ -307,6 +307,16 @@ export const updateDepartmentApi = async (id, updatedDesignation) => {
       `/update-department/${id}`,
       updatedDesignation
     );
+  } catch (e) {
+    result = e;
+  }
+  return result;
+};
+
+export const getAllUsers = async () => {
+  let result;
+  try {
+    result = await axiosInstanceApi.get(`/user-list?pagination=false`);
   } catch (e) {
     result = e;
   }

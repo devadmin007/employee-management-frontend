@@ -22,15 +22,10 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import {
   createDepartment,
-  createSkillApi,
   deleteDepartmentApi,
-  deleteSkillApi,
   getAllDepartmentApi,
-  getAllSkillApi,
   getDepartmentByIdApi,
-  getSkillByIdApi,
   updateDepartmentApi,
-  updateSkillApi,
 } from "@/api";
 import { toast } from "react-toastify";
 import CommonDeleteModal from "@/components/CommonDelete";
@@ -77,7 +72,7 @@ const Page = () => {
         return <Typography>{(page - 1) * limit + rowIndex + 1}</Typography>;
       },
     },
-    { field: "label", headerName: "Skill", flex: 1, minWidth: 140 },
+    { field: "label", headerName: "Department", flex: 1, minWidth: 140 },
     {
       field: "createdAt",
       headerName: "Created Date",
@@ -95,7 +90,7 @@ const Page = () => {
       sortable: false,
       renderCell: (params) => (
         <Stack direction="row" spacing={1}>
-          <Tooltip title="Edit skill">
+          <Tooltip title="Edit department">
             <IconButton
               color="primary"
               onClick={() => handleClickOpenDialogForFormToEditTeam(params?.id)}
@@ -104,7 +99,7 @@ const Page = () => {
               <EditIcon sx={{ color: "#1976D2" }} />
             </IconButton>
           </Tooltip>
-          <Tooltip title="Delete skill">
+          <Tooltip title="Delete department">
             <IconButton
               color="error"
               onClick={() => handleClickOpenDialog(params?.id)}
@@ -127,7 +122,7 @@ const Page = () => {
     try {
       const result = await getAllDepartmentApi(page, limit, search);
       if (result?.data?.status === "success") {
-        setRows(result.data.data.Department);
+        setRows(result.data.data.departments);
 
         const totalCount = result.data.data.totalCount;
         setTotalCount(totalCount);

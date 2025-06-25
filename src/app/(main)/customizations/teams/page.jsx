@@ -1,5 +1,6 @@
 "use client";
 
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Button,
@@ -7,90 +8,139 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  DialogContentText,
   DialogTitle,
+  FormControl,
   IconButton,
+  InputLabel,
   MenuItem,
-  Paper,
+  Select,
   Stack,
   TextField,
   Tooltip,
   Typography,
 } from "@mui/material";
-import React, { useEffect, useState } from "react";
-import { DataGrid } from "@mui/x-data-grid";
-import { useForm, Controller } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 import {
   createTeamApi,
   deleteTeamApi,
-  getAllManagerApi,
   getAllTeamApi,
+  getAllUsers,
   getTeamByIdApi,
   updateTeamApi,
 } from "@/api";
 import { toast } from "react-toastify";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
 import CommonDeleteModal from "@/components/CommonDelete";
+import CommonTable from "@/components/CommonTable";
 
 const Page = () => {
-  const {
-    handleSubmit,
-    control,
-    reset,
-    setValue,
-    formState: { errors },
-  } = useForm();
   const [open, setOpen] = useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [rows, setRows] = useState([]);
-  const [manager, setManager] = useState([]);
   const [deleteId, setDeleteId] = useState([]);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [updateId, setUpdateId] = useState([]);
+  const [manager, setManager] = useState([]);
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(5);
+  const [search, setSearch] = useState("");
+  const [rows, setRows] = useState([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    setValue,
+    control,
+    formState: { errors },
+  } = useForm();
+
+  const columns = [
+    {
+      field: "_id",
+      headerName: "ID",
+      flex: 1,
+      minWidth: 100,
+      renderCell: (params) => {
+        const rowIndex = params.api.getRowIndexRelativeToVisibleRows(params.id);
+        return <Typography>{(page - 1) * limit + rowIndex + 1}</Typography>;
+      },
+    },
+    { field: "label", headerName: "Teams", flex: 1, minWidth: 140 },
+    {
+      field: "managerFirstName",
+      headerName: "Manager",
+      flex: 1,
+      minWidth: 140,
+    },
+    {
+      field: "actions",
+      headerName: "Actions",
+      width: 120,
+      sortable: false,
+      renderCell: (params) => (
+        <Stack direction="row" spacing={1}>
+          <Tooltip title="Edit team">
+            <IconButton
+              onClick={() => handleClickOpenDialogForFormToEditTeam(params.id)}
+              size="small"
+            >
+              <EditIcon sx={{ color: "#1976D2" }} />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Delete team">
+            <IconButton
+              onClick={() => handleClickOpenDialog(params.id)}
+              size="small"
+            >
+              <DeleteIcon sx={{ color: "#d32f2f" }} />
+            </IconButton>
+          </Tooltip>
+        </Stack>
+      ),
+    },
+  ];
 
   useEffect(() => {
-    getManagerArray();
-    getTeam();
-  }, []);
+    getTeams();
+  }, [page, search, limit]);
 
-  const getManagerArray = async () => {
+  const getTeams = async () => {
     setIsLoading(true);
-
     try {
-      const result = await getAllManagerApi();
-      if (result?.data?.status == "success") {
-        const response = result?.data?.data;
-        let temp = [];
-        response.forEach((ele, index) => {
-          temp.push({
-            label: ele.label,
-            value: ele._id,
-          });
-        });
-        setManager(temp);
+      const result = await getAllTeamApi(page, limit, search);
+      if (result?.data?.status === "success") {
+        setRows(result.data.data.team);
+        setTotalCount(result.data.data.totalCount);
+        setTotalPages(Math.ceil(result.data.data.totalCount / limit));
       }
     } catch (e) {
-      console.log(e);
+      toast.error("Failed to fetch teams");
     } finally {
       setIsLoading(false);
     }
   };
 
-  const getTeam = async () => {
-    try {
-      const result = await getAllTeamApi();
-      setIsLoading(true);
-      if (result?.data?.status == "success") {
-        const res = result.data.data;
-        setRows(res);
-      }
-    } catch (e) {
-      console.log(e);
-    } finally {
-      setIsLoading(false);
-    }
+  const handlePageChange = (newPage) => {
+    setPage(newPage);
+  };
+
+  const handleRowsPerPageChange = (newLimit) => {
+    setLimit(newLimit);
+    setPage(1);
+  };
+
+  const handleSearchChange = (searchValue) => {
+    setSearch(searchValue);
+    setPage(1);
   };
 
   const handleClickOpen = () => setOpen(true);
@@ -110,16 +160,17 @@ const Page = () => {
     reset();
   };
 
-  const handleClickOpenDialogForFormToEditManager = async (id) => {
+  const handleClickOpenDialogForFormToEditTeam = async (id) => {
     setUpdateId(id);
     setOpenUpdateDialog(true);
+    setIsLoading(true);
     try {
       const result = await getTeamByIdApi(id);
-      console.log("update data ====>", result);
       const teamData = result.data.data;
       setValue("team", teamData.label);
+      setValue("managerId", teamData.managerId?._id);
     } catch (e) {
-      console.log(e);
+      toast.error("Failed to fetch team data");
     } finally {
       setIsLoading(false);
     }
@@ -131,288 +182,260 @@ const Page = () => {
   };
 
   const onDelete = async () => {
-    setIsLoading(true);
+    setIsDeleting(true);
     try {
       const result = await deleteTeamApi(deleteId);
       if (result?.data?.status === "success") {
-        toast.success(result?.data?.message);
-        getTeam();
+        toast.success(result?.data?.message || "Team deleted successfully");
+        getTeams();
       }
     } catch (e) {
-      console.log(e);
+      toast.error("Failed to delete team");
     } finally {
-      setIsLoading(false);
+      setIsDeleting(false);
+      handleCloseDeleteDialog();
     }
-    handleCloseDeleteDialog();
   };
 
   const onSubmit = async (data) => {
-    setIsLoading(true);
+    setIsCreating(true);
     const payload = {
-      label: data.name,
-      managerId: data.manager,
+      label: data.team,
+      managerId: data.managerId,
     };
+
     try {
       const result = await createTeamApi(payload);
       if (result?.data?.status === "success") {
-        console.log(result);
-        toast.success(result?.data?.message);
-        getTeam();
+        toast.success(result?.data?.message || "Team created successfully");
+        getTeams();
+        handleClose();
       }
     } catch (e) {
-      console.log(e);
+      toast.error("Failed to create team");
     } finally {
-      setIsLoading(false);
+      setIsCreating(false);
     }
-
-    handleClose();
   };
 
-  const updateTeamData = async (data) => {
-    const payload = { label: data.team };
+  const updateTeamsData = async (data) => {
+    setIsUpdating(true);
+    const payload = {
+      label: data.team,
+      managerId: data.managerId,
+    };
+
     try {
       const result = await updateTeamApi(updateId, payload);
-      console.log(result);
-      getTeam();
+      if (result?.data?.status === "success") {
+        toast.success(result?.data?.message || "Team updated successfully");
+        getTeams();
+        handleClickCloseDialogForFormToEditManager();
+      }
     } catch (e) {
-      console.log(e);
+      toast.error("Failed to update team");
     } finally {
-      setIsLoading(false);
-      handleClickCloseDialogForFormToEditManager();
+      setIsUpdating(false);
     }
   };
 
-  const columns = [
-    {
-      field: "_id",
-      headerName: "ID",
-      flex: 1,
-      minWidth: 100,
-      renderCell: (params) => {
-        const rowIndex = params.api.getRowIndexRelativeToVisibleRows(params.id);
-        return <Typography>{rowIndex + 1}</Typography>;
-      },
-    },
-    { field: "value", headerName: "Name", flex: 1, minWidth: 100 },
-    { field: "managerId", headerName: "Manager", flex: 1, minWidth: 100 },
-    { field: "createdAt", headerName: "Created Date", flex: 1, minWidth: 100 },
-    { field: "updatedAt", headerName: "Updated Date", flex: 1, minWidth: 100 },
-    {
-      field: "actions",
-      headerName: "Actions",
-      width: 100,
-      sortable: false,
-      renderCell: (params) => (
-        <Stack direction="row" spacing={1}>
-          <Tooltip title="Edit manager">
-            <IconButton
-              color="primary"
-              onClick={() =>
-                handleClickOpenDialogForFormToEditManager(params?.id)
-              }
-            >
-              <EditIcon sx={{ color: "#1976D2" }} />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Delete manager">
-            <IconButton
-              color="error"
-              onClick={() => handleClickOpenDialog(params?.id)}
-            >
-              <DeleteIcon sx={{ color: "#1976D2" }} />
-            </IconButton>
-          </Tooltip>
-        </Stack>
-      ),
-    },
-  ];
+  useEffect(() => {
+    getManagers();
+  }, []);
 
-  const paginationModel = { page: 0, pageSize: 7 };
+  const getManagers = async () => {
+    try {
+      const response = await getAllUsers();
+      setManager(response.data.data.user);
+    } catch (e) {
+      console.log(e);
+    }
+  };
 
   return (
     <Stack sx={{ p: 4 }}>
-      <Box sx={{ textAlign: "right" }}>
-        <Button
-          variant="contained"
-          sx={{
-            minWidth: "20%",
-            height: "50px",
-            fontSize: { xs: 16, sm: 18, md: 20 },
-            background:
-              "linear-gradient(90deg, rgb(239, 131, 29) 0%, rgb(245, 134, 55) 27%, rgb(244, 121, 56) 100%)",
-            textTransform: "none",
-          }}
-          onClick={handleClickOpen}
-        >
-          Add Team
-        </Button>
+      <CommonTable
+        rows={rows}
+        columns={columns}
+        count={totalPages}
+        page={page}
+        onPageChange={handlePageChange}
+        onSearchChange={handleSearchChange}
+        searchValue={search}
+        loading={isLoading}
+        title="Teams Management"
+        searchPlaceholder="Search Team..."
+        noDataMessage="No Teams found"
+        showSearch
+        showActionButton
+        actionButtonText="Add Teams"
+        onActionClick={handleClickOpen}
+        rowsPerPage={limit}
+        onRowsPerPageChange={handleRowsPerPageChange}
+        showRowsPerPage
+        rowsPerPageOptions={[5, 10, 25, 50]}
+        totalRows={totalCount}
+        currentPageRows={rows?.length}
+      />
 
-        <CommonDeleteModal
-          onClose={handleCloseDeleteDialog}
-          open={openDeleteDialog}
-          isLoading={isLoading}
-          onClick={onDelete}
-        />
-
-        <Dialog open={open} onClose={handleClose}>
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <DialogTitle sx={{ width: "500px" }}>Team</DialogTitle>
-            <DialogContent>
-              {/* Team Name */}
+      {/* Create Dialog */}
+      <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <DialogTitle>Add New Team</DialogTitle>
+          <DialogContent>
+            <TextField
+              autoFocus
+              margin="dense"
+              label="Team"
+              fullWidth
+              variant="outlined"
+              {...register("team", {
+                required: "Team is required",
+                minLength: { value: 2, message: "Minimum 2 characters" },
+                maxLength: { value: 50, message: "Maximum 50 characters" },
+              })}
+              error={!!errors.team}
+              helperText={errors.team?.message}
+            />
+            <FormControl fullWidth margin="dense" sx={{ mt: 2 }}>
+              <InputLabel id="manager-label">Manager</InputLabel>
               <Controller
-                name="name"
+                name="managerId"
                 control={control}
-                rules={{ required: "Required" }}
+                rules={{ required: "Manager is required" }}
                 render={({ field }) => (
-                  <TextField
+                  <Select
                     {...field}
-                    margin="dense"
-                    label="Name"
-                    fullWidth
-                    variant="outlined"
-                    error={!!errors.name}
-                    helperText={errors.name?.message}
-                    sx={{ my: 1 }}
-                  />
-                )}
-              />
-
-              {/* Manager Dropdown */}
-
-              <Controller
-                name="manager"
-                control={control}
-                rules={{ required: "Required" }}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    select
+                    labelId="manager-label"
                     label="Manager"
-                    fullWidth
-                    variant="outlined"
-                    error={!!errors.manager}
-                    helperText={errors.manager?.message}
-                    sx={{ my: 1 }}
+                    error={!!errors.managerId}
                   >
-                    {manager.map((option) => (
-                      <MenuItem key={option.value} value={option.value}>
-                        {option.label}
+                    {manager.map((mgr) => (
+                      <MenuItem key={mgr._id} value={mgr._id}>
+                        {mgr.firstName}
                       </MenuItem>
                     ))}
-                  </TextField>
+                  </Select>
                 )}
               />
-            </DialogContent>
-            <DialogActions>
-              <Button
-                onClick={handleClose}
-                sx={{ fontSize: "16px", color: "black" }}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                sx={{
-                  fontSize: "16px",
-                  background:
-                    "linear-gradient(90deg, rgb(239, 131, 29) 0%, rgb(245, 134, 55) 27%, rgb(244, 121, 56) 100%)",
-                  color: "white",
-                  mx: 2,
-                }}
-              >
-                Save
-              </Button>
-            </DialogActions>
-          </form>
-        </Dialog>
+              {errors.managerId && (
+                <Typography color="error" variant="caption">
+                  {errors.managerId.message}
+                </Typography>
+              )}
+            </FormControl>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleClose} disabled={isCreating}>
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={isCreating}
+              variant="contained"
+              sx={{
+                fontSize: "16px",
+                background:
+                  "linear-gradient(90deg, rgb(239, 131, 29) 0%, rgb(245, 134, 55) 27%, rgb(244, 121, 56) 100%)",
+                color: "white",
+                mx: 2,
+              }}
+            >
+              {isCreating ? (
+                <CircularProgress size={20} color="inherit" />
+              ) : (
+                "Save"
+              )}
+            </Button>
+          </DialogActions>
+        </form>
+      </Dialog>
 
-        <Dialog
-          open={openUpdateDialog}
-          onClose={handleClickCloseDialogForFormToEditManager}
-        >
-          <form onSubmit={handleSubmit(updateTeamData)}>
-            <DialogTitle sx={{ width: "500px" }}>Team</DialogTitle>
-            <DialogContent>
-              {/* Team Name */}
+      {/* Update Dialog */}
+      <Dialog
+        open={openUpdateDialog}
+        onClose={handleClickCloseDialogForFormToEditManager}
+        maxWidth="sm"
+        fullWidth
+      >
+        <form onSubmit={handleSubmit(updateTeamsData)}>
+          <DialogTitle>Update Team</DialogTitle>
+          <DialogContent>
+            <TextField
+              margin="dense"
+              fullWidth
+              variant="outlined"
+              {...register("team", {
+                required: "Team is required",
+                minLength: { value: 2, message: "Minimum 2 characters" },
+                maxLength: { value: 50, message: "Maximum 50 characters" },
+              })}
+              error={!!errors.team}
+              helperText={errors.team?.message}
+            />
+            <FormControl fullWidth margin="dense" sx={{ mt: 2 }}>
+              <InputLabel id="update-manager-label">Manager</InputLabel>
               <Controller
-                name="name"
+                name="managerId"
                 control={control}
-                rules={{ required: "Required" }}
+                rules={{ required: "Manager is required" }}
                 render={({ field }) => (
-                  <TextField
+                  <Select
                     {...field}
-                    margin="dense"
-                    // label="Team Name"
-                    fullWidth
-                    variant="outlined"
-                    error={!!errors.name}
-                    helperText={errors.name?.message}
-                    sx={{ my: 1 }}
-                  />
-                )}
-              />
-
-              {/* Manager Dropdown */}
-              <Controller
-                name="manager"
-                control={control}
-                rules={{ required: "Required" }}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    select
-                    // label="Manager"
-                    fullWidth
-                    variant="outlined"
-                    error={!!errors.manager}
-                    helperText={errors.manager?.message}
-                    sx={{ my: 1 }}
+                    labelId="update-manager-label"
+                    label="Manager"
+                    error={!!errors.managerId}
                   >
-                    {manager.map((option, index) => (
-                      <MenuItem key={index} value={option.value}>
-                        {option.label}
+                    {manager.map((mgr) => (
+                      <MenuItem key={mgr._id} value={mgr._id}>
+                        {mgr.firstName}
                       </MenuItem>
                     ))}
-                  </TextField>
+                  </Select>
                 )}
               />
-            </DialogContent>
-            <DialogActions>
-              <Button
-                onClick={handleClickCloseDialogForFormToEditManager}
-                sx={{ fontSize: "16px", color: "black" }}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                sx={{
-                  fontSize: "16px",
-                  background:
-                    "linear-gradient(90deg, rgb(239, 131, 29) 0%, rgb(245, 134, 55) 27%, rgb(244, 121, 56) 100%)",
-                  color: "white",
-                  mx: 2,
-                }}
-              >
-                Update
-              </Button>
-            </DialogActions>
-          </form>
-        </Dialog>
-      </Box>
+              {errors.managerId && (
+                <Typography color="error" variant="caption">
+                  {errors.managerId.message}
+                </Typography>
+              )}
+            </FormControl>
+          </DialogContent>
+          <DialogActions>
+            <Button
+              onClick={handleClickCloseDialogForFormToEditManager}
+              disabled={isUpdating}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={isUpdating}
+              variant="contained"
+              sx={{
+                fontSize: "16px",
+                background:
+                  "linear-gradient(90deg, rgb(239, 131, 29) 0%, rgb(245, 134, 55) 27%, rgb(244, 121, 56) 100%)",
+                color: "white",
+                mx: 2,
+              }}
+            >
+              {isUpdating ? (
+                <CircularProgress size={20} color="inherit" />
+              ) : (
+                "Update"
+              )}
+            </Button>
+          </DialogActions>
+        </form>
+      </Dialog>
 
-      <Box sx={{ mt: 5 }}>
-        <Paper sx={{ height: 500, width: "100%", p: 2 }}>
-          <DataGrid
-            getRowId={(row) => row._id}
-            rows={rows}
-            columns={columns}
-            initialState={{ pagination: { paginationModel } }}
-            pageSizeOptions={[5, 10]}
-            sx={{ border: 0 }}
-          />
-        </Paper>
-      </Box>
+      <CommonDeleteModal
+        onClose={handleCloseDeleteDialog}
+        open={openDeleteDialog}
+        isLoading={isDeleting}
+        onClick={onDelete}
+      />
     </Stack>
   );
 };

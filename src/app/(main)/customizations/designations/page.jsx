@@ -22,15 +22,10 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import {
   createDesignation,
-  createSkillApi,
   deleteDesignationApi,
-  deleteSkillApi,
   getAllDesignationApi,
-  getAllSkillApi,
   getDesignationByIdApi,
-  getSkillByIdApi,
   updateDesignationApi,
-  updateSkillApi,
 } from "@/api";
 import { toast } from "react-toastify";
 import CommonDeleteModal from "@/components/CommonDelete";
@@ -77,7 +72,7 @@ const Page = () => {
         return <Typography>{(page - 1) * limit + rowIndex + 1}</Typography>;
       },
     },
-    { field: "label", headerName: "Skill", flex: 1, minWidth: 140 },
+    { field: "label", headerName: "Designation", flex: 1, minWidth: 140 },
     {
       field: "createdAt",
       headerName: "Created Date",
@@ -203,7 +198,7 @@ const Page = () => {
         toast.success(
           result?.data?.message || "Designation deleted successfully"
         );
-        getSkill();
+        getDesignation();
       }
     } catch (e) {
       console.log(e);
