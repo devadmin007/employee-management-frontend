@@ -137,10 +137,12 @@ export const createSkillApi = async (payload) => {
   return result;
 };
 
-export const getAllSkillApi = async (limit = 1, page = 5, search = "") => {
+export const getAllSkillApi = async (page, limit, search) => {
   let result;
   try {
-    result = await axiosInstanceApi.get(`/skills`);
+    result = await axiosInstanceApi.get(
+      `/skills?page=${page}&itemsPerPage=${limit}${search && `&search=${search}`}&pagination=true`
+    );
   } catch (e) {
     result = e;
   }
@@ -199,11 +201,12 @@ export const createDesignation = async (payload) => {
   return result;
 };
 
-export const getAllDesignations = async () => {
+export const getAllDesignationApi = async (page, limit, search) => {
   let result;
-
   try {
-    result = await axiosInstanceApi.get(`/designations`);
+    result = await axiosInstanceApi.get(
+      `/designations?page=${page}&itemsPerPage=${limit}${search && `&search=${search}`}&pagination=true`
+    );
   } catch (e) {
     result = e;
   }
@@ -247,7 +250,6 @@ export const updateDesignationApi = async (id, updatedDesignation) => {
 export const createEmployeeApi = async (payload) => {
   let result;
 
-
   try {
     result = await axiosInstanceApi.post(`/add-user`, payload);
   } catch (e) {
@@ -256,57 +258,57 @@ export const createEmployeeApi = async (payload) => {
   return result;
 };
 
-// export const createDepartment = async (payload) => {
-//   let result;
-//   try {
-//     result = await axiosInstanceApi.post("/add-department", payload);
-//   } catch (e) {
-//     result = e;
-//   }
-//   return result;
-// };
+export const createDepartment = async (payload) => {
+  let result;
+  try {
+    result = await axiosInstanceApi.post("/add-department", payload);
+  } catch (e) {
+    result = e;
+  }
+  return result;
+};
 
-// export const getAllDepartments = async () => {
-//   let result;
+export const getAllDepartmentApi = async (page, limit, search) => {
+  let result;
+  try {
+    result = await axiosInstanceApi.get(
+      `/departments?page=${page}&itemsPerPage=${limit}${search && `&search=${search}`}&pagination=true`
+    );
+  } catch (e) {
+    result = e;
+  }
+  return result;
+};
+export const deleteDepartmentApi = async (id) => {
+  let result;
+  try {
+    result = await axiosInstanceApi.delete(`/delete-department/${id}`);
+  } catch (e) {
+    result = e;
+  }
+  return result;
+};
 
-//   try {
-//     result = await axiosInstanceApi.get(`/departments`);
-//   } catch (e) {
-//     result = e;
-//   }
-//   return result;
-// };
+export const getDepartmentByIdApi = async (id) => {
+  let result;
+  try {
+    result = await axiosInstanceApi.get(`/department/${id}`);
+  } catch (e) {
+    result = e;
+  }
+  return result;
+};
 
-// export const deleteDepartmentApi = async (id) => {
-//   let result;
-//   try {
-//     result = await axiosInstanceApi.delete(`/delete-department/${id}`);
-//   } catch (e) {
-//     result = e;
-//   }
-//   return result;
-// };
+export const updateDepartmentApi = async (id, updatedDesignation) => {
+  let result;
 
-// export const getDepartmentByIdApi = async (id) => {
-//   let result;
-//   try {
-//     result = await axiosInstanceApi.get(`/department/${id}`);
-//   } catch (e) {
-//     result = e;
-//   }
-//   return result;
-// };
-
-// export const updateDepartmentApi = async (id, updatedDesignation) => {
-//   let result;
-
-//   try {
-//     result = await axiosInstanceApi.patch(
-//       `/update-department/${id}`,
-//       updatedDesignation
-//     );
-//   } catch (e) {
-//     result = e;
-//   }
-//   return result;
-// };
+  try {
+    result = await axiosInstanceApi.patch(
+      `/update-department/${id}`,
+      updatedDesignation
+    );
+  } catch (e) {
+    result = e;
+  }
+  return result;
+};

@@ -151,6 +151,7 @@ const SignUP = () => {
                     variant="outlined"
                     placeholder="Enter User Name"
                     fullWidth
+                    autoComplete="off"
                     error={Boolean(errors.username)}
                     helperText={errors.username?.message}
                   />
@@ -170,6 +171,7 @@ const SignUP = () => {
                         variant="outlined"
                         placeholder="Enter First Name"
                         fullWidth
+                        autoComplete="off"
                         error={Boolean(errors.firstName)}
                         helperText={errors.firstName?.message}
                       />
@@ -188,6 +190,7 @@ const SignUP = () => {
                         variant="outlined"
                         placeholder="Enter Last Name"
                         fullWidth
+                        autoComplete="off"
                         error={Boolean(errors.lastName)}
                         helperText={errors.lastName?.message}
                       />
@@ -209,6 +212,7 @@ const SignUP = () => {
                     type="password"
                     variant="outlined"
                     fullWidth
+                    autoComplete="off"
                     error={Boolean(errors.password)}
                     helperText={errors.password?.message}
                   />

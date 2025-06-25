@@ -81,7 +81,6 @@ const CommonTable = ({
     };
   }, [searchTimer]);
 
-  // Show pagination if there are multiple pages OR if showRowsPerPage is true and there's data
   const shouldShowPagination = count > 1 || (showRowsPerPage && totalRows > 0);
 
   return (
@@ -165,8 +164,7 @@ const CommonTable = ({
         </Stack>
       </Paper>
 
-      {/* Data Grid */}
-      <Paper sx={{ height: 500, width: "100%", p: 2 }}>
+      <Paper sx={{ width: "100%", p: 2 }}>
         <DataGrid
           getRowId={(row) => row._id}
           rows={rows}
@@ -195,7 +193,6 @@ const CommonTable = ({
         />
       </Paper>
 
-      {/* Pagination - Now with all required props */}
       {shouldShowPagination && (
         <CommonPagination
           page={page}
@@ -209,7 +206,6 @@ const CommonTable = ({
         />
       )}
 
-      {/* No Data State */}
       {rows?.length === 0 && !loading && (
         <Box
           sx={{

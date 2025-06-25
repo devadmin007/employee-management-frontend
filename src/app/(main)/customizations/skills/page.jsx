@@ -1,4 +1,4 @@
-// Updated Page component with proper pagination handling
+// Updated Page component with proper totalCount-based pagination
 
 "use client";
 
@@ -30,6 +30,7 @@ import {
 import { toast } from "react-toastify";
 import CommonDeleteModal from "@/components/CommonDelete";
 import CommonTable from "@/components/CommonTable";
+import moment from "moment/moment";
 
 const Page = () => {
   const [open, setOpen] = useState(false);
@@ -39,7 +40,7 @@ const Page = () => {
   const [updateId, setUpdateId] = useState([]);
 
   // Separate loading states
-  const [isLoading, setIsLoading] = useState(false); // For data fetching only
+  const [isLoading, setIsLoading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -49,8 +50,8 @@ const Page = () => {
   const [limit, setLimit] = useState(5);
   const [search, setSearch] = useState("");
   const [rows, setRows] = useState([]);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalRows, setTotalRows] = useState(0);
+  const [totalCount, setTotalCount] = useState(0); // Total records count
+  const [totalPages, setTotalPages] = useState(1); // Total pages
 
   const {
     register,
@@ -79,7 +80,7 @@ const Page = () => {
       minWidth: 140,
       renderCell: (params) => {
         const date = new Date(params.value);
-        return <Typography>{date.toLocaleDateString()}</Typography>;
+        return <Typography>{moment(date).format("DD/MM/YYYY")}</Typography>;
       },
     },
     {
@@ -122,10 +123,12 @@ const Page = () => {
       const result = await getAllSkillApi(page, limit, search);
       if (result?.data?.status === "success") {
         setRows(result.data.data.skill);
-        setTotalPages(result.data.data.totalPages);
-        setTotalRows(
-          result.data.data?.totalCount || result.data.data.skill?.length
-        );
+
+        const totalCount = result.data.data.totalCount;
+        setTotalCount(totalCount);
+
+        const calculatedTotalPages = Math.ceil(totalCount / limit);
+        setTotalPages(calculatedTotalPages);
       }
     } catch (e) {
       console.error(e);
@@ -247,12 +250,12 @@ const Page = () => {
       <CommonTable
         rows={rows}
         columns={columns}
-        count={totalPages}
+        count={totalPages} // Total pages for pagination
         page={page}
         onPageChange={handlePageChange}
         onSearchChange={handleSearchChange}
         searchValue={search}
-        loading={isLoading} // Only for data fetching
+        loading={isLoading}
         title="Skills Management"
         searchPlaceholder="Search skills..."
         noDataMessage="No skills found"
@@ -265,7 +268,7 @@ const Page = () => {
         onRowsPerPageChange={handleRowsPerPageChange}
         showRowsPerPage={true}
         rowsPerPageOptions={[5, 10, 25, 50]}
-        totalRows={totalRows}
+        totalRows={totalCount} // Total records count
         currentPageRows={rows?.length}
       />
 
@@ -325,7 +328,6 @@ const Page = () => {
         </form>
       </Dialog>
 
-      {/* Update Dialog */}
       <Dialog
         open={openUpdateDialog}
         onClose={handleClickCloseDialogForFormToEditManager}
@@ -336,9 +338,7 @@ const Page = () => {
           <DialogTitle>Update Skill</DialogTitle>
           <DialogContent>
             <TextField
-              autoFocus
               margin="dense"
-              label="Skill"
               fullWidth
               variant="outlined"
               {...register("skill", {
@@ -386,7 +386,6 @@ const Page = () => {
         </form>
       </Dialog>
 
-      {/* Delete Modal */}
       <CommonDeleteModal
         onClose={handleCloseDeleteDialog}
         open={openDeleteDialog}

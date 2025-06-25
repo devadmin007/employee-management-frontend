@@ -57,9 +57,7 @@ const TeamsAndSkillTab = ({ onBack, onSubmit }) => {
     const formData = new FormData();
 
     Object.keys(data).forEach((key) => {
-     
-        formData.append(key, data[key]);
-
+      formData.append(key, data[key]);
     });
     formData.append("step", 2);
 
@@ -127,7 +125,7 @@ const TeamsAndSkillTab = ({ onBack, onSubmit }) => {
                     {designationOptions.map((option) => (
                       <MenuItem key={option.value} value={option.value}>
                         {option.label}
-                      </MenuItem>
+                    </MenuItem>
                     ))}
                   </CommonInput>
                 )}
@@ -220,7 +218,9 @@ const TeamsAndSkillTab = ({ onBack, onSubmit }) => {
               borderColor: "divider",
             }}
           >
-            <Button variant="outlined" onClick={onBack}>Back</Button>
+            <Button variant="outlined" onClick={onBack}>
+              Back
+            </Button>
             <Button
               variant="contained"
               color="success"
