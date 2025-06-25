@@ -1,3 +1,4 @@
+import { store } from "@/redux/store";
 import axios from "axios";
 import { toast } from "react-toastify";
 
@@ -8,7 +9,9 @@ const axiosInstanceApi = axios.create({
 
 axiosInstanceApi.interceptors.request.use(
   async (config) => {
-    const token = localStorage.getItem("token");
+    const state = store.getState();
+    const token = state.auth.userData?.token;
+
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }

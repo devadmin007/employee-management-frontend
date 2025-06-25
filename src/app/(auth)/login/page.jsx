@@ -11,6 +11,8 @@ import { styled } from "@mui/material/styles";
 import { loginApi } from "@/api";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
+import { useDispatch } from "react-redux";
+import { setUserData } from "@/redux/slice/authSlice";
 
 const loginSchema = yup.object().shape({
   username: yup.string().required("Required"),
@@ -46,6 +48,7 @@ const SignupContainer = styled(Box)(({ theme }) => ({
 
 const Login = () => {
   const router = useRouter();
+  const dispatch = useDispatch();
   const {
     control,
     handleSubmit,
@@ -63,12 +66,12 @@ const Login = () => {
     setIsLoading(true);
     try {
       const response = await loginApi(data);
-      console.log(response);
       if (response?.data?.status == "success") {
-        // console.log(response?.data?.data);
-        localStorage.setItem("token", response?.data?.data?.token);
-        toast.success(response.data.message);
+        dispatch(setUserData(response?.data?.data));
         router.push("/dashboard");
+        // console.log(response?.data?.data);
+        // localStorage.setItem("token", response?.data?.data?.token);
+        // toast.success(response.data.message);
       }
     } catch (e) {
       console.log(e);

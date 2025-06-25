@@ -15,6 +15,7 @@ import {
   Stack,
   TextField,
   Tooltip,
+  Typography,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { DataGrid } from "@mui/x-data-grid";
@@ -30,8 +31,16 @@ import {
 import { toast } from "react-toastify";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import CommonDeleteModal from "@/components/CommonDelete";
 
 const Page = () => {
+  const {
+    handleSubmit,
+    control,
+    reset,
+    setValue,
+    formState: { errors },
+  } = useForm();
   const [open, setOpen] = useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -73,12 +82,9 @@ const Page = () => {
     try {
       const result = await getAllTeamApi();
       setIsLoading(true);
-      console.log(result);
-      console.log("result====>", result.data.data);
       if (result?.data?.status == "success") {
         const res = result.data.data;
         setRows(res);
-        toast.success(result?.data?.message);
       }
     } catch (e) {
       console.log(e);
@@ -87,24 +93,14 @@ const Page = () => {
     }
   };
 
-  console.log("manager", manager);
-  const {
-    handleSubmit,
-    control,
-    reset,
-    setValue,
-    formState: { errors },
-  } = useForm();
-
   const handleClickOpen = () => setOpen(true);
 
   const handleClose = () => {
     setOpen(false);
-    reset(); // clear form
+    reset();
   };
 
   const handleClickOpenDialog = (id) => {
-    console.log(id);
     setDeleteId(id);
     setOpenDeleteDialog(true);
   };
@@ -134,11 +130,10 @@ const Page = () => {
     reset();
   };
 
-  const deleteTeam = async () => {
+  const onDelete = async () => {
     setIsLoading(true);
     try {
       const result = await deleteTeamApi(deleteId);
-      console.log(result);
       if (result?.data?.status === "success") {
         toast.success(result?.data?.message);
         getTeam();
@@ -152,7 +147,6 @@ const Page = () => {
   };
 
   const onSubmit = async (data) => {
-    console.log(data);
     setIsLoading(true);
     const payload = {
       label: data.name,
@@ -175,7 +169,6 @@ const Page = () => {
   };
 
   const updateTeamData = async (data) => {
-    console.log(updateId);
     const payload = { label: data.team };
     try {
       const result = await updateTeamApi(updateId, payload);
@@ -188,8 +181,18 @@ const Page = () => {
       handleClickCloseDialogForFormToEditManager();
     }
   };
+
   const columns = [
-    { field: "_id", headerName: "ID", flex: 1, minWidth: 100 },
+    {
+      field: "_id",
+      headerName: "ID",
+      flex: 1,
+      minWidth: 100,
+      renderCell: (params) => {
+        const rowIndex = params.api.getRowIndexRelativeToVisibleRows(params.id);
+        return <Typography>{rowIndex + 1}</Typography>;
+      },
+    },
     { field: "value", headerName: "Name", flex: 1, minWidth: 100 },
     { field: "managerId", headerName: "Manager", flex: 1, minWidth: 100 },
     { field: "createdAt", headerName: "Created Date", flex: 1, minWidth: 100 },
@@ -244,42 +247,12 @@ const Page = () => {
           Add Team
         </Button>
 
-        <Dialog open={openDeleteDialog} onClose={handleCloseDeleteDialog}>
-          <DialogContent sx={{ height: "90px" }}>
-            <DialogContentText
-              id="alert-dialog-description"
-              sx={{ width: "400px", mx: 2, my: 1, fontSize: "18px" }}
-            >
-              are you sure? you want to delete.
-            </DialogContentText>
-          </DialogContent>
-          <DialogActions>
-            <Button
-              onClick={handleCloseDeleteDialog}
-              sx={{ fontSize: "16px", color: "black" }}
-            >
-              No
-            </Button>
-            <Button
-              type="submit"
-              disabled={isLoading}
-              onClick={deleteTeam}
-              sx={{
-                fontSize: "16px",
-                background:
-                  "linear-gradient(90deg, rgb(239, 131, 29) 0%, rgb(245, 134, 55) 27%, rgb(244, 121, 56) 100%)",
-                color: "white",
-                mx: 2,
-              }}
-            >
-              {isLoading ? (
-                <CircularProgress size={20} color="inherit" />
-              ) : (
-                "Yes"
-              )}
-            </Button>
-          </DialogActions>
-        </Dialog>
+        <CommonDeleteModal
+          onClose={handleCloseDeleteDialog}
+          open={openDeleteDialog}
+          isLoading={isLoading}
+          onClick={onDelete}
+        />
 
         <Dialog open={open} onClose={handleClose}>
           <form onSubmit={handleSubmit(onSubmit)}>

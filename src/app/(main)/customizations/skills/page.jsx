@@ -1,3 +1,5 @@
+// Updated Page component with proper pagination handling
+
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -8,15 +10,13 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  DialogContentText,
   DialogTitle,
   IconButton,
-  Paper,
   Stack,
   TextField,
   Tooltip,
+  Typography,
 } from "@mui/material";
-import { DataGrid } from "@mui/x-data-grid";
 import { useForm } from "react-hook-form";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -28,6 +28,8 @@ import {
   updateSkillApi,
 } from "@/api";
 import { toast } from "react-toastify";
+import CommonDeleteModal from "@/components/CommonDelete";
+import CommonTable from "@/components/CommonTable";
 
 const Page = () => {
   const [open, setOpen] = useState(false);
@@ -35,8 +37,20 @@ const Page = () => {
   const [deleteId, setDeleteId] = useState([]);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [updateId, setUpdateId] = useState([]);
+
+  // Separate loading states
+  const [isLoading, setIsLoading] = useState(false); // For data fetching only
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  // Pagination and search state
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(5);
+  const [search, setSearch] = useState("");
   const [rows, setRows] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalRows, setTotalRows] = useState(0);
 
   const {
     register,
@@ -47,13 +61,31 @@ const Page = () => {
   } = useForm();
 
   const columns = [
-    { field: "_id", headerName: "ID", flex: 1, minWidth: 100 },
+    {
+      field: "_id",
+      headerName: "ID",
+      flex: 1,
+      minWidth: 100,
+      renderCell: (params) => {
+        const rowIndex = params.api.getRowIndexRelativeToVisibleRows(params.id);
+        return <Typography>{(page - 1) * limit + rowIndex + 1}</Typography>;
+      },
+    },
     { field: "label", headerName: "Skill", flex: 1, minWidth: 140 },
-    { field: "createdAt", headerName: "Created Date", flex: 1, minWidth: 140 },
+    {
+      field: "createdAt",
+      headerName: "Created Date",
+      flex: 1,
+      minWidth: 140,
+      renderCell: (params) => {
+        const date = new Date(params.value);
+        return <Typography>{date.toLocaleDateString()}</Typography>;
+      },
+    },
     {
       field: "actions",
       headerName: "Actions",
-      width: 100,
+      width: 120,
       sortable: false,
       renderCell: (params) => (
         <Stack direction="row" spacing={1}>
@@ -61,6 +93,7 @@ const Page = () => {
             <IconButton
               color="primary"
               onClick={() => handleClickOpenDialogForFormToEditTeam(params?.id)}
+              size="small"
             >
               <EditIcon sx={{ color: "#1976D2" }} />
             </IconButton>
@@ -69,8 +102,9 @@ const Page = () => {
             <IconButton
               color="error"
               onClick={() => handleClickOpenDialog(params?.id)}
+              size="small"
             >
-              <DeleteIcon sx={{ color: "#1976D2" }} />
+              <DeleteIcon sx={{ color: "#d32f2f" }} />
             </IconButton>
           </Tooltip>
         </Stack>
@@ -80,34 +114,49 @@ const Page = () => {
 
   useEffect(() => {
     getSkill();
-  }, []);
+  }, [page, search, limit]);
 
   const getSkill = async () => {
+    setIsLoading(true);
     try {
-      const result = await getAllSkillApi();
-      setIsLoading(true);
-      console.log(result.data.data.skill);
-      console.log("result====>", result.data.data);
-      if (result?.data?.status == "success") {
-        const res = result.data.data.skill;
-        setRows(res);
-        toast.success(result?.data?.message);
+      const result = await getAllSkillApi(page, limit, search);
+      if (result?.data?.status === "success") {
+        setRows(result.data.data.skill);
+        setTotalPages(result.data.data.totalPages);
+        setTotalRows(
+          result.data.data?.totalCount || result.data.data.skill?.length
+        );
       }
     } catch (e) {
-      console.log(e);
+      console.error(e);
+      toast.error("Failed to fetch skills");
     } finally {
       setIsLoading(false);
     }
   };
 
+  const handlePageChange = (newPage) => {
+    setPage(newPage);
+  };
+
+  const handleRowsPerPageChange = (newLimit) => {
+    setLimit(newLimit);
+    setPage(1); // Reset to first page when changing page size
+  };
+
+  const handleSearchChange = (searchValue) => {
+    setSearch(searchValue);
+    setPage(1); // Reset to first page when searching
+  };
+
   const handleClickOpen = () => setOpen(true);
+
   const handleClose = () => {
     setOpen(false);
     reset();
   };
 
   const handleClickOpenDialog = (id) => {
-    console.log(id);
     setDeleteId(id);
     setOpenDeleteDialog(true);
   };
@@ -120,13 +169,14 @@ const Page = () => {
   const handleClickOpenDialogForFormToEditTeam = async (id) => {
     setUpdateId(id);
     setOpenUpdateDialog(true);
+    setIsLoading(true);
     try {
       const result = await getSkillByIdApi(id);
-      console.log("update data ====>", result);
       const skillData = result.data.data;
       setValue("skill", skillData.label);
     } catch (e) {
       console.log(e);
+      toast.error("Failed to fetch skill data");
     } finally {
       setIsLoading(false);
     }
@@ -136,84 +186,93 @@ const Page = () => {
     setOpenUpdateDialog(false);
     reset();
   };
-  const deleteSkill = async () => {
-    setIsLoading(true);
+
+  const onDelete = async () => {
+    setIsDeleting(true);
     try {
       const result = await deleteSkillApi(deleteId);
-      console.log(result);
       if (result?.data?.status === "success") {
-        toast.success(result?.data?.message);
+        toast.success(result?.data?.message || "Skill deleted successfully");
         getSkill();
       }
     } catch (e) {
       console.log(e);
+      toast.error("Failed to delete skill");
     } finally {
-      setIsLoading(false);
+      setIsDeleting(false);
     }
     handleCloseDeleteDialog();
   };
 
   const onSubmit = async (data) => {
-    setIsLoading(true);
+    setIsCreating(true);
+    const payload = { label: data.skill };
 
-    const payload = {
-      label: data.skill,
-    };
-    console.log(payload);
     try {
       const result = await createSkillApi(payload);
       if (result?.data?.status === "success") {
-        console.log("skills", result);
-        toast.success(result?.data?.message);
+        toast.success(result?.data?.message || "Skill created successfully");
         getSkill();
+        handleClose();
       }
     } catch (e) {
       console.log(e);
+      toast.error("Failed to create skill");
     } finally {
-      setIsLoading(false);
+      setIsCreating(false);
     }
-
-    handleClose();
   };
 
   const updateSkillData = async (data) => {
-    console.log(updateId);
+    setIsUpdating(true);
     const payload = { label: data.skill };
+
     try {
       const result = await updateSkillApi(updateId, payload);
-      console.log(result);
-      getSkill();
+      if (result?.data?.status === "success") {
+        toast.success(result?.data?.message || "Skill updated successfully");
+        getSkill();
+        handleClickCloseDialogForFormToEditManager();
+      }
     } catch (e) {
       console.log(e);
+      toast.error("Failed to update skill");
     } finally {
-      setIsLoading(false);
-      handleClickCloseDialogForFormToEditManager();
+      setIsUpdating(false);
     }
   };
 
   return (
     <Stack sx={{ p: 4 }}>
-      <Box sx={{ textAlign: "right" }}>
-        <Button
-          variant="contained"
-          sx={{
-            minWidth: "15%",
-            height: "50px",
-            fontSize: { xs: 16, sm: 18, md: 20 },
-            background:
-              "linear-gradient(90deg, rgb(239, 131, 29) 0%, rgb(245, 134, 55) 27%, rgb(244, 121, 56) 100%)",
-            textTransform: "none",
-          }}
-          onClick={handleClickOpen}
-        >
-          Add Skills
-        </Button>
-      </Box>
+      <CommonTable
+        rows={rows}
+        columns={columns}
+        count={totalPages}
+        page={page}
+        onPageChange={handlePageChange}
+        onSearchChange={handleSearchChange}
+        searchValue={search}
+        loading={isLoading} // Only for data fetching
+        title="Skills Management"
+        searchPlaceholder="Search skills..."
+        noDataMessage="No skills found"
+        showSearch={true}
+        showActionButton={true}
+        actionButtonText="Add Skills"
+        onActionClick={handleClickOpen}
+        // Pagination props
+        rowsPerPage={limit}
+        onRowsPerPageChange={handleRowsPerPageChange}
+        showRowsPerPage={true}
+        rowsPerPageOptions={[5, 10, 25, 50]}
+        totalRows={totalRows}
+        currentPageRows={rows?.length}
+      />
 
-      {/* Dialog using react-hook-form */}
-      <Dialog open={open} onClose={handleClose}>
+      {/* Create Dialog */}
+      <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
         <form onSubmit={handleSubmit(onSubmit)}>
-          <DialogTitle sx={{ width: "500px" }}>Skills</DialogTitle>
+          <DialogTitle>Add New Skill</DialogTitle>
           <DialogContent>
             <TextField
               autoFocus
@@ -221,7 +280,17 @@ const Page = () => {
               label="Skill"
               fullWidth
               variant="outlined"
-              {...register("skill", { required: "Required" })}
+              {...register("skill", {
+                required: "Skill is required",
+                minLength: {
+                  value: 2,
+                  message: "Skill must be at least 2 characters",
+                },
+                maxLength: {
+                  value: 50,
+                  message: "Skill must be less than 50 characters",
+                },
+              })}
               error={!!errors.skill}
               helperText={errors.skill?.message}
             />
@@ -230,14 +299,14 @@ const Page = () => {
             <Button
               onClick={handleClose}
               sx={{ fontSize: "16px", color: "black" }}
-              disabled={isLoading}
+              disabled={isCreating}
             >
               Cancel
             </Button>
-
             <Button
               type="submit"
-              disabled={isLoading}
+              disabled={isCreating}
+              variant="contained"
               sx={{
                 fontSize: "16px",
                 background:
@@ -246,7 +315,7 @@ const Page = () => {
                 mx: 2,
               }}
             >
-              {isLoading ? (
+              {isCreating ? (
                 <CircularProgress size={20} color="inherit" />
               ) : (
                 "Save"
@@ -256,53 +325,33 @@ const Page = () => {
         </form>
       </Dialog>
 
-      <Dialog open={openDeleteDialog} onClose={handleCloseDeleteDialog}>
-        <DialogContent sx={{ height: "90px" }}>
-          <DialogContentText
-            id="alert-dialog-description"
-            sx={{ width: "400px", mx: 2, my: 1, fontSize: "18px" }}
-          >
-            are you sure? you want to delete.
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={handleCloseDeleteDialog}
-            sx={{ fontSize: "16px", color: "black" }}
-          >
-            No
-          </Button>
-          <Button
-            type="submit"
-            disabled={isLoading}
-            onClick={deleteSkill}
-            sx={{
-              fontSize: "16px",
-              background:
-                "linear-gradient(90deg, rgb(239, 131, 29) 0%, rgb(245, 134, 55) 27%, rgb(244, 121, 56) 100%)",
-              color: "white",
-              mx: 2,
-            }}
-          >
-            {isLoading ? <CircularProgress size={20} color="inherit" /> : "Yes"}
-          </Button>
-        </DialogActions>
-      </Dialog>
-
+      {/* Update Dialog */}
       <Dialog
         open={openUpdateDialog}
         onClose={handleClickCloseDialogForFormToEditManager}
+        maxWidth="sm"
+        fullWidth
       >
         <form onSubmit={handleSubmit(updateSkillData)}>
-          <DialogTitle sx={{ width: "500px" }}>Skill</DialogTitle>
+          <DialogTitle>Update Skill</DialogTitle>
           <DialogContent>
             <TextField
               autoFocus
               margin="dense"
-              // label="manager"
+              label="Skill"
               fullWidth
               variant="outlined"
-              {...register("skill", { required: "Required" })}
+              {...register("skill", {
+                required: "Skill is required",
+                minLength: {
+                  value: 2,
+                  message: "Skill must be at least 2 characters",
+                },
+                maxLength: {
+                  value: 50,
+                  message: "Skill must be less than 50 characters",
+                },
+              })}
               error={!!errors.skill}
               helperText={errors.skill?.message}
             />
@@ -311,12 +360,14 @@ const Page = () => {
             <Button
               onClick={handleClickCloseDialogForFormToEditManager}
               sx={{ fontSize: "16px", color: "black" }}
+              disabled={isUpdating}
             >
               Cancel
             </Button>
             <Button
               type="submit"
-              disabled={isLoading}
+              disabled={isUpdating}
+              variant="contained"
               sx={{
                 fontSize: "16px",
                 background:
@@ -325,7 +376,7 @@ const Page = () => {
                 mx: 2,
               }}
             >
-              {isLoading ? (
+              {isUpdating ? (
                 <CircularProgress size={20} color="inherit" />
               ) : (
                 "Update"
@@ -335,21 +386,13 @@ const Page = () => {
         </form>
       </Dialog>
 
-      {/* DataGrid section */}
-      <Box sx={{ mt: 5 }}>
-        <Paper sx={{ height: 500, width: "100%", p: 2 }}>
-          <DataGrid
-            getRowId={(row) => row._id}
-            rows={rows}
-            columns={columns}
-            initialState={{
-              pagination: { paginationModel: { page: 0, pageSize: 7 } },
-            }}
-            pageSizeOptions={[5, 10]}
-            sx={{ border: 0 }}
-          />
-        </Paper>
-      </Box>
+      {/* Delete Modal */}
+      <CommonDeleteModal
+        onClose={handleCloseDeleteDialog}
+        open={openDeleteDialog}
+        isLoading={isDeleting}
+        onClick={onDelete}
+      />
     </Stack>
   );
 };

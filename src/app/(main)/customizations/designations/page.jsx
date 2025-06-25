@@ -1,37 +1,70 @@
 "use client";
 
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Button,
+  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
+  DialogContentText,
   DialogTitle,
-  MenuItem,
+  IconButton,
   Paper,
   Stack,
   TextField,
+  Tooltip,
+  Typography,
 } from "@mui/material";
-import React, { useState } from "react";
 import { DataGrid } from "@mui/x-data-grid";
 import { useForm, Controller } from "react-hook-form";
+import {
+  createDesignation,
+  deleteDesignationApi,
+  deleteManagerApi,
+  getAllDesignations,
+  getDesignationByIdApi,
+  updateDesignationApi,
+} from "@/api";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+import { toast } from "react-toastify";
+import CommonDeleteModal from "@/components/CommonDelete";
 
 const Page = () => {
   const [open, setOpen] = useState(false);
-  const [rows, setRows] = useState([
-    {
-      id: 1,
-      name: "alex",
-      userRole: "",
-      standardPercentages: "",
-      createdDate: "17-06-2025",
-      edit: "",
-      delete: "",
-    },
-  ]);
-  const role = ["react", "node"];
+  const [rows, setRows] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [deleteId, setDeleteId] = useState([]);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [updateId, setUpdateId] = useState([]);
+  const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
 
-  const { handleSubmit, control, reset, formState: { errors } } = useForm();
+  const {
+    register,
+    handleSubmit,
+    control,
+    reset,
+    setValue,
+
+    formState: { errors },
+  } = useForm();
+
+  useEffect(() => {
+    fetchDesignations();
+  }, []);
+
+  const fetchDesignations = async () => {
+    try {
+      const result = await getAllDesignations();
+      console.log(result?.data?.data?.designations);
+      const res = result.data.data.designations;
+      setRows(res);
+    } catch (e) {
+      console.log(e);
+    }
+  };
 
   const handleClickOpen = () => setOpen(true);
   const handleClose = () => {
@@ -39,27 +72,132 @@ const Page = () => {
     reset();
   };
 
-  const onSubmit = (data) => {
-    const newRow = {
-      id: rows.length + 1,
-      name: data.Designation,
-      userRole: data.role,
-      standardPercentages: data.standardPercentages,
-      createdDate: new Date().toLocaleDateString("en-GB"),
-      edit: "",
-      delete: "",
+  const handleClickOpenDialog = (id) => {
+    console.log(id);
+    setDeleteId(id);
+    setOpenDeleteDialog(true);
+  };
+
+  const handleCloseDeleteDialog = () => {
+    setOpenDeleteDialog(false);
+    reset();
+  };
+  const onSubmit = async (data) => {
+    const payload = {
+      label: data.designation,
     };
-    setRows([...rows, newRow]);
-    handleClose();
+    console.log(payload, "payload 56 -->");
+    try {
+      setIsLoading(true);
+      const result = await createDesignation(payload);
+      if (result?.data?.status === "success") {
+        console.log(result, "60 -->");
+        toast.success(result?.data?.message);
+        fetchDesignations();
+      }
+    } catch (e) {
+      console.log(e);
+    } finally {
+      handleClose();
+      setIsLoading(false);
+    }
+  };
+
+  console.log(rows);
+
+  const deleteDesignation = async () => {
+    setIsLoading(true);
+    try {
+      const result = await deleteDesignationApi(deleteId);
+      console.log(result);
+      if (result?.data?.status === "success") {
+        toast.success(result?.data?.message);
+        fetchDesignations();
+      }
+    } catch (e) {
+      console.log(e);
+    } finally {
+      setIsLoading(false);
+    }
+    handleCloseDeleteDialog();
+  };
+
+  const handleClickOpenDialogForFormToEditDesignation = async (id) => {
+    setUpdateId(id);
+    setOpenUpdateDialog(true);
+    try {
+      const result = await getDesignationByIdApi(id);
+      console.log("update data ====>", result);
+      const designationData = result.data.data.designation;
+      setValue("designation", designationData.label);
+    } catch (e) {
+      console.log(e);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleClickCloseDialogForFormToEditManager = () => {
+    setOpenUpdateDialog(false);
+    reset();
+  };
+
+  const updateDesignationData = async (data) => {
+    console.log(updateId);
+    const payload = { label: data.designation };
+    try {
+      const result = await updateDesignationApi(updateId, payload);
+      console.log(result);
+      fetchDesignations();
+    } catch (e) {
+      console.log(e);
+    } finally {
+      setIsLoading(false);
+      handleClickCloseDialogForFormToEditManager();
+    }
   };
 
   const columns = [
-    { field: "id", headerName: "ID", width: 70 },
-    { field: "name", headerName: "Name", width: 130 },
-    { field: "userRole", headerName: "User Role", width: 150 },
-    { field: "standardPercentages", headerName: "Standard Percentages", width: 200 },
-    { field: "edit", headerName: "Edit", width: 130 },
-    { field: "delete", headerName: "Delete", width: 130 },
+    {
+      field: "_id",
+      headerName: "ID",
+      flex: 1,
+      minWidth: 140,
+      renderCell: (params) => {
+        const rowIndex = params.api.getRowIndexRelativeToVisibleRows(params.id);
+        return <Typography>{rowIndex + 1}</Typography>;
+      },
+    },
+    { field: "label", headerName: "Name", flex: 1, minWidth: 140 },
+
+    {
+      field: "actions",
+      headerName: "Actions",
+      width: 100,
+      sortable: false,
+      renderCell: (params) => (
+        <Stack direction="row" spacing={1}>
+          <Tooltip title="Edit manager">
+            <IconButton
+              color="primary"
+              onClick={() =>
+                handleClickOpenDialogForFormToEditDesignation(params?.id)
+              }
+            >
+              <EditIcon sx={{ color: "#1976D2" }} />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Delete manager">
+            <IconButton
+              color="error"
+              onClick={() => handleClickOpenDialog(params?.id)}
+            >
+              <DeleteIcon sx={{ color: "#1976D2" }} />
+            </IconButton>
+          </Tooltip>
+        </Stack>
+      ),
+    },
   ];
 
   const paginationModel = { page: 0, pageSize: 7 };
@@ -70,10 +208,11 @@ const Page = () => {
         <Button
           variant="contained"
           sx={{
-            width: "20%",
+            minWidth: "20%",
             height: "50px",
             fontSize: { xs: 16, sm: 18, md: 20 },
-            background: "linear-gradient(90deg, rgb(239, 131, 29) 0%, rgb(245, 134, 55) 27%, rgb(244, 121, 56) 100%)",
+            background:
+              "linear-gradient(90deg, rgb(239, 131, 29) 0%, rgb(245, 134, 55) 27%, rgb(244, 121, 56) 100%)",
             textTransform: "none",
           }}
           onClick={handleClickOpen}
@@ -87,70 +226,28 @@ const Page = () => {
             <DialogContent>
               {/* Designation Field */}
               <Controller
-                name="Designation"
+                name="designation"
                 control={control}
                 rules={{ required: "Required" }}
                 render={({ field }) => (
                   <TextField
-                    {...field}
+                    autoFocus
                     margin="dense"
-                    label="Designation"
                     fullWidth
                     variant="outlined"
-                    error={!!errors.Designation}
-                    helperText={errors.Designation?.message}
-                    sx={{ my: 1 }}
-                  />
-                )}
-              />
-
-              {/* Role Dropdown */}
-              <Controller
-                name="role"
-                control={control}
-                rules={{ required: "Required" }}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    select
-                    label="Role"
-                    fullWidth
-                    variant="outlined"
-                    error={!!errors.role}
-                    helperText={errors.role?.message}
-                    sx={{ my: 1 }}
-                  >
-                    {role.map((option, index) => (
-                      <MenuItem key={index} value={option}>
-                        {option}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                )}
-              />
-
-              {/* Standard Percentages */}
-              <Controller
-                name="standardPercentages"
-                control={control}
-                rules={{ required: "Required" }}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    margin="dense"
-                    label="Standard Percentages"
-                    fullWidth
-                    variant="outlined"
-                    error={!!errors.standardPercentages}
-                    helperText={errors.standardPercentages?.message}
-                    sx={{ my: 1 }}
+                    {...register("designation", { required: "Required" })}
+                    error={!!errors.manager}
+                    helperText={errors.manager?.message}
                   />
                 )}
               />
             </DialogContent>
 
             <DialogActions>
-              <Button onClick={handleClose} sx={{ fontSize: "16px", color: "black" }}>
+              <Button
+                onClick={handleClose}
+                sx={{ fontSize: "16px", color: "black" }}
+              >
                 Cancel
               </Button>
               <Button
@@ -168,11 +265,58 @@ const Page = () => {
             </DialogActions>
           </form>
         </Dialog>
+
+        <Dialog
+          open={openUpdateDialog}
+          onClose={handleClickCloseDialogForFormToEditManager}
+        >
+          <form onSubmit={handleSubmit(updateDesignationData)}>
+            <DialogTitle sx={{ width: "500px" }}>Manager</DialogTitle>
+            <DialogContent>
+              <TextField
+                autoFocus
+                margin="dense"
+                // label="manager"
+                fullWidth
+                variant="outlined"
+                {...register("designation", { required: "Required" })}
+                error={!!errors.manager}
+                helperText={errors.manager?.message}
+              />
+            </DialogContent>
+            <DialogActions>
+              <Button
+                onClick={handleClickCloseDialogForFormToEditManager}
+                sx={{ fontSize: "16px", color: "black" }}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={isLoading}
+                sx={{
+                  fontSize: "16px",
+                  background:
+                    "linear-gradient(90deg, rgb(239, 131, 29) 0%, rgb(245, 134, 55) 27%, rgb(244, 121, 56) 100%)",
+                  color: "white",
+                  mx: 2,
+                }}
+              >
+                {isLoading ? (
+                  <CircularProgress size={20} color="inherit" />
+                ) : (
+                  "Update"
+                )}
+              </Button>
+            </DialogActions>
+          </form>
+        </Dialog>
       </Box>
 
       <Box sx={{ mt: 5 }}>
         <Paper sx={{ height: 500, width: "100%", p: 2 }}>
           <DataGrid
+            getRowId={(row) => row._id}
             rows={rows}
             columns={columns}
             initialState={{ pagination: { paginationModel } }}
@@ -181,6 +325,13 @@ const Page = () => {
           />
         </Paper>
       </Box>
+
+      <CommonDeleteModal
+        onClose={handleCloseDeleteDialog}
+        open={openDeleteDialog}
+        isLoading={isLoading}
+        onClick={onclick}
+      />
     </Stack>
   );
 };

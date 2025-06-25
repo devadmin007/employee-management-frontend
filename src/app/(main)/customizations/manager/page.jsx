@@ -15,6 +15,7 @@ import {
   Stack,
   TextField,
   Tooltip,
+  Typography,
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { useForm } from "react-hook-form";
@@ -50,7 +51,16 @@ const Page = () => {
   } = useForm();
 
   const columns = [
-    { field: "_id", headerName: "ID", flex: 1, minWidth: 100 },
+    {
+      field: "_id",
+      headerName: "ID",
+      flex: 1,
+      minWidth: 100,
+      renderCell: (params) => {
+        const rowIndex = params.api.getRowIndexRelativeToVisibleRows(params.id);
+        return <Typography>{rowIndex + 1}</Typography>;
+      },
+    },
     { field: "label", headerName: "Manager Name", flex: 1, minWidth: 140 },
     { field: "createdAt", headerName: "Created Date", flex: 1, minWidth: 140 },
     { field: "updatedAt", headerName: "Updated Date", flex: 1, minWidth: 140 },

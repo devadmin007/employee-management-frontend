@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import * as yup from "yup";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -8,13 +8,15 @@ import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { styled } from "@mui/material/styles";
-import { signUpApi } from "@/api";
+import { getAllRoles, signUpApi } from "@/api";
 import { MenuItem, Select } from "@mui/material";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 
 const signupSchema = yup.object().shape({
   username: yup.string().required("Required"),
+  firstName: yup.string().required("Required"),
+  lastName: yup.string().required("Required"),
   password: yup.string().required("Required"),
   role: yup.string().required("Required"),
 });
@@ -30,11 +32,11 @@ const SignupMainContainer = styled(Box)(({ theme }) => ({
 
 const SignupContainer = styled(Box)(({ theme }) => ({
   padding: "30px",
-  boxShadow: " rgba(100, 100, 111, 0.2) 0px 7px 29px 0px",
+  boxShadow: "rgba(100, 100, 111, 0.2) 0px 7px 29px 0px",
   borderRadius: "10px",
   backgroundColor: "white",
   width: "90%",
-  maxWidth: "400px",
+  maxWidth: "700px",
   [theme.breakpoints.up("sm")]: {
     width: "80%",
   },
@@ -57,12 +59,37 @@ const SignUP = () => {
   } = useForm({
     defaultValues: {
       username: "",
+      firstName: "",
+      lastName: "",
       password: "",
       role: "",
     },
     resolver: yupResolver(signupSchema),
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [roleOption, setRoleOption] = useState([]);
+
+  useEffect(() => {
+    fetchAllRoles();
+  }, []);
+
+  const fetchAllRoles = async () => {
+    try {
+      const response = await getAllRoles();
+      let tempArr = [];
+      response?.data?.data?.roles.forEach((ele, index) => {
+        tempArr.push({
+          label: ele.role,
+          value: ele._id,
+        });
+      });
+      setRoleOption(tempArr);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      console.log("error");
+    }
+  };
 
   const onSubmit = async (data) => {
     setIsLoading(true);
@@ -110,6 +137,7 @@ const SignUP = () => {
         >
           Welcome user, please sign up to continue
         </Typography>
+
         <form onSubmit={handleSubmit(onSubmit)}>
           <Box sx={{ my: 3 }}>
             <Box sx={{ mt: 1, width: "100%" }}>
@@ -128,6 +156,45 @@ const SignUP = () => {
                   />
                 )}
               />
+
+              {/* First Name and Last Name side by side */}
+              <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
+                <Box sx={{ flex: 1 }}>
+                  <Typography variant="subtitle1">First Name</Typography>
+                  <Controller
+                    name="firstName"
+                    control={control}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        variant="outlined"
+                        placeholder="Enter First Name"
+                        fullWidth
+                        error={Boolean(errors.firstName)}
+                        helperText={errors.firstName?.message}
+                      />
+                    )}
+                  />
+                </Box>
+
+                <Box sx={{ flex: 1 }}>
+                  <Typography variant="subtitle1">Last Name</Typography>
+                  <Controller
+                    name="lastName"
+                    control={control}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        variant="outlined"
+                        placeholder="Enter Last Name"
+                        fullWidth
+                        error={Boolean(errors.lastName)}
+                        helperText={errors.lastName?.message}
+                      />
+                    )}
+                  />
+                </Box>
+              </Box>
 
               <Typography variant="subtitle1" sx={{ mt: 2 }}>
                 Password
@@ -155,20 +222,20 @@ const SignUP = () => {
                 name="role"
                 control={control}
                 render={({ field }) => (
-                  <Select
-                    fullWidth
-                    {...field}
-                    error={Boolean(errors.role)}
-                    helperText={errors.role?.message}
-                  >
-                    {roles.map((option, index) => (
-                      <MenuItem key={index} value={option}>
-                        {option}
+                  <Select fullWidth {...field} error={Boolean(errors.role)}>
+                    {roleOption.map((option, index) => (
+                      <MenuItem key={index} value={option.value}>
+                        {option.label}
                       </MenuItem>
                     ))}
                   </Select>
                 )}
               />
+              {errors.role?.message && (
+                <Typography color="error" variant="caption">
+                  {errors.role.message}
+                </Typography>
+              )}
             </Box>
           </Box>
 
