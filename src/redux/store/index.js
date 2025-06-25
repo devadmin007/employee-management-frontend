@@ -10,17 +10,10 @@ const persistConfig = {
 };
 
 const combinedReducer = combineReducers(rootReducer);
-
 const persistedReducer = persistReducer(persistConfig, combinedReducer);
 
 export const store = configureStore({
   reducer: persistedReducer,
-  //     middleware: getDefaultMiddleware({
-  //     serializableCheck: {
-  //       ignoredActions: ["REGISTER"],
-  //       ignoredPaths: ["register"],
-  //     },
-  //   }),
 });
 
 export const persistor = persistStore(store);

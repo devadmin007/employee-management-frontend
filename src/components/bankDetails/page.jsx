@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Box, Stack, Grid, Button } from "@mui/material";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -13,36 +13,59 @@ const schema = yup.object().shape({
   }),
 });
 
-const BankDetailsTab = ({ onBack, onSubmit }) => {
+
+
+const BankDetailsTab = ({ onBack, onSubmit, defaultValues, userId }) => {
+
+  // const getDefaultValues = () => ({
+  //   bankDetails: {
+  //     accountNumber: userId ? (defaultValues?.bankDetails?.accountNumber || "") : "",
+  //     ifscCode: userId ? (defaultValues?.bankDetails?.ifscCode || "") : "",
+  //     branchName: userId ? (defaultValues?.bankDetails?.branchName || "") : "",
+  //     accountHolderName: userId ? (defaultValues?.bankDetails?.accountHolderName || "") : "",
+  //     bankName: userId ? (defaultValues?.bankDetails?.bankName || "") : "",
+  //   }
+  // });
+
   const {
     control,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm({
-    // resolver: yupResolver(schema),
+    resolver: yupResolver(schema),
+    // defaultValues: getDefaultValues(),
+    // mode: "onChange",
     defaultValues: {
       bankDetails: {
         accountNumber: "",
         ifscCode: "",
         branchName: "",
+        accountHolderName: "",
+        bankName: "",
       }
-    },
+    }
   });
 
   const handleFormSubmit = (data) => {
-    console.log("Form data:", data);
-    
+
     if (onSubmit) {
       const formData = new FormData();
       formData.append("step", "4");
-      
+
       Object.entries(data.bankDetails).forEach(([key, value]) => {
         formData.append(`bankDetails[${key}]`, value);
       });
-      
+
       onSubmit(formData);
     }
   };
+
+  // useEffect(() => {
+  //   if (userId && defaultValues) {
+  //     reset(getDefaultValues());
+  //   }
+  // }, [userId, defaultValues])
 
   return (
     <Box
@@ -57,7 +80,7 @@ const BankDetailsTab = ({ onBack, onSubmit }) => {
       <form onSubmit={handleSubmit(handleFormSubmit)}>
         <Stack spacing={2}>
           <Grid container spacing={3}>
-            <Grid item size={{xs:12, md:6}}>
+            <Grid item size={{ xs: 12, md: 6 }}>
               <Controller
                 name="bankDetails.accountNumber"
                 control={control}
@@ -74,7 +97,7 @@ const BankDetailsTab = ({ onBack, onSubmit }) => {
               />
             </Grid>
 
-            <Grid item size={{xs:12, md:6}}>
+            <Grid item size={{ xs: 12, md: 6 }}>
               <Controller
                 name="bankDetails.ifscCode"
                 control={control}
@@ -91,7 +114,7 @@ const BankDetailsTab = ({ onBack, onSubmit }) => {
               />
             </Grid>
 
-            <Grid item size={{xs:12, md:6}}>
+            <Grid item size={{ xs: 12, md: 6 }}>
               <Controller
                 name="bankDetails.branchName"
                 control={control}

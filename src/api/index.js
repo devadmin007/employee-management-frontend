@@ -247,9 +247,80 @@ export const updateDesignationApi = async (id, updatedDesignation) => {
 export const createEmployeeApi = async (payload) => {
   let result;
 
-
   try {
     result = await axiosInstanceApi.post(`/add-user`, payload);
+  } catch (e) {
+    result = e;
+  }
+  return result;
+};
+
+export const fetchAllEmployeeDetails = async ({ params }) => {
+  let result;
+  try {
+    result = await axiosInstanceApi.get("/user-list", { params });
+  } catch (error) {
+    result = error;
+  }
+  return result;
+};
+
+export const fetchAllDesignation = async ({ params }) => {
+  let result;
+  try {
+    result = await axiosInstanceApi.get("/designations", { params });
+  } catch (error) {
+    result = error;
+  }
+  return result;
+};
+
+export const fetchAllDepartments = async ({ params }) => {
+  let result;
+  try {
+    result = await axiosInstanceApi.get("/departments", { params });
+  } catch (error) {
+    result = error;
+  }
+  return result;
+};
+
+export const fetchAllSkills = async ({ params }) => {
+  let result;
+  try {
+    result = await axiosInstanceApi.get("/skills", { params });
+  } catch (error) {
+    result = error;
+  }
+  return result;
+};
+
+export const fetchAllTeams = async ({ params }) => {
+  let result;
+  try {
+    result = await axiosInstanceApi.get("/teams", { params });
+  } catch (error) {
+    result = error;
+  }
+  return result;
+};
+
+export const getEmployeeByIdApi = async (id) => {
+  let result;
+
+  try {
+    result = await axiosInstanceApi.get(`/fetched-userdetails/${id}`);
+  } catch (e) {
+    result = e;
+  }
+  return result;
+};
+
+export const updateEmployeeeApi = async (id, payload) => {
+  let result;
+
+  try {
+    result = await axiosInstanceApi.patch(`/update-userdetails/${id}`, payload);
   } catch (e) {
     result = e;
   }

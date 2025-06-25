@@ -15,7 +15,7 @@ import { useDispatch } from "react-redux";
 import { setUserData } from "@/redux/slice/authSlice";
 
 const loginSchema = yup.object().shape({
-  username: yup.string().required("Required"),
+  email: yup.string().required("Required"),
   password: yup.string().required("Required"),
 });
 
@@ -55,7 +55,7 @@ const Login = () => {
     formState: { errors },
   } = useForm({
     defaultValues: {
-      username: "",
+      email: "",
       password: "",
     },
     resolver: yupResolver(loginSchema),
@@ -114,9 +114,9 @@ const Login = () => {
         <form onSubmit={handleSubmit(onSubmit)}>
           <Box sx={{ my: 3 }}>
             <Box sx={{ mt: 1, width: "100%" }}>
-              <Typography variant="subtitle1">Username</Typography>
+              <Typography variant="subtitle1">Email</Typography>
               <Controller
-                name="username"
+                name="email"
                 control={control}
                 render={({ field }) => (
                   <TextField
@@ -124,8 +124,8 @@ const Login = () => {
                     variant="outlined"
                     placeholder="Enter User Name"
                     fullWidth
-                    error={Boolean(errors.username)}
-                    helperText={errors.username?.message}
+                    error={Boolean(errors.email)}
+                    helperText={errors.email?.message}
                   />
                 )}
               />

@@ -21,20 +21,29 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import CommonInput from "../CommonInput";
 import * as yup from "yup";
 import { getAllRoles } from "@/api";
+import moment from "moment";
 
-
+// Fixed yup schema with proper validation
 const personalInfoSchema = yup.object().shape({
   image: yup
     .mixed()
+    .nullable()
     .test("fileSize", "Image is too large", (value) => {
-      if (!value) return true;
-      return value.size <= 2000000;
+      if (!value) return true; // Allow null/undefined
+      if (typeof value === 'string') return true; // Allow URL strings for existing images
+      if (value instanceof File) {
+        return value.size <= 2000000; // 2MB limit
+      }
+      return true;
     })
     .test("fileType", "Unsupported file format", (value) => {
-      if (!value) return true;
-      return ["image/jpeg", "image/png", "image/jpg"].includes(value.type);
-    })
-    .required("Profile image is required"),
+      if (!value) return true; // Allow null/undefined
+      if (typeof value === 'string') return true; // Allow URL strings for existing images
+      if (value instanceof File) {
+        return ["image/jpeg", "image/png", "image/jpg"].includes(value.type);
+      }
+      return true;
+    }),
   role: yup.string().required("Role is required"),
   firstName: yup.string().required("First Name is required"),
   lastName: yup.string().required("Last Name is required"),
@@ -51,10 +60,11 @@ const personalInfoSchema = yup.object().shape({
     .required("Date of birth is required")
     .test("is-date", "Invalid date format", (value) => {
       if (!value) return false;
-      return !isNaN(Date.parse(value));
+      const date = new Date(value);
+      return date instanceof Date && !isNaN(date.getTime());
     }),
   gender: yup.string().required("Gender is required"),
-  permanentAddress: yup.object().shape({
+  permenentAddress: yup.object().shape({
     street: yup.string().required("Address is required"),
     city: yup.string().required("City is required"),
     state: yup.string().required("State is required"),
@@ -76,32 +86,109 @@ const personalInfoSchema = yup.object().shape({
   }),
 });
 
-
 const genderOptions = [
   { value: "male", label: "Male" },
   { value: "female", label: "Female" },
 ];
 
+const PersonalInfoTab = ({ onBack, onSubmit, defaultValues = {}, userId = null }) => {
+  console.log("defaultValues 94", defaultValues);
 
-const PersonalInfoTab = ({ onBack,onSubmit }) => {
   const [preview, setPreview] = useState(null);
   const [sameAsPermanent, setSameAsPermanent] = useState(false);
   const [roles, setRoles] = useState([]);
 
+  // const getDefaultValues = () => {
+  //   // Parse address fields if they come as JSON strings
+  //   const parseAddress = (address) => {
+  //     if (!address) return {
+  //       street: "",
+  //       city: "",
+  //       state: "",
+  //       zip: "",
+  //       country: ""
+  //     };
+
+  //     if (typeof address === 'string') {
+  //       try {
+  //         return JSON.parse(address);
+  //       } catch (e) {
+  //         console.error('Failed to parse address:', e);
+  //         return {
+  //           street: "",
+  //           city: "",
+  //           state: "",
+  //           zip: "",
+  //           country: ""
+  //         };
+  //       }
+  //     }
+  //     return address;
+  //   };
+
+  //   // If userId is null, return blank/default values
+  //   if (!userId) {
+  //     return {
+  //       role: "",
+  //       firstName: "",
+  //       lastName: "",
+  //       phoneNumber: "",
+  //       personalNumber: "",
+  //       dateOfBirth: "",
+  //       gender: "",
+  //       image: null,
+  //       permenentAddress: {
+  //         street: "",
+  //         city: "",
+  //         state: "",
+  //         zip: "",
+  //         country: "",
+  //       },
+  //       currentAddress: {
+  //         street: "",
+  //         city: "",
+  //         state: "",
+  //         zip: "",
+  //         country: "",
+  //       },
+  //     };
+  //   }
+
+  //   return {
+  //     role: defaultValues?.role || "",
+  //     firstName: defaultValues?.firstName || "",
+  //     lastName: defaultValues?.lastName || "",
+  //     phoneNumber: defaultValues?.phoneNumber || "",
+  //     personalNumber: defaultValues?.personalNumber || "",
+  //     dateOfBirth: defaultValues?.dateOfBirth || "",
+  //     gender: defaultValues?.gender || "",
+  //     image: defaultValues?.image || null,
+  //     permenentAddress: parseAddress(defaultValues?.permenentAddress),
+  //     currentAddress: parseAddress(defaultValues?.currentAddress),
+  //   };
+  // };
 
   const {
-    register,
     setValue,
     watch,
     control,
     handleSubmit,
     trigger,
+    reset,
     formState: { errors },
   } = useForm({
-    // resolver: yupResolver(personalInfoSchema),
+    resolver: yupResolver(personalInfoSchema),
+    // defaultValues: getDefaultValues(),
     defaultValues: {
+      role: "",
+      firstName: "",
+      lastName: "",
+      phoneNumber: "",
+      personalNumber: "",
+      dateOfBirth: "",
+      gender: "",
       image: null,
-      permanentAddress: {
+      permenentAddress: {
         street: "",
         city: "",
         state: "",
@@ -118,22 +205,21 @@ const PersonalInfoTab = ({ onBack,onSubmit }) => {
     },
   });
 
-
   const handleFormSubmit = (data) => {
+    console.log("data", data);
+
     const formData = new FormData();
 
-
     Object.keys(data).forEach(key => {
-      if (key === 'permanentAddress' || key === 'currentAddress') {
+      if (key === 'permenentAddress' || key === 'currentAddress') {
         formData.append(key, JSON.stringify(data[key]));
       } else if (key === 'image' && data[key] instanceof File) {
         formData.append('image', data[key]);
-      } else {
+      } else if (data[key] !== null && data[key] !== undefined) {
         formData.append(key, data[key]);
       }
     });
     formData.append("step", 1);
-
 
     console.log("Form data:", Object.fromEntries(formData));
     if (onSubmit) {
@@ -141,22 +227,32 @@ const PersonalInfoTab = ({ onBack,onSubmit }) => {
     }
   };
 
-
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setPreview(URL.createObjectURL(file));
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreview(reader.result);
+      };
+      reader.readAsDataURL(file);
       setValue("image", file);
       trigger("image");
     }
   };
 
+  const handleRemoveImage = () => {
+    setPreview(null);
+    setValue("image", null);
+    trigger("image");
+  };
 
   const handleSameAddressToggle = (e) => {
     setSameAsPermanent(e.target.checked);
     if (e.target.checked) {
-      const permanentAddress = watch("permanentAddress");
-      setValue("currentAddress", permanentAddress);
+      const permenentAddress = watch("permenentAddress");
+      setValue("currentAddress", permenentAddress);
+      // Trigger validation for current address fields
+      trigger("currentAddress");
     } else {
       setValue("currentAddress", {
         street: "",
@@ -167,7 +263,6 @@ const PersonalInfoTab = ({ onBack,onSubmit }) => {
       });
     }
   };
-
 
   const handleFetchRole = async () => {
     try {
@@ -180,11 +275,42 @@ const PersonalInfoTab = ({ onBack,onSubmit }) => {
     }
   };
 
-
   useEffect(() => {
     handleFetchRole();
   }, []);
 
+  useEffect(() => {
+    console.log("userId 214", userId);
+
+    if (userId && defaultValues) {
+      setValue("role", defaultValues?.role || "");
+      setValue("firstName", defaultValues?.firstName || "");
+      setValue("lastName", defaultValues?.lastName || "");
+      setValue("phoneNumber", defaultValues?.phoneNumber || "");
+      setValue("personalNumber", defaultValues?.personalNumber || "");
+      setValue("dateOfBirth", defaultValues?.dateOfBirth ? moment(defaultValues?.dateOfBirth).format("DD/MM/YYY") : "");
+      setValue("gender", defaultValues?.gender || "Male");
+      setValue("permenentAddress.street", defaultValues?.permenentAddress?.street || "");
+      setValue("permenentAddress.city", defaultValues?.permenentAddress?.city || "");
+      setValue("permenentAddress.state", defaultValues?.permenentAddress?.state || "");
+      setValue("permenentAddress.zip", defaultValues?.permenentAddress?.zip || "");
+      setValue("permenentAddress.country", defaultValues?.permenentAddress?.country || "");
+      setValue("currentAddress.street", defaultValues?.currentAddress?.street || "");
+      setValue("currentAddress.city", defaultValues?.currentAddress?.city || "");
+      setValue("currentAddress.state", defaultValues?.currentAddress?.state || "");
+      setValue("currentAddress.zip", defaultValues?.currentAddress?.zip || "");
+      setValue("currentAddress.country", defaultValues?.currentAddress?.country || "");
+
+      if (defaultValues?.image) {
+        setPreview(defaultValues.image);
+      }
+      if (defaultValues?.permenentAddress && defaultValues?.currentAddress) {
+        const isSame = JSON.stringify(defaultValues.permenentAddress) ===
+          JSON.stringify(defaultValues.currentAddress);
+        setSameAsPermanent(isSame);
+      }
+    }
+  }, [userId, defaultValues]);
 
   return (
     <Box
@@ -206,7 +332,6 @@ const PersonalInfoTab = ({ onBack,onSubmit }) => {
             onChange={handleImageUpload}
           />
 
-
           <label htmlFor="profile-upload">
             <IconButton component="span">
               <Avatar src={preview || ""} sx={{ width: 150, height: 150 }} />
@@ -224,7 +349,6 @@ const PersonalInfoTab = ({ onBack,onSubmit }) => {
               )}
             </IconButton>
           </label>
-
 
           {preview && (
             <Box
@@ -246,15 +370,17 @@ const PersonalInfoTab = ({ onBack,onSubmit }) => {
                   <EditIcon fontSize="small" />
                 </IconButton>
               </label>
-
-
-              <IconButton size="small" onClick={() => setPreview(null)}>
+              <IconButton size="small" onClick={handleRemoveImage}>
                 <DeleteIcon fontSize="small" />
               </IconButton>
             </Box>
           )}
+          {errors.image && (
+            <Typography color="error" textAlign="center" mb={2}>
+              {errors.image.message}
+            </Typography>
+          )}
         </Box>
-
 
         <Stack spacing={2}>
           <Grid container spacing={3}>
@@ -299,7 +425,6 @@ const PersonalInfoTab = ({ onBack,onSubmit }) => {
               />
             </Grid>
 
-
             <Grid item size={{ xs: 12, md: 6 }}>
               <Controller
                 name="lastName"
@@ -316,7 +441,6 @@ const PersonalInfoTab = ({ onBack,onSubmit }) => {
                 )}
               />
             </Grid>
-
 
             <Grid item size={{ xs: 12, md: 6 }}>
               <Controller
@@ -336,7 +460,6 @@ const PersonalInfoTab = ({ onBack,onSubmit }) => {
               />
             </Grid>
 
-
             <Grid item size={{ xs: 12, md: 6 }}>
               <Controller
                 name="personalNumber"
@@ -354,7 +477,6 @@ const PersonalInfoTab = ({ onBack,onSubmit }) => {
                 )}
               />
             </Grid>
-
 
             <Grid item size={{ xs: 12, md: 6 }}>
               <Controller
@@ -377,7 +499,6 @@ const PersonalInfoTab = ({ onBack,onSubmit }) => {
                 )}
               />
             </Grid>
-
 
             <Grid item size={{ xs: 12, md: 6 }}>
               <Controller
@@ -404,14 +525,13 @@ const PersonalInfoTab = ({ onBack,onSubmit }) => {
             </Grid>
           </Grid>
 
-
           <Typography variant="subtitle1" fontWeight="bold" mt={3}>
             Permanent Address
           </Typography>
           <Grid container spacing={3}>
             <Grid item size={{ xs: 12 }}>
               <Controller
-                name="permanentAddress.street"
+                name="permenentAddress.street"
                 control={control}
                 render={({ field }) => (
                   <CommonInput
@@ -419,15 +539,15 @@ const PersonalInfoTab = ({ onBack,onSubmit }) => {
                     fullWidth
                     label="Address"
                     variant="outlined"
-                    error={!!errors.permanentAddress?.street}
-                    helperText={errors.permanentAddress?.street?.message}
+                    error={!!errors.permenentAddress?.street}
+                    helperText={errors.permenentAddress?.street?.message}
                   />
                 )}
               />
             </Grid>
             <Grid item size={{ xs: 12, md: 6 }}>
               <Controller
-                name="permanentAddress.city"
+                name="permenentAddress.city"
                 control={control}
                 render={({ field }) => (
                   <CommonInput
@@ -435,15 +555,15 @@ const PersonalInfoTab = ({ onBack,onSubmit }) => {
                     fullWidth
                     label="City"
                     variant="outlined"
-                    error={!!errors.permanentAddress?.city}
-                    helperText={errors.permanentAddress?.city?.message}
+                    error={!!errors.permenentAddress?.city}
+                    helperText={errors.permenentAddress?.city?.message}
                   />
                 )}
               />
             </Grid>
             <Grid item size={{ xs: 12, md: 6 }}>
               <Controller
-                name="permanentAddress.state"
+                name="permenentAddress.state"
                 control={control}
                 render={({ field }) => (
                   <CommonInput
@@ -451,15 +571,15 @@ const PersonalInfoTab = ({ onBack,onSubmit }) => {
                     fullWidth
                     label="State"
                     variant="outlined"
-                    error={!!errors.permanentAddress?.state}
-                    helperText={errors.permanentAddress?.state?.message}
+                    error={!!errors.permenentAddress?.state}
+                    helperText={errors.permenentAddress?.state?.message}
                   />
                 )}
               />
             </Grid>
             <Grid item size={{ xs: 12, md: 6 }}>
               <Controller
-                name="permanentAddress.zip"
+                name="permenentAddress.zip"
                 control={control}
                 render={({ field }) => (
                   <CommonInput
@@ -467,15 +587,15 @@ const PersonalInfoTab = ({ onBack,onSubmit }) => {
                     fullWidth
                     label="Zip Code"
                     variant="outlined"
-                    error={!!errors.permanentAddress?.zip}
-                    helperText={errors.permanentAddress?.zip?.message}
+                    error={!!errors.permenentAddress?.zip}
+                    helperText={errors.permenentAddress?.zip?.message}
                   />
                 )}
               />
             </Grid>
             <Grid item size={{ xs: 12, md: 6 }}>
               <Controller
-                name="permanentAddress.country"
+                name="permenentAddress.country"
                 control={control}
                 render={({ field }) => (
                   <CommonInput
@@ -483,14 +603,13 @@ const PersonalInfoTab = ({ onBack,onSubmit }) => {
                     fullWidth
                     label="Country"
                     variant="outlined"
-                    error={!!errors.permanentAddress?.country}
-                    helperText={errors.permanentAddress?.country?.message}
+                    error={!!errors.permenentAddress?.country}
+                    helperText={errors.permenentAddress?.country?.message}
                   />
                 )}
               />
             </Grid>
           </Grid>
-
 
           <Box
             display="flex"
@@ -511,7 +630,6 @@ const PersonalInfoTab = ({ onBack,onSubmit }) => {
               label="Same as Permanent Address"
             />
           </Box>
-
 
           <Grid container spacing={3}>
             <Grid item size={{ xs: 12 }}>
@@ -600,7 +718,6 @@ const PersonalInfoTab = ({ onBack,onSubmit }) => {
               />
             </Grid>
           </Grid>
-
 
           <Box
             sx={{
