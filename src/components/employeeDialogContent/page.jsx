@@ -1,94 +1,132 @@
-import * as React from "react";
-import PropTypes from "prop-types";
-import Tabs from "@mui/material/Tabs";
-import Tab from "@mui/material/Tab";
-import Box from "@mui/material/Box";
+"use client";
+import React, { useState } from "react";
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  Step,
+  StepLabel,
+  Stepper,
+  Typography,
+} from "@mui/material";
+
+// Components with `forwardRef` and `validate()` exposed
 import PersonalInfoTab from "../personalInfo/page";
 import TeamsAndSkillTab from "../teamsAndSkill/page";
 import SettingTab from "../setting/page";
+import BankDetailsTab from "../bankDetails/page";
+import { createEmployeeApi } from "@/api";
+import SuccessModal from "../SuccessModal/page";
 
-function CustomTabPanel(props) {
-  const { children, value, index, ...other } = props;
+const steps = ["Personal Info", "Team & Skill", "Settings", "Bank Details"];
 
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`simple-tabpanel-${index}`}
-      aria-labelledby={`simple-tab-${index}`}
-      {...other}
-    >
-      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
-    </div>
-  );
-}
+export default function EmployeeStepperForm({ open, onClose }) {
+  const [activeStep, setActiveStep] = useState(0);
+  console.log("activeStep", activeStep);
+  const [formData, setFormData] = useState({
+    personalInfo: {},
+    teamAndSkill: {},
+    settings: {},
+    bankDetails: {},
+  });
 
-CustomTabPanel.propTypes = {
-  children: PropTypes.node,
-  index: PropTypes.number.isRequired,
-  value: PropTypes.number.isRequired,
-};
-
-function a11yProps(index) {
-  return {
-    id: `simple-tab-${index}`,
-    "aria-controls": `simple-tabpanel-${index}`,
-  };
-}
-
-export default function EmployeeDialogContent() {
-  const [value, setValue] = React.useState(0);
-
-  const handleChange = (event, newValue) => {
-    setValue(newValue);
+  const handleNext = () => {
+    setActiveStep((prevActiveStep) => prevActiveStep + 1);
   };
 
+  const handleBack = () => {
+    setActiveStep((prevActiveStep) => prevActiveStep - 1);
+  };
+
+  const onSubmit = async (data) => {
+    console.log("Final form data:", data);
+    try {
+      // const response = await createEmployeeApi(data);
+      console.log("response", response);
+    } catch (error) {
+      console.log("error", error);
+    }
+
+    setActiveStep((prevStep) => prevStep + 1);
+  };
+
+  const renderStepContent = (step) => {
+    switch (step) {
+      case 0:
+        return <PersonalInfoTab onBack={onClose} onSubmit={onSubmit} />;
+      case 1:
+        return <TeamsAndSkillTab onBack={handleBack} onSubmit={onSubmit} />;
+      case 2:
+        return <SettingTab onBack={handleBack} onSubmit={onSubmit} />;
+      case 3:
+        return <BankDetailsTab onBack={handleBack} onSubmit={onSubmit} />;
+      default:
+        return  <SuccessModal onClose={onClose} setActiveStep={setActiveStep}/>;
+    }
+  };
+
   return (
-    <Box
-      sx={{
-        width: "100%",
-        height: "515px",
-        display: "flex",
-        flexDirection: "column",
+    <Dialog
+      open={open}
+      onClose={onClose}
+      PaperProps={{
+        sx: {
+          width: "900px",
+          maxWidth: "100%",
+          m: 5,
+        },
       }}
     >
-      <Box
-        sx={{
-          borderBottom: 1,
-          borderColor: "divider",
-        }}
-      >
-        <Tabs
-          value={value}
-          onChange={handleChange}
-          aria-label="basic tabs example"
+      <DialogTitle sx={{ mx: 2, fontWeight: "600", fontSize: "22px" }}>
+        Add Employee
+      </DialogTitle>
+      <DialogContent>
+        <Box
+          sx={{
+            width: "100%",
+            height: "515px",
+            display: "flex",
+            flexDirection: "column",
+          }}
         >
-          <Tab
-            sx={{ fontSize: "16px" }}
-            label="Personal Info"
-            {...a11yProps(0)}
-          />
+          {/* Sticky Stepper Header */}
+          <Box
+            sx={{
+              position: "sticky",
+              top: 0,
+              zIndex: 10,
+              backgroundColor: "#fff",
+              borderBottom: 1,
+              borderColor: "divider",
+            }}
+          >
+            <Stepper activeStep={activeStep} alternativeLabel>
+              {steps.map((label) => (
+                <Step key={label}>
+                  <StepLabel>
+                    <Typography sx={{ fontSize: "14px" }}>{label}</Typography>
+                  </StepLabel>
+                </Step>
+              ))}
+            </Stepper>
+          </Box>
 
-          <Tab
-            sx={{ fontSize: "16px" }}
-            label="Team & Skill"
-            {...a11yProps(1)}
-          />
-          <Tab sx={{ fontSize: "16px" }} label="Settings" {...a11yProps(2)} />
-        </Tabs>
-      </Box>
-
-      <Box sx={{ flexGrow: 1, overflow: "auto" }}>
-        <CustomTabPanel value={value} index={0}>
-          <PersonalInfoTab />
-        </CustomTabPanel>
-        <CustomTabPanel value={value} index={1}>
-          <TeamsAndSkillTab />
-        </CustomTabPanel>
-        <CustomTabPanel value={value} index={2}>
-          <SettingTab />
-        </CustomTabPanel>
-      </Box>
-    </Box>
+          {/* Scrollable Form Section */}
+          <Box
+            sx={{
+              flexGrow: 1,
+              overflowY: "auto",
+              scrollbarWidth: "none",
+              px: 2,
+              py: 3,
+            }}
+          >
+            {renderStepContent(activeStep)}
+          </Box>
+        </Box>
+      </DialogContent>
+    </Dialog>
   );
 }

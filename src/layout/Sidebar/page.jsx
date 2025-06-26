@@ -61,7 +61,7 @@ const Sidebar = () => {
       <Link href="/dashboard">
         <SidebarLogo>
           <Image
-            src="/assets/technithunder-logo2.svg"
+            src="/assets/techniThunder-logo2.svg"
             width={270}
             height={70}
             alt="Picture of the author"

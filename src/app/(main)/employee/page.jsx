@@ -13,23 +13,16 @@ import {
   Stack,
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
-import { useForm } from "react-hook-form";
 
 import EmployeeDialogContent from "@/components/employeeDialogContent/page";
+import { createEmployeeApi } from "@/api";
 
 const Page = () => {
   const [open, setOpen] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [rows, setRows] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-
-  const {
-    register,
-    handleSubmit,
-    reset,
-    setValue,
-    formState: { errors },
-  } = useForm();
+  // const [formData, setFormData] = useState({});
 
   const columns = [
     { field: "x", headerName: "ID", flex: 1, minWidth: 100 },
@@ -41,11 +34,7 @@ const Page = () => {
   const handleClickOpen = () => setOpen(true);
   const handleClose = () => {
     setOpen(false);
-    reset();
-  };
-
-  const onSubmit = async (data) => {
-    console.log("welcome");
+    // reset();
   };
 
   return (
@@ -66,55 +55,7 @@ const Page = () => {
           Add Employee
         </Button>
       </Box>
-      <Box>
-        <Dialog
-          open={open}
-          onClose={handleClose}
-          PaperProps={{
-            sx: {
-              width: "900px",
-              maxWidth: "100%",
-              m: 5,
-            },
-          }}
-        >
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <DialogTitle sx={{ mx: 2, fontWeight: "600", fontSize: "22px" }}>
-              Add Employee
-            </DialogTitle>
-            <DialogContent>
-              <EmployeeDialogContent />
-            </DialogContent>
-            <DialogActions>
-              <Button
-                onClick={handleClose}
-                sx={{ fontSize: "16px", color: "black" }}
-                disabled={isLoading}
-              >
-                Cancel
-              </Button>
-
-              <Button
-                type="submit"
-                disabled={isLoading}
-                sx={{
-                  fontSize: "16px",
-                  background:
-                    "linear-gradient(90deg, rgb(239, 131, 29) 0%, rgb(245, 134, 55) 27%, rgb(244, 121, 56) 100%)",
-                  color: "white",
-                  mx: 2,
-                }}
-              >
-                {isLoading ? (
-                  <CircularProgress size={20} color="inherit" />
-                ) : (
-                  "Next"
-                )}
-              </Button>
-            </DialogActions>
-          </form>
-        </Dialog>
-      </Box>
+      <EmployeeDialogContent open={open} onClose={handleClose} />
 
       <Box sx={{ mt: 5 }}>
         <Paper sx={{ height: 500, width: "100%", p: 2 }}>
