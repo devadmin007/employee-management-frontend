@@ -4,37 +4,36 @@ import {
   Box,
   Button,
   CircularProgress,
+  FormControl,
   IconButton,
+  InputAdornment,
+  InputLabel,
+  MenuItem,
+  Pagination,
   Paper,
+  Select,
   Stack,
   Tooltip,
   Typography,
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
+import SearchIcon from "@mui/icons-material/Search";
 
 import EmployeeDialogContent from "@/components/employeeDialogContent/page";
 import { fetchAllEmployeeDetails } from "@/api";
 import EditIcon from "@mui/icons-material/Edit";
-import CommonTable from "@/components/CommonTable";
 import { toast } from "react-toastify";
+import DebaunceInput from "@/utils/DebaunceInput";
 
 const Page = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(5);
-  const [sortBy, setSortBy] = useState("firstName");
-  const [order, setOrder] = useState("ASC");
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [pagination, setPagination] = useState(false);
-  const [employeeData, setEmployeeData] = useState([]);
   const [employeeId, setEmployeeId] = useState("");
-  const [search, setSearch] = useState("");
   const [rows, setRows] = useState([]);
-  const [totalPages, setTotalPages] = useState(1);
   const [totalRows, setTotalRows] = useState(0);
-
-  // const [formData, setFormData] = useState({});
 
   const columns = [
     {
@@ -56,33 +55,30 @@ const Page = () => {
       width: 100,
       sortable: false,
       renderCell: (params) => {
-        return <Stack direction="row" spacing={1}>
-          <Tooltip title="Edit Employee">
-            <IconButton
-              color="primary"
-              onClick={() => handleEditClick(params.row)
-              }
-            >
-              <EditIcon />
-            </IconButton>
-          </Tooltip>
-        </Stack >
+        return (
+          <Stack direction="row" spacing={1}>
+            <Tooltip title="Edit Employee">
+              <IconButton
+                color="primary"
+                onClick={() => handleEditClick(params.row)}
+              >
+                <EditIcon />
+              </IconButton>
+            </Tooltip>
+          </Stack>
+        );
       },
     },
   ];
 
-  const handlePageChange = (newPage) => {
-    setPage(newPage);
-  };
-
   const handleRowsPerPageChange = (newLimit) => {
     setLimit(newLimit);
-    setPage(1); // Reset to first page when changing page size
+    setPage(1);
   };
 
   const handleSearchChange = (searchValue) => {
-    setSearch(searchValue);
-    setPage(1); // Reset to first page when searching
+    setSearchQuery(searchValue);
+    setPage(1);
   };
 
   const handleClickOpen = () => setOpen(true);
@@ -91,123 +87,189 @@ const Page = () => {
   };
 
   const handleEditClick = (employee) => {
-    setEmployeeId(employee?._id)
+    setEmployeeId(employee?._id);
     setOpen(true);
   };
-
 
   const fetchEmployee = async () => {
     try {
       setIsLoading(true);
-      const params = {};
+      const params = {
+        page,
+        itemsPerPage: limit,
+      };
+      searchQuery && (params.search = searchQuery);
       const res = await fetchAllEmployeeDetails({ params });
       if (res && res?.data) {
-        setRows(res?.data?.data?.user)
-        setTotalPages(res.data.data.totalPages);
-        setTotalRows(
-          res.data.data?.totalCount || res.data.data.user?.length
-        );
+        setRows(res?.data?.data?.user);
+        setTotalRows(res.data.data?.totalCount || res.data.data.user?.length);
       }
     } catch (error) {
       console.error("Failed to employee", error);
-      toast.error("Failed to fetch skills");
+      // toast.error("Failed to fetch skills");
     } finally {
       setIsLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
     fetchEmployee();
-  }, [page, limit]);
+  }, [page, limit, searchQuery]);
 
   return (
     <Stack sx={{ p: 4 }}>
-      <CommonTable
-        rows={rows}
-        columns={columns}
-        count={totalPages}
-        page={page}
-        onPageChange={handlePageChange}
-        onSearchChange={handleSearchChange}
-        searchValue={search}
-        loading={isLoading} // Only for data fetching
-        title="Employee Management"
-        searchPlaceholder="Search employee..."
-        noDataMessage="No Employee found"
-        showSearch={true}
-        showActionButton={true}
-        actionButtonText="Add Employee"
-        onActionClick={handleClickOpen}
-        // Pagination props
-        rowsPerPage={limit}
-        onRowsPerPageChange={handleRowsPerPageChange}
-        showRowsPerPage={true}
-        rowsPerPageOptions={[5, 10, 25, 50]}
-        totalRows={totalRows}
-        currentPageRows={rows?.length}
-      />
-      {/* <Box sx={{ textAlign: "right" }}>
-        <Button
-          variant="contained"
+      <Box>
+        <Paper
           sx={{
-            minWidth: "15%",
-            height: "50px",
-            fontSize: { xs: 16, sm: 18, md: 20 },
-            background:
-              "linear-gradient(90deg, rgb(239, 131, 29) 0%, rgb(245, 134, 55) 27%, rgb(244, 121, 56) 100%)",
-            textTransform: "none",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            mb: 2,
+            flexWrap: "wrap",
+            gap: 2,
+            padding: 2,
           }}
-          onClick={handleClickOpen}
         >
-          Add Employee
-        </Button>
-      </Box> */}
-      <EmployeeDialogContent open={open} onClose={handleClose} userId={employeeId} fetchEmployee={fetchEmployee} />
+          <Typography variant="h6" component="h2" sx={{ fontWeight: 600 }}>
+            Employee Management
+          </Typography>
+          <Stack direction="row" spacing={2}>
+            <Box>
+              <DebaunceInput
+                placeholder="Search Employee..."
+                variant="outlined"
+                size="small"
+                delay={500}
+                sx={{
+                  minWidth: 250,
+                  maxWidth: 400,
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: 2,
+                  },
+                }}
+                value={searchQuery}
+                onChange={handleSearchChange}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon color="action" />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </Box>
 
-      {/* <Box sx={{ mt: 5 }}>
-        <Paper sx={{ height: 500, width: "100%", p: 2 }}>
-          {isLoading ?
-            (<Box
+            <Button
+              variant="contained"
+              sx={{
+                minWidth: "120px",
+                height: "40px",
+                fontSize: 16,
+                background:
+                  "linear-gradient(90deg, rgb(239, 131, 29) 0%, rgb(245, 134, 55) 27%, rgb(244, 121, 56) 100%)",
+                textTransform: "none",
+              }}
+              onClick={handleClickOpen}
+            >
+              Add Employee
+            </Button>
+          </Stack>
+        </Paper>
+      </Box>
+      <EmployeeDialogContent
+        open={open}
+        onClose={handleClose}
+        userId={employeeId}
+        fetchEmployee={fetchEmployee}
+      />
+
+      <Box>
+        <Paper sx={{ height: 340, width: "100%", p: 2 }}>
+          {isLoading ? (
+            <Box
               display="flex"
               justifyContent="center"
               alignItems="center"
               height="300px"
             >
               <CircularProgress />
-            </Box>) :
-            employeeData.length > 0 ? (
-
-              <DataGrid
-                getRowId={(row) => row._id}
-                rows={employeeData}
-                columns={columns}
-                loading={isLoading}
-                pagination={false}
-                disableColumnFilter
-                disableColumnMenu
-                disableColumnSelector
-                disableDensitySelector
-                disableRowSelectionOnClick
-                sx={{
-                  backgroundColor: "#fff",
-                  border: "none",
-                }}
-                pageSizeOptions={[5, 10]}
-                initialState={{
-                  pagination: { paginationModel: { page: 0, pageSize: 7 } },
-                }}
-              />) : (
-              <Typography
-                variant="h6"
-                align="center"
-                sx={{ color: "gray", padding: 3 }}
-              >
-                No Data Found
-              </Typography>
-            )}
-
+            </Box>
+          ) : rows.length > 0 ? (
+            <DataGrid
+              getRowId={(row) => row._id}
+              rows={rows}
+              columns={columns}
+              loading={isLoading}
+              pagination={false}
+              disableColumnFilter
+              disableColumnMenu
+              disableColumnSelector
+              disableDensitySelector
+              disableRowSelectionOnClick
+              hideFooter
+              sx={{
+                backgroundColor: "#fff",
+                border: "none",
+              }}
+            />
+          ) : (
+            <Typography
+              variant="h6"
+              align="center"
+              sx={{ color: "gray", padding: 3 }}
+            >
+              No Data Found
+            </Typography>
+          )}
         </Paper>
-      </Box> */}
+      </Box>
+
+      <Box>
+        <Paper
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            mt: 2,
+            p: 2,
+            flexWrap: "wrap",
+            gap: 2,
+          }}
+        >
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <Typography variant="body2" sx={{ color: "text.secondary" }}>
+              Showing {(page - 1) * limit + 1}-
+              {Math.min(page * limit, totalRows)} from {totalRows} results
+            </Typography>
+            <FormControl size="small" sx={{ minWidth: 120 }}>
+              <InputLabel>Rows per page</InputLabel>
+              <Select
+                value={limit}
+                onChange={(e) => handleRowsPerPageChange(e.target.value)}
+                label="Rows per page"
+              >
+                {[5, 10, 25, 50].map((option) => (
+                  <MenuItem key={option} value={option}>
+                    {option}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Box>
+
+          <Pagination
+            page={page}
+            count={Math.ceil(totalRows / limit)}
+            onChange={(e, value) => setPage(value)}
+            color="primary"
+            shape="rounded"
+            showFirstButton
+            showLastButton
+            siblingCount={1}
+            boundaryCount={1}
+          />
+        </Paper>
+      </Box>
     </Stack>
   );
 };

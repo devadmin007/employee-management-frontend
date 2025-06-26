@@ -13,10 +13,13 @@ const schema = yup.object().shape({
   }),
 });
 
-
-
-const BankDetailsTab = ({ onBack, onSubmit, defaultValues, userId }) => {
-
+const BankDetailsTab = ({
+  onBack,
+  onSubmit,
+  defaultValues = {},
+  userId = null,
+  isLoading,
+}) => {
   // const getDefaultValues = () => ({
   //   bankDetails: {
   //     accountNumber: userId ? (defaultValues?.bankDetails?.accountNumber || "") : "",
@@ -36,19 +39,18 @@ const BankDetailsTab = ({ onBack, onSubmit, defaultValues, userId }) => {
     resolver: yupResolver(schema),
     // defaultValues: getDefaultValues(),
     // mode: "onChange",
-    defaultValues: {
+    defaultValues: defaultValues || {
       bankDetails: {
         accountNumber: "",
         ifscCode: "",
         branchName: "",
         accountHolderName: "",
         bankName: "",
-      }
-    }
+      },
+    },
   });
 
   const handleFormSubmit = (data) => {
-
     if (onSubmit) {
       const formData = new FormData();
       formData.append("step", "4");
@@ -142,17 +144,24 @@ const BankDetailsTab = ({ onBack, onSubmit, defaultValues, userId }) => {
               borderColor: "divider",
             }}
           >
-            <Button variant="outlined" onClick={onBack}>Back</Button>
+            <Button variant="outlined" onClick={onBack}>
+              Back
+            </Button>
             <Button
               variant="contained"
               color="success"
               type="submit"
+              disabled={isLoading}
               sx={{
                 background:
                   "linear-gradient(90deg, rgb(239, 131, 29) 0%, rgb(245, 134, 55) 27%, rgb(244, 121, 56) 100%)",
               }}
             >
-              Submit
+              {isLoading ? (
+                <CircularProgress size={20} color="inherit" />
+              ) : (
+                "Submit"
+              )}
             </Button>
           </Box>
         </Stack>

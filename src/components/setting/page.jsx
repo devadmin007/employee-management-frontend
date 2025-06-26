@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Box, Stack, Grid, Button } from "@mui/material";
+import { Box, Stack, Grid, Button, CircularProgress } from "@mui/material";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -13,11 +13,15 @@ const schema = yup.object().shape({
   pfNo: yup.string().nullable(),
   uanDetail: yup.string().nullable(),
   previousExperience: yup.string().nullable(),
-
 });
 
-const SettingTab = ({ onBack, onSubmit, defaultValues, userId }) => {
-
+const SettingTab = ({
+  onBack,
+  onSubmit,
+  defaultValues = {},
+  userId = null,
+  isLoading,
+}) => {
   // const getDefaultValues = () => {
   //   // If userId is null, return blank/default values
   //   if (!userId) {
@@ -49,14 +53,14 @@ const SettingTab = ({ onBack, onSubmit, defaultValues, userId }) => {
   } = useForm({
     resolver: yupResolver(schema),
     // defaultValues: getDefaultValues(),
-    defaultValues: {
+    defaultValues: defaultValues || {
       joiningDate: "",
       probationDate: "",
       panNo: "",
       pfNo: "",
       uanDetail: "",
       previousExperience: "",
-    }
+    },
     // mode: "onChange", // Enable real-time validation
   });
 
@@ -173,8 +177,6 @@ const SettingTab = ({ onBack, onSubmit, defaultValues, userId }) => {
               />
             </Grid>
 
-
-
             <Grid item size={{ xs: 12, md: 6 }}>
               <Controller
                 name="pfNo"
@@ -244,12 +246,17 @@ const SettingTab = ({ onBack, onSubmit, defaultValues, userId }) => {
               variant="contained"
               color="success"
               type="submit"
+              disabled={isLoading}
               sx={{
                 background:
                   "linear-gradient(90deg, rgb(239, 131, 29) 0%, rgb(245, 134, 55) 27%, rgb(244, 121, 56) 100%)",
               }}
             >
-              Submit
+              {isLoading ? (
+                <CircularProgress size={20} color="inherit" />
+              ) : (
+                "Next"
+              )}
             </Button>
           </Box>
         </Stack>

@@ -12,6 +12,7 @@ import {
   Typography,
   Grid,
   Button,
+  CircularProgress,
 } from "@mui/material";
 import { useForm, Controller } from "react-hook-form";
 import PhotoCamera from "@mui/icons-material/PhotoCamera";
@@ -29,16 +30,16 @@ const personalInfoSchema = yup.object().shape({
     .mixed()
     .nullable()
     .test("fileSize", "Image is too large", (value) => {
-      if (!value) return true; // Allow null/undefined
-      if (typeof value === 'string') return true; // Allow URL strings for existing images
+      if (!value) return true; 
+      if (typeof value === "string") return true; 
       if (value instanceof File) {
-        return value.size <= 2000000; // 2MB limit
+        return value.size <= 2000000;
       }
       return true;
     })
     .test("fileType", "Unsupported file format", (value) => {
-      if (!value) return true; // Allow null/undefined
-      if (typeof value === 'string') return true; // Allow URL strings for existing images
+      if (!value) return true; 
+      if (typeof value === "string") return true; 
       if (value instanceof File) {
         return ["image/jpeg", "image/png", "image/jpg"].includes(value.type);
       }
@@ -91,82 +92,18 @@ const genderOptions = [
   { value: "female", label: "Female" },
 ];
 
-const PersonalInfoTab = ({ onBack, onSubmit, defaultValues = {}, userId = null }) => {
-  console.log("defaultValues 94", defaultValues);
+const PersonalInfoTab = ({
+  onBack,
+  onSubmit,
+  defaultValues = {},
+  userId = null,
+  isLoading,
+}) => {
+  // console.log("defaultValues 102", defaultValues, userId);
 
   const [preview, setPreview] = useState(null);
   const [sameAsPermanent, setSameAsPermanent] = useState(false);
   const [roles, setRoles] = useState([]);
-
-  // const getDefaultValues = () => {
-  //   // Parse address fields if they come as JSON strings
-  //   const parseAddress = (address) => {
-  //     if (!address) return {
-  //       street: "",
-  //       city: "",
-  //       state: "",
-  //       zip: "",
-  //       country: ""
-  //     };
-
-  //     if (typeof address === 'string') {
-  //       try {
-  //         return JSON.parse(address);
-  //       } catch (e) {
-  //         console.error('Failed to parse address:', e);
-  //         return {
-  //           street: "",
-  //           city: "",
-  //           state: "",
-  //           zip: "",
-  //           country: ""
-  //         };
-  //       }
-  //     }
-  //     return address;
-  //   };
-
-  //   // If userId is null, return blank/default values
-  //   if (!userId) {
-  //     return {
-  //       role: "",
-  //       firstName: "",
-  //       lastName: "",
-  //       phoneNumber: "",
-  //       personalNumber: "",
-  //       dateOfBirth: "",
-  //       gender: "",
-  //       image: null,
-  //       permenentAddress: {
-  //         street: "",
-  //         city: "",
-  //         state: "",
-  //         zip: "",
-  //         country: "",
-  //       },
-  //       currentAddress: {
-  //         street: "",
-  //         city: "",
-  //         state: "",
-  //         zip: "",
-  //         country: "",
-  //       },
-  //     };
-  //   }
-
-  //   return {
-  //     role: defaultValues?.role || "",
-  //     firstName: defaultValues?.firstName || "",
-  //     lastName: defaultValues?.lastName || "",
-  //     phoneNumber: defaultValues?.phoneNumber || "",
-  //     personalNumber: defaultValues?.personalNumber || "",
-  //     dateOfBirth: defaultValues?.dateOfBirth || "",
-  //     gender: defaultValues?.gender || "",
-  //     image: defaultValues?.image || null,
-  //     permenentAddress: parseAddress(defaultValues?.permenentAddress),
-  //     currentAddress: parseAddress(defaultValues?.currentAddress),
-  //   };
-  // };
 
   const {
     setValue,
@@ -179,7 +116,7 @@ const PersonalInfoTab = ({ onBack, onSubmit, defaultValues = {}, userId = null }
   } = useForm({
     resolver: yupResolver(personalInfoSchema),
     // defaultValues: getDefaultValues(),
-    defaultValues: {
+    defaultValues: defaultValues || {
       role: "",
       firstName: "",
       lastName: "",
@@ -206,15 +143,14 @@ const PersonalInfoTab = ({ onBack, onSubmit, defaultValues = {}, userId = null }
   });
 
   const handleFormSubmit = (data) => {
-    console.log("data", data);
 
     const formData = new FormData();
 
-    Object.keys(data).forEach(key => {
-      if (key === 'permenentAddress' || key === 'currentAddress') {
+    Object.keys(data).forEach((key) => {
+      if (key === "permenentAddress" || key === "currentAddress") {
         formData.append(key, JSON.stringify(data[key]));
-      } else if (key === 'image' && data[key] instanceof File) {
-        formData.append('image', data[key]);
+      } else if (key === "image" && data[key] instanceof File) {
+        formData.append("image", data[key]);
       } else if (data[key] !== null && data[key] !== undefined) {
         formData.append(key, data[key]);
       }
@@ -280,7 +216,6 @@ const PersonalInfoTab = ({ onBack, onSubmit, defaultValues = {}, userId = null }
   }, []);
 
   useEffect(() => {
-    console.log("userId 214", userId);
 
     if (userId && defaultValues) {
       setValue("role", defaultValues?.role || "");
@@ -288,24 +223,57 @@ const PersonalInfoTab = ({ onBack, onSubmit, defaultValues = {}, userId = null }
       setValue("lastName", defaultValues?.lastName || "");
       setValue("phoneNumber", defaultValues?.phoneNumber || "");
       setValue("personalNumber", defaultValues?.personalNumber || "");
-      setValue("dateOfBirth", defaultValues?.dateOfBirth ? moment(defaultValues?.dateOfBirth).format("DD/MM/YYY") : "");
+      setValue(
+        "dateOfBirth",
+        defaultValues?.dateOfBirth
+          ? moment(defaultValues?.dateOfBirth).format("DD/MM/YYY")
+          : ""
+      );
       setValue("gender", defaultValues?.gender || "Male");
-      setValue("permenentAddress.street", defaultValues?.permenentAddress?.street || "");
-      setValue("permenentAddress.city", defaultValues?.permenentAddress?.city || "");
-      setValue("permenentAddress.state", defaultValues?.permenentAddress?.state || "");
-      setValue("permenentAddress.zip", defaultValues?.permenentAddress?.zip || "");
-      setValue("permenentAddress.country", defaultValues?.permenentAddress?.country || "");
-      setValue("currentAddress.street", defaultValues?.currentAddress?.street || "");
-      setValue("currentAddress.city", defaultValues?.currentAddress?.city || "");
-      setValue("currentAddress.state", defaultValues?.currentAddress?.state || "");
+      setValue(
+        "permenentAddress.street",
+        defaultValues?.permenentAddress?.street || ""
+      );
+      setValue(
+        "permenentAddress.city",
+        defaultValues?.permenentAddress?.city || ""
+      );
+      setValue(
+        "permenentAddress.state",
+        defaultValues?.permenentAddress?.state || ""
+      );
+      setValue(
+        "permenentAddress.zip",
+        defaultValues?.permenentAddress?.zip || ""
+      );
+      setValue(
+        "permenentAddress.country",
+        defaultValues?.permenentAddress?.country || ""
+      );
+      setValue(
+        "currentAddress.street",
+        defaultValues?.currentAddress?.street || ""
+      );
+      setValue(
+        "currentAddress.city",
+        defaultValues?.currentAddress?.city || ""
+      );
+      setValue(
+        "currentAddress.state",
+        defaultValues?.currentAddress?.state || ""
+      );
       setValue("currentAddress.zip", defaultValues?.currentAddress?.zip || "");
-      setValue("currentAddress.country", defaultValues?.currentAddress?.country || "");
+      setValue(
+        "currentAddress.country",
+        defaultValues?.currentAddress?.country || ""
+      );
 
       if (defaultValues?.image) {
         setPreview(defaultValues.image);
       }
       if (defaultValues?.permenentAddress && defaultValues?.currentAddress) {
-        const isSame = JSON.stringify(defaultValues.permenentAddress) ===
+        const isSame =
+          JSON.stringify(defaultValues.permenentAddress) ===
           JSON.stringify(defaultValues.currentAddress);
         setSameAsPermanent(isSame);
       }
@@ -729,17 +697,24 @@ const PersonalInfoTab = ({ onBack, onSubmit, defaultValues = {}, userId = null }
               borderColor: "divider",
             }}
           >
-            <Button variant="outlined" onClick={onBack}>Back</Button>
+            <Button variant="outlined" onClick={onBack}>
+              Back
+            </Button>
             <Button
               variant="contained"
               color="success"
               type="submit"
+              disabled={isLoading}
               sx={{
                 background:
                   "linear-gradient(90deg, rgb(239, 131, 29) 0%, rgb(245, 134, 55) 27%, rgb(244, 121, 56) 100%)",
               }}
             >
-              Submit
+              {isLoading ? (
+                <CircularProgress size={20} color="inherit" />
+              ) : (
+                "Next"
+              )}
             </Button>
           </Box>
         </Stack>
