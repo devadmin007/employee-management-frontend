@@ -14,6 +14,7 @@ import { toast } from "react-toastify";
 import { useDispatch } from "react-redux";
 import { setUserData } from "@/redux/slice/authSlice";
 import { Stack } from "@mui/material";
+import { useAuth } from "@/hooks/useAuth";
 
 const loginSchema = yup.object().shape({
   email: yup.string().required("Required"),
@@ -48,6 +49,7 @@ const SignupContainer = styled(Box)(({ theme }) => ({
 }));
 
 const Login = () => {
+  const { login } = useAuth();
   const router = useRouter();
   const dispatch = useDispatch();
   const {
@@ -69,7 +71,8 @@ const Login = () => {
       const response = await loginApi(data);
       if (response?.data?.status == "success") {
         dispatch(setUserData(response?.data?.data));
-        router.push("/dashboard");
+        login(response?.data?.data)
+        // router.push("/dashboard");
         // console.log(response?.data?.data);
         // localStorage.setItem("token", response?.data?.data?.token);
         // toast.success(response.data.message);

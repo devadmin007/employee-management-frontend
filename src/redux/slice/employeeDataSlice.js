@@ -3,6 +3,7 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
   employeeDetails: {
     // employeeID: null,
+    roleId: null,
     personalDetails: null,
     teamAndSkillDetails: null,
     settingDetails: null,
@@ -21,12 +22,14 @@ const employeeDataSlcie = createSlice({
         teamAndSkillDetail,
         settingDetail,
         bankDetail,
+        roleID,
         // employeeID,
       } = action.payload;
 
       switch (type) {
         case "personalInfo":
           state.employeeDetails.personalDetails = { ...(personalDetail ?? {}) };
+          state.countryDetails.roleId = roleID ?? null;
           break;
 
         case "teamAndSkillInfo":

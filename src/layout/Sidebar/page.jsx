@@ -3,6 +3,8 @@ import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useAuth } from "@/hooks/useAuth";
+import { sidemenu_items } from "@/data";
 
 const SidebarMenuContainerItemText = styled(Typography)(({ theme }) => ({
   fontSize: "18px",
@@ -55,6 +57,26 @@ const SidebarMenuContainerItem = styled(Link, {
 
 const Sidebar = () => {
   const pathname = usePathname();
+  const { roleId } = useAuth();
+
+  console.log("roleId 61", roleId);
+
+
+  // Define role-based filtering logic
+  const getFilteredMenuItems = () => {
+    if (roleId === "ADMIN") {
+      return sidemenu_items; // Show all items for roleId 1
+    } else if (roleId === "EMPLOYEE") {
+      return sidemenu_items.filter((item) =>
+        ["Dashboard", "Leave", "Employee", "Holidays"].includes(item.label)
+      );
+    } else if (roleId === "PROJECT_MANAGER") {
+      return sidemenu_items.filter((item) =>
+        ["Dashboard", "Leave", "Employee", "Holidays"].includes(item.label)
+      );
+    }
+    return [];
+  };
 
   return (
     <SidebarContent>
@@ -70,61 +92,26 @@ const Sidebar = () => {
         </SidebarLogo>
       </Link>
 
-      <SidebarMenuContainer>
-        <SidebarMenuContainerItem
-          href="/dashboard"
-          active={pathname === "/dashboard"}
-        >
-          <Image
-            src="/icons/dashboard.svg"
-            height={22}
-            width={22}
-            alt="Leave icon"
-          />
-          <Typography>Dashboard</Typography>
-        </SidebarMenuContainerItem>
-        <SidebarMenuContainerItem href="/leave" active={pathname === "/leave"}>
-          <Image
-            src="/icons/leave.svg"
-            height={22}
-            width={22}
-            alt="Leave icon"
-          />
-          <Typography>Leave</Typography>
-        </SidebarMenuContainerItem>
-        <SidebarMenuContainerItem
-          href="/employee"
-          active={pathname === "/employee"}
-        >
-          <Image
-            src="/icons/employees.svg"
-            height={22}
-            width={22}
-            alt=""
-          ></Image>
-          <SidebarMenuContainerItemText>Employees</SidebarMenuContainerItemText>
-        </SidebarMenuContainerItem>
-        <SidebarMenuContainerItem
-          href="/holidays"
-          active={pathname === "/holidays"}
-        >
-          <Image src="/icons/holiday.svg" height={22} width={22} alt=""></Image>
-          <SidebarMenuContainerItemText>Holidays</SidebarMenuContainerItemText>
-        </SidebarMenuContainerItem>
-        <SidebarMenuContainerItem
-          href="/customizations/teams"
-          active={pathname === "/customizations/teams"}
-        >
-          <Image
-            src="/icons/Customizations.svg"
-            height={22}
-            width={22}
-            alt=""
-          ></Image>
-          <SidebarMenuContainerItemText>
-            Customizations
-          </SidebarMenuContainerItemText>
-        </SidebarMenuContainerItem>
+        <SidebarMenuContainer>
+        {getFilteredMenuItems().map((item, index) => (
+          <SidebarMenuContainerItem
+            key={index}
+            href={item.to}
+            active={pathname === (item.to) || pathname.startsWith((item.to) + "/")}
+          >
+            {item.icon && (
+              <Image
+                src={item.icon}
+                height={22}
+                width={22}
+                alt={`${item.label} icon`}
+              />
+            )}
+            <SidebarMenuContainerItemText>
+              {item.label}
+            </SidebarMenuContainerItemText>
+          </SidebarMenuContainerItem>
+        ))}
       </SidebarMenuContainer>
     </SidebarContent>
   );
