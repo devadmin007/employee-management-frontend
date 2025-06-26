@@ -29,11 +29,10 @@ const CommonPagination = ({
       onRowsPerPageChange(newRowsPerPage);
     }
     if (onPageChange) {
-      onPageChange(1); // Reset to page 1 whenever rowsPerPage changes
+      onPageChange(1);
     }
   };
 
-  // Show pagination if there are multiple pages OR if showRowsPerPage is true and there's data
   const shouldShowPagination = count > 1 || (showRowsPerPage && totalRows > 0);
 
   if (!shouldShowPagination) {
@@ -77,17 +76,39 @@ const CommonPagination = ({
         )}
       </Box>
 
-      {count > 1 && (
+      {count > 0 && (
         <Pagination
           page={page}
           count={count}
           onChange={(e, value) => onPageChange(value)}
           color="primary"
+          variant="outlined"
           shape="rounded"
-          showFirstButton
-          showLastButton
-          siblingCount={1}
-          boundaryCount={1}
+          // showFirstButton
+          // showLastButton
+          // siblingCount={2}
+          // boundaryCount={2}
+          sx={{
+            "& .MuiPaginationItem-root": {
+              fontSize: "14px",
+              fontWeight: 500,
+              minWidth: "32px",
+              height: "32px",
+            },
+            "& .MuiPaginationItem-page": {
+              "&:hover": {
+                backgroundColor: "primary.light",
+                color: "white",
+              },
+            },
+            "& .Mui-selected": {
+              backgroundColor: "primary.main !important",
+              color: "white",
+              "&:hover": {
+                backgroundColor: "primary.dark !important",
+              },
+            },
+          }}
         />
       )}
     </Paper>

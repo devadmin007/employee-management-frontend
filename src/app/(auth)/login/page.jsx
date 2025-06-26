@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { useDispatch } from "react-redux";
 import { setUserData } from "@/redux/slice/authSlice";
+import { Stack } from "@mui/material";
 
 const loginSchema = yup.object().shape({
   email: yup.string().required("Required"),
@@ -150,6 +151,21 @@ const Login = () => {
                 )}
               />
             </Box>
+            <Stack
+              direction={"row"}
+              spacing={1}
+              mt={2}
+              alignItems={"center"}
+              justifyContent={"center"}
+            >
+              <Typography>Don't have account?</Typography>
+              <Typography
+                sx={{ color: "blue", cursor: "pointer" }}
+                onClick={() => router.push("/signup")}
+              >
+                Signup
+              </Typography>
+            </Stack>
           </Box>
 
           <Box sx={{ textAlign: "center" }}>

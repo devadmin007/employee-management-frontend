@@ -104,6 +104,8 @@ const TeamsAndSkillTab = ({
       ) {
         formData.append(key, data[key]);
       }
+
+      formData.append(key, data[key])
     });
 
     formData.append("step", 2);
@@ -262,12 +264,19 @@ const TeamsAndSkillTab = ({
                     error={!!errors.designationId}
                     helperText={errors.designationId?.message}
                   >
+
                     {designationList?.length > 0 &&
                       designationList.map((option) => (
                         <MenuItem key={option?._id} value={option?._id}>
                           {option.label}
                         </MenuItem>
                       ))}
+                    {designationOptions.map((option) => (
+                      <MenuItem key={option.value} value={option.value}>
+                        {option.label}
+                    </MenuItem>
+                    ))}
+
                   </CommonInput>
                 )}
               />
