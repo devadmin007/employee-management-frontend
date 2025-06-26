@@ -38,6 +38,7 @@ const Page = () => {
   const [deleteId, setDeleteId] = useState([]);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [updateId, setUpdateId] = useState([]);
+  const [originalDepartmentValue, setOriginalDepartmentValue] = useState(""); // Store original value
 
   // Separate loading states
   const [isLoading, setIsLoading] = useState(false);
@@ -177,6 +178,7 @@ const Page = () => {
       const result = await getDepartmentByIdApi(id);
       const departmentData = result.data.data.Department;
       setValue("department", departmentData.label);
+      setOriginalDepartmentValue(departmentData.label); // Store original value
     } catch (e) {
       console.log(e);
       toast.error("Failed to fetch department data");
@@ -187,6 +189,8 @@ const Page = () => {
 
   const handleClickCloseDialogForFormToEditManager = () => {
     setOpenUpdateDialog(false);
+    setOriginalDepartmentValue(""); // Clear original value
+
     reset();
   };
 
@@ -231,6 +235,12 @@ const Page = () => {
   };
 
   const updateDepartmentData = async (data) => {
+    if (data.department.trim() === originalDepartmentValue.trim()) {
+      toast.warning(
+        "No changes detected."
+      );
+      return;
+    }
     setIsUpdating(true);
     const payload = { label: data.department };
 
@@ -356,6 +366,12 @@ const Page = () => {
                 maxLength: {
                   value: 50,
                   message: "department must be less than 50 characters",
+                },
+                validate: (value) => {
+                  if (value.trim() === originalDepartmentValue.trim()) {
+                    return;
+                  }
+                  return true;
                 },
               })}
               error={!!errors.department}
