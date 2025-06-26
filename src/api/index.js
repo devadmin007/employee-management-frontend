@@ -406,9 +406,7 @@ export const createHolidayApi = async (payload) => {
 export const getAllHolidayApi = async (page, limit, search) => {
   let result;
   try {
-    result = await axiosInstanceApi.get(
-      `/holidays?page=${page}&itemsPerPage=${limit}${search && `&search=${search}`}&pagination=true`
-    );
+    result = await axiosInstanceApi.get(`/holidays?pagination=false`);
   } catch (e) {
     result = e;
   }
@@ -442,6 +440,63 @@ export const updateHolidayApi = async (id, updatedSkill) => {
     result = await axiosInstanceApi.patch(
       `/update-holiday/${id}`,
       updatedSkill
+    );
+  } catch (e) {
+    result = e;
+  }
+  return result;
+};
+
+
+export const createLeaveApi = async (payload) => {
+  let result;
+  try {
+    result = await axiosInstanceApi.post("/add-leave", payload);
+  } catch (e) {
+    result = e;
+  }
+  return result;
+};
+
+export const getAllLeaveApi = async (page, limit, search) => {
+  let result;
+  try {
+    result = await axiosInstanceApi.get(
+      `/leave-list?page=${page}&itemsPerPage=${limit}${search && `&search=${search}`}&pagination=true`
+    );
+  } catch (e) {
+    result = e;
+  }
+  return result;
+};
+
+export const deleteLeaveApi = async (id) => {
+  let result;
+  try {
+    result = await axiosInstanceApi.delete(`/delete-leave/${id}`);
+  } catch (e) {
+    result = e;
+  }
+  return result;
+};
+
+export const getLeaveByIdApi = async (id) => {
+  let result;
+  try {
+    result = await axiosInstanceApi.get(`/leave/${id}`);
+  } catch (e) {
+    result = e;
+  }
+  return result;
+};
+
+export const updateLeaveApi = async (id, updatedDesignation) => {
+  let result;
+
+  try {
+    result = await axiosInstanceApi.patch(
+      `/update-leave/${id}`,
+      updatedDesignation
     );
   } catch (e) {
     result = e;
