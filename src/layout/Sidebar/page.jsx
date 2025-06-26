@@ -43,8 +43,8 @@ const SidebarMenuContainerItem = styled(Link, {
   alignItems: "center",
   display: "flex",
   gap: 15,
-  paddingLeft: theme.spacing(2),
-  paddingRight: theme.spacing(2),
+  paddingLeft: theme.spacing(1),
+  paddingRight: theme.spacing(1),
   borderRadius: 8,
   transition: "all 0.3s ease",
   "&:hover": {
@@ -62,9 +62,10 @@ const Sidebar = () => {
         <SidebarLogo>
           <Image
             src="/assets/techniThunder-logo2.svg"
-            width={270}
+            width={200}
             height={70}
             alt="Picture of the author"
+            
           />
         </SidebarLogo>
       </Link>

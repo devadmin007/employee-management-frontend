@@ -12,13 +12,13 @@ const MainWrapper = styled(Box)(({ theme }) => ({
 }));
 
 const SidebarWrapper = styled(Box)(({ theme }) => ({
-  width: "18%",
+  width: "16%",
   height: "100%",
   backgroundColor: "#15283C",
 }));
 
 const BodyWrapper = styled(Box)(({ theme }) => ({
-  width: "82%",
+  width: "84%",
   height: "100%",
 }));
 

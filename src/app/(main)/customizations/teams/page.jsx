@@ -41,6 +41,7 @@ const Page = () => {
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [updateId, setUpdateId] = useState([]);
   const [manager, setManager] = useState([]);
+  const [originalTeamValue, setOriginalTeamValue] = useState(""); // Store original value
 
   const [isLoading, setIsLoading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -169,6 +170,7 @@ const Page = () => {
       const teamData = result.data.data;
       setValue("team", teamData.label);
       setValue("managerId", teamData.managerId?._id);
+      setOriginalTeamValue(teamData.label); // Store original value
     } catch (e) {
       toast.error("Failed to fetch team data");
     } finally {
@@ -178,6 +180,7 @@ const Page = () => {
 
   const handleClickCloseDialogForFormToEditManager = () => {
     setOpenUpdateDialog(false);
+    setOriginalTeamValue("");
     reset();
   };
 
@@ -219,6 +222,11 @@ const Page = () => {
   };
 
   const updateTeamsData = async (data) => {
+    // Check if the data has actually changed
+    if (data.team.trim() === originalTeamValue.trim()) {
+      toast.warning("No changes detected.");
+      return;
+    }
     setIsUpdating(true);
     const payload = {
       label: data.team,
@@ -369,6 +377,12 @@ const Page = () => {
                 required: "Team is required",
                 minLength: { value: 2, message: "Minimum 2 characters" },
                 maxLength: { value: 50, message: "Maximum 50 characters" },
+                validate: (value) => {
+                  if (value.trim() === originalTeamValue.trim()) {
+                    return;
+                  }
+                  return true;
+                },
               })}
               error={!!errors.team}
               helperText={errors.team?.message}

@@ -14,7 +14,7 @@ import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 
 const signupSchema = yup.object().shape({
-  username: yup.string().required("Required"),
+  email: yup.string().required("Required"),
   firstName: yup.string().required("Required"),
   lastName: yup.string().required("Required"),
   password: yup.string().required("Required"),
@@ -58,7 +58,7 @@ const SignUP = () => {
     formState: { errors },
   } = useForm({
     defaultValues: {
-      username: "",
+      email: "",
       firstName: "",
       lastName: "",
       password: "",
@@ -141,19 +141,19 @@ const SignUP = () => {
         <form onSubmit={handleSubmit(onSubmit)}>
           <Box sx={{ my: 3 }}>
             <Box sx={{ mt: 1, width: "100%" }}>
-              <Typography variant="subtitle1">Username</Typography>
+              <Typography variant="subtitle1">Email</Typography>
               <Controller
-                name="username"
+                name="email"
                 control={control}
                 render={({ field }) => (
                   <TextField
                     {...field}
                     variant="outlined"
-                    placeholder="Enter User Name"
+                    placeholder="Enter Your Email"
                     fullWidth
                     autoComplete="off"
-                    error={Boolean(errors.username)}
-                    helperText={errors.username?.message}
+                    error={Boolean(errors.email)}
+                    helperText={errors.email?.message}
                   />
                 )}
               />

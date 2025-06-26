@@ -392,3 +392,59 @@ export const getAllUsers = async () => {
   }
   return result;
 };
+
+export const createHolidayApi = async (payload) => {
+  let result;
+  try {
+    result = await axiosInstanceApi.post("/add-holiday", payload);
+  } catch (e) {
+    result = e;
+  }
+  return result;
+};
+
+export const getAllHolidayApi = async (page, limit, search) => {
+  let result;
+  try {
+    result = await axiosInstanceApi.get(
+      `/holidays?page=${page}&itemsPerPage=${limit}${search && `&search=${search}`}&pagination=true`
+    );
+  } catch (e) {
+    result = e;
+  }
+  return result;
+};
+
+export const deleteHolidayApi = async (id) => {
+  let result;
+  try {
+    result = await axiosInstanceApi.delete(`/delete-holiday/${id}`);
+  } catch (e) {
+    result = e;
+  }
+  return result;
+};
+
+export const getHolidayByIdApi = async (id) => {
+  let result;
+  try {
+    result = await axiosInstanceApi.get(`/holiday/${id}`);
+  } catch (e) {
+    result = e;
+  }
+  return result;
+};
+
+export const updateHolidayApi = async (id, updatedSkill) => {
+  let result;
+
+  try {
+    result = await axiosInstanceApi.patch(
+      `/update-holiday/${id}`,
+      updatedSkill
+    );
+  } catch (e) {
+    result = e;
+  }
+  return result;
+};

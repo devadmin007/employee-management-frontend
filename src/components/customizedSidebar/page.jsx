@@ -38,7 +38,7 @@ const CustomizedSidebar = () => {
           borderBottom: "1px solid #EEEEEE",
           py: 1,
           px: "20px",
-          fontSize: "20px",
+          fontSize: "18px",
         }}
       >
         Customizations
@@ -49,6 +49,7 @@ const CustomizedSidebar = () => {
             key={index}
             href={element.url}
             active={pathname === element.url}
+            sx={{ fontSize:'16px',fontWeight:'500' }}
           >
             {element.title}
           </Text>

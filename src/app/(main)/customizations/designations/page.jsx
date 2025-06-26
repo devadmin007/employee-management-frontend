@@ -38,6 +38,7 @@ const Page = () => {
   const [deleteId, setDeleteId] = useState([]);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [updateId, setUpdateId] = useState([]);
+  const [originalDesignationValue, setOriginalDesignationValue] = useState(""); // Store original value
 
   // Separate loading states
   const [isLoading, setIsLoading] = useState(false);
@@ -177,6 +178,7 @@ const Page = () => {
       const result = await getDesignationByIdApi(id);
       const designationData = result.data.data.designation;
       setValue("designation", designationData.label);
+      setOriginalDesignationValue(designationData.label); // Store original value
     } catch (e) {
       console.log(e);
       toast.error("Failed to fetch designation data");
@@ -187,6 +189,8 @@ const Page = () => {
 
   const handleClickCloseDialogForFormToEditManager = () => {
     setOpenUpdateDialog(false);
+    setOriginalDesignationValue(""); // Clear original value
+
     reset();
   };
 
@@ -231,6 +235,13 @@ const Page = () => {
   };
 
   const updateDesignationData = async (data) => {
+    // Check if the data has actually changed
+    if (data.designation.trim() === originalDesignationValue.trim()) {
+      toast.warning(
+        "No changes detected. "
+      );
+      return;
+    }
     setIsUpdating(true);
     const payload = { label: data.designation };
 
@@ -298,6 +309,12 @@ const Page = () => {
                 maxLength: {
                   value: 50,
                   message: "designation must be less than 50 characters",
+                },
+                validate: (value) => {
+                  if (value.trim() === originalDesignationValue.trim()) {
+                    return;
+                  }
+                  return true;
                 },
               })}
               error={!!errors.designation}

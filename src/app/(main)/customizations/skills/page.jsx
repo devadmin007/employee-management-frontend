@@ -30,7 +30,6 @@ import {
 import { toast } from "react-toastify";
 import CommonDeleteModal from "@/components/CommonDelete";
 import CommonTable from "@/components/CommonTable";
-import moment from "moment/moment";
 
 const Page = () => {
   const [open, setOpen] = useState(false);
@@ -38,6 +37,7 @@ const Page = () => {
   const [deleteId, setDeleteId] = useState([]);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [updateId, setUpdateId] = useState([]);
+  const [originalSkillValue, setOriginalSkillValue] = useState(""); // Store original value
 
   // Separate loading states
   const [isLoading, setIsLoading] = useState(false);
@@ -80,7 +80,7 @@ const Page = () => {
       minWidth: 140,
       renderCell: (params) => {
         const date = new Date(params.value);
-        return <Typography>{moment(date).format("DD/MM/YYYY")}</Typography>;
+        return <Typography>{date.toLocaleDateString()}</Typography>;
       },
     },
     {
@@ -124,9 +124,11 @@ const Page = () => {
       if (result?.data?.status === "success") {
         setRows(result.data.data.skill);
 
+        // Get totalCount from API response
         const totalCount = result.data.data.totalCount;
         setTotalCount(totalCount);
 
+        // Calculate total pages based on totalCount and limit
         const calculatedTotalPages = Math.ceil(totalCount / limit);
         setTotalPages(calculatedTotalPages);
       }
@@ -177,6 +179,7 @@ const Page = () => {
       const result = await getSkillByIdApi(id);
       const skillData = result.data.data;
       setValue("skill", skillData.label);
+      setOriginalSkillValue(skillData.label); // Store original value
     } catch (e) {
       console.log(e);
       toast.error("Failed to fetch skill data");
@@ -187,6 +190,7 @@ const Page = () => {
 
   const handleClickCloseDialogForFormToEditManager = () => {
     setOpenUpdateDialog(false);
+    setOriginalSkillValue(""); // Clear original value
     reset();
   };
 
@@ -227,6 +231,14 @@ const Page = () => {
   };
 
   const updateSkillData = async (data) => {
+    // Check if the data has actually changed
+    if (data.skill.trim() === originalSkillValue.trim()) {
+      toast.warning(
+        "No changes detected."
+      );
+      return;
+    }
+
     setIsUpdating(true);
     const payload = { label: data.skill };
 
@@ -350,6 +362,12 @@ const Page = () => {
                 maxLength: {
                   value: 50,
                   message: "Skill must be less than 50 characters",
+                },
+                validate: (value) => {
+                  if (value.trim() === originalSkillValue.trim()) {
+                    return;
+                  }
+                  return true;
                 },
               })}
               error={!!errors.skill}
