@@ -274,6 +274,9 @@ export const fetchAllDesignation = async ({ params }) => {
     result = await axiosInstanceApi.get("/designations", { params });
   } catch (error) {
     result = error;
+  }
+  return result;
+};
 
 export const createDepartment = async (payload) => {
   let result;
@@ -301,6 +304,8 @@ export const fetchAllSkills = async ({ params }) => {
     result = await axiosInstanceApi.get("/skills", { params });
   } catch (error) {
     result = error;
+  }
+};
 
 export const getAllDepartmentApi = async (page, limit, search) => {
   let result;
@@ -319,8 +324,6 @@ export const deleteDepartmentApi = async (id) => {
     result = await axiosInstanceApi.delete(`/delete-department/${id}`);
   } catch (e) {
     result = e;
-
-  
   }
   return result;
 };
@@ -331,7 +334,9 @@ export const fetchAllTeams = async ({ params }) => {
     result = await axiosInstanceApi.get("/teams", { params });
   } catch (error) {
     result = error;
-    
+  }
+};
+
 export const getDepartmentByIdApi = async (id) => {
   let result;
   try {
@@ -347,6 +352,11 @@ export const getEmployeeByIdApi = async (id) => {
 
   try {
     result = await axiosInstanceApi.get(`/fetched-userdetails/${id}`);
+  } catch (e) {
+    result = e;
+  }
+  return result;
+};
 
 export const updateDepartmentApi = async (id, updatedDesignation) => {
   let result;
@@ -367,6 +377,12 @@ export const updateEmployeeeApi = async (id, payload) => {
 
   try {
     result = await axiosInstanceApi.patch(`/update-userdetails/${id}`, payload);
+  } catch (e) {
+    result = e;
+  }
+  return result;
+};
+
 export const getAllUsers = async () => {
   let result;
   try {
@@ -376,59 +392,3 @@ export const getAllUsers = async () => {
   }
   return result;
 };
-
-// export const createDepartment = async (payload) => {
-//   let result;
-//   try {
-//     result = await axiosInstanceApi.post("/add-department", payload);
-//   } catch (e) {
-//     result = e;
-//   }
-//   return result;
-// };
-
-// export const getAllDepartments = async () => {
-//   let result;
-
-//   try {
-//     result = await axiosInstanceApi.get(`/departments`);
-//   } catch (e) {
-//     result = e;
-//   }
-//   return result;
-// };
-
-// export const deleteDepartmentApi = async (id) => {
-//   let result;
-//   try {
-//     result = await axiosInstanceApi.delete(`/delete-department/${id}`);
-//   } catch (e) {
-//     result = e;
-//   }
-//   return result;
-// };
-
-// export const getDepartmentByIdApi = async (id) => {
-//   let result;
-//   try {
-//     result = await axiosInstanceApi.get(`/department/${id}`);
-//   } catch (e) {
-//     result = e;
-//   }
-//   return result;
-// };
-
-// export const updateDepartmentApi = async (id, updatedDesignation) => {
-//   let result;
-
-//   try {
-//     result = await axiosInstanceApi.patch(
-//       `/update-department/${id}`,
-//       updatedDesignation
-//     );
-//   } catch (e) {
-//     result = e;
-//   }
-//   return result;
-// };
-
