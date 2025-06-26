@@ -61,7 +61,7 @@ const Sidebar = () => {
       <Link href="/dashboard">
         <SidebarLogo>
           <Image
-            src="/assets/techniThunder-logo2.svg"
+            src="/assets/technithunder-logo2.svg"
             width={200}
             height={70}
             alt="Picture of the author"
@@ -116,7 +116,7 @@ const Sidebar = () => {
           active={pathname === "/customizations/teams"}
         >
           <Image
-            src="/icons/Customizations.svg"
+            src="/icons/customizations.svg"
             height={22}
             width={22}
             alt=""
