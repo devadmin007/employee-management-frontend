@@ -1,8 +1,7 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
-  Button,
   Dialog,
   DialogContent,
   DialogTitle,
@@ -12,60 +11,318 @@ import {
   Typography,
 } from "@mui/material";
 
-// Components with `forwardRef` and `validate()` exposed
 import PersonalInfoTab from "../personalInfo/page";
 import TeamsAndSkillTab from "../teamsAndSkill/page";
 import SettingTab from "../setting/page";
 import BankDetailsTab from "../bankDetails/page";
-import { createEmployeeApi } from "@/api";
+import {
+  createEmployeeApi,
+  getEmployeeByIdApi,
+  updateEmployeeeApi,
+} from "@/api";
 import SuccessModal from "../SuccessModal/page";
+import { useDispatch, useSelector } from "react-redux";
+import { addEmployeeDataInfo } from "@/redux/slice/employeeDataSlice";
 
 const steps = ["Personal Info", "Team & Skill", "Settings", "Bank Details"];
 
-export default function EmployeeStepperForm({ open, onClose }) {
+export default function EmployeeStepperForm({
+  open,
+  onClose,
+  userId = null,
+  EmployeeStepperForm,
+}) {
+
+  const dispatch = useDispatch();
+  const employeeDetails = useSelector((state) => state.employeeData);
+
   const [activeStep, setActiveStep] = useState(0);
-  console.log("activeStep", activeStep);
+  const [empId, setEmpId] = useState(null);
+  const [isBack, setIsBack] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     personalInfo: {},
     teamAndSkill: {},
     settings: {},
     bankDetails: {},
   });
+  const mode = !userId ? "create" : "update";
 
   const handleNext = () => {
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
   };
 
   const handleBack = () => {
+    setIsBack(true);
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
   };
 
   const onSubmit = async (data) => {
-    console.log("Final form data:", data);
+    setIsLoading(true);
+
+    // for (let [key, value] of data.entries()) {
+    //   console.log(`${key}:`, value);
+    // }
+
+    // Convert FormData to plain object
+    const plainData = Object?.fromEntries(data?.entries());
+
+    const handleDispatchAction = async (payloadObj, type, detailKey, mode) => {
+      try {
+        if (mode === "create" && !isBack) {
+          const response = await createEmployeeApi(data);
+          if (response?.data) {
+            setEmpId(response?.data?.data?.userId);
+
+            setFormData((prev) => ({ ...prev, personalInfo: plainData }));
+            dispatch(
+              addEmployeeDataInfo({
+                type,
+                [detailKey]: payloadObj,
+              })
+            );
+          }
+        } else if (mode === "update" || isBack) {
+          const response = await updateEmployeeeApi(userId, data);
+          if (response?.data) {
+            setEmpId(response?.data?.data?.userId);
+            setFormData((prev) => ({ ...prev, personalInfo: plainData }));
+            dispatch(
+              addEmployeeDataInfo({
+                type,
+                [detailKey]: payloadObj,
+              })
+            );
+          }
+        }
+      } catch (error) {
+        console.log("error", error);
+      }
+    };
+
+    if (mode === "create") {
+      if (activeStep === 0) {
+        await handleDispatchAction(
+          plainData,
+          "personalInfo",
+          "personalDetail",
+          mode
+        );
+      } else {
+        data.append("userId", empId);
+        switch (activeStep) {
+          case 1:
+            await handleDispatchAction(
+              plainData,
+              "teamAndSkillInfo",
+              "teamAndSkillDetail",
+              mode
+            );
+            break;
+          case 2:
+            await handleDispatchAction(
+              plainData,
+              "settingInfo",
+              "settingDetails",
+              mode
+            );
+            break;
+          case 3:
+            await handleDispatchAction(
+              plainData,
+              "bankInfo",
+              "bankDetail",
+              mode
+            );
+            break;
+          default:
+            console.log("Invalid step");
+        }
+      }
+    } else if (mode === "update") {
+      data.append("userId", userId);
+      if (activeStep === 0) {
+        await handleDispatchAction(
+          plainData,
+          "personalInfo",
+          "personalDetail",
+          mode
+        );
+      } else {
+        switch (activeStep) {
+          case 1:
+            await handleDispatchAction(
+              plainData,
+              "teamAndSkillInfo",
+              "teamAndSkillDetail",
+              mode
+            );
+            break;
+          case 2:
+            await handleDispatchAction(
+              plainData,
+              "settingInfo",
+              "settingDetails",
+              mode
+            );
+            break;
+          case 3:
+            await handleDispatchAction(
+              plainData,
+              "bankInfo",
+              "bankDetail",
+              mode
+            );
+            break;
+          default:
+            console.log("Invalid step");
+        }
+      }
+    }
+
+    setIsLoading(false);
+    setActiveStep((prevStep) => prevStep + 1);
+  };
+
+  const fetchEmployeeById = async (id) => {
     try {
-      // const response = await createEmployeeApi(data);
-      console.log("response", response);
+      const response = await getEmployeeByIdApi(id);
+
+      const data = response?.data?.data;
+
+      const personalDetails = {
+        role: data?.role,
+        firstName: data?.firstName,
+        lastName: data?.lastName,
+        image: data?.image,
+        phoneNumber: data?.userDetails?.phoneNumber,
+        personalNumber: data?.userDetails?.personalNumber,
+        dateOfBirth: data?.userDetails?.dateOfBirth || "-",
+        gender: data?.userDetails?.gender || "-",
+        permenentAddress: data?.userDetails?.permenentAddress || "-",
+        currentAddress: data?.userDetails?.currentAddress || "-",
+      };
+
+      const teamAndSkillDetails = {
+        managerId: data?.userDetails?.managerId || "-",
+        designationId: data?.userDetails?.designationId || "-",
+        teamId: data?.userDetails?.teamId || "-",
+        department: data?.userDetails?.department || "-",
+        primarySkills: data?.userDetails?.phoneNumber || [],
+        secondarySkills: data?.userDetails?.personalNumber || [],
+      };
+
+      const settingDetails = {
+        joiningDate: data?.userDetails?.joiningDate || "-" || "",
+        probationDate: data?.userDetails?.probationDate || "-" || "",
+        panNo: data?.userDetails?.panNo || "-" || "",
+        pfNo: data?.userDetails?.pfNo || "-" || "",
+        uanDetail: data?.userDetails?.uanDetail || "-" || "",
+        previousExperience: data?.userDetails?.previousExperience || "-",
+      };
+
+      const bankDetails = {
+        accountNumber: data?.userDetails?.accountNumber || "-",
+        ifscCode: data?.userDetails?.ifscCode || "-",
+        branchName: data?.userDetails?.branchName || "-",
+        accountHolderName: data?.userDetails?.accountHolderName || "-",
+        bankName: data?.userDetails?.bankName || "-",
+      };
+
+      dispatch(
+        addEmployeeDataInfo({
+          type: "personalInfo",
+          personalDetail: personalDetails,
+        })
+      );
+      dispatch(
+        addEmployeeDataInfo({
+          type: "teamAndSkillInfo",
+          teamAndSkillDetail: teamAndSkillDetails,
+        })
+      );
+      dispatch(
+        addEmployeeDataInfo({
+          type: "settingInfo",
+          settingDetail: settingDetails,
+        })
+      );
+      dispatch(
+        addEmployeeDataInfo({
+          type: "bankInfo",
+          bankDetail: bankDetails,
+        })
+      );
     } catch (error) {
       console.log("error", error);
     }
-
-    setActiveStep((prevStep) => prevStep + 1);
   };
 
   const renderStepContent = (step) => {
     switch (step) {
       case 0:
-        return <PersonalInfoTab onBack={onClose} onSubmit={onSubmit} />;
+        return (
+          <PersonalInfoTab
+            onBack={onClose}
+            onSubmit={onSubmit}
+            defaultValues={
+              employeeDetails?.employeeDetails?.personalDetails || formData
+            }
+            userId={userId}
+            isLoading={isLoading}
+          />
+        );
       case 1:
-        return <TeamsAndSkillTab onBack={handleBack} onSubmit={onSubmit} />;
+        return (
+          <TeamsAndSkillTab
+            onBack={handleBack}
+            onSubmit={onSubmit}
+            defaultValues={
+              employeeDetails?.employeeDetails?.personalDetails || formData
+            }
+            userId={userId}
+            isLoading={isLoading}
+          />
+        );
       case 2:
-        return <SettingTab onBack={handleBack} onSubmit={onSubmit} />;
+        return (
+          <SettingTab
+            onBack={handleBack}
+            onSubmit={onSubmit}
+            defaultValues={
+              employeeDetails?.employeeDetails?.personalDetails || formData
+            }
+            userId={userId}
+            isLoading={isLoading}
+          />
+        );
       case 3:
-        return <BankDetailsTab onBack={handleBack} onSubmit={onSubmit} />;
+        return (
+          <BankDetailsTab
+            onBack={handleBack}
+            onSubmit={onSubmit}
+            defaultValues={
+              employeeDetails?.employeeDetails?.personalDetails || formData
+            }
+            userId={userId}
+            isLoading={isLoading}
+          />
+        );
       default:
-        return  <SuccessModal onClose={onClose} setActiveStep={setActiveStep}/>;
+        return (
+          <SuccessModal
+            onClose={onClose}
+            setActiveStep={setActiveStep}
+            EmployeeStepperForm={EmployeeStepperForm}
+          />
+        );
     }
   };
+
+  useEffect(() => {
+    if (!userId) return;
+    fetchEmployeeById(userId);
+  }, [userId]);
 
   return (
     <Dialog

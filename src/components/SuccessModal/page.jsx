@@ -6,7 +6,7 @@ import Typography from "@mui/material/Typography";
 import CardContent from "@mui/material/CardContent";
 import Image from "next/image";
 
-const SuccessModal = ({onClose, setActiveStep}) => {
+const SuccessModal = ({ onClose, setActiveStep, EmployeeStepperForm }) => {
   const router = useRouter();
   const [seconds, setSeconds] = useState(3);
 
@@ -17,6 +17,7 @@ const SuccessModal = ({onClose, setActiveStep}) => {
           clearInterval(countdown);
           onClose?.();
           setActiveStep?.(0);
+          EmployeeStepperForm?.();
           router.push("/employee/");
           return 0;
         }
@@ -54,7 +55,7 @@ const SuccessModal = ({onClose, setActiveStep}) => {
             />
           </Box> */}
           <Typography textAlign={"center"} mt={2} fontWeight={"700"}>
-           Form will automatically close in {""}
+            Form will automatically close in {""}
             <span style={{ color: "#B92932" }}>{seconds} second</span>
           </Typography>
         </CardContent>

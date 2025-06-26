@@ -1,71 +1,212 @@
-import React from "react";
-import {
-  TextField,
-  MenuItem,
-  Select,
-  InputLabel,
-  FormControl,
-  Box,
-  Stack,
-  Typography,
-  Grid,
-  Button,
-} from "@mui/material";
+import React, { useEffect, useState } from "react";
+import { MenuItem, Box, Stack, Grid, Button, CircularProgress } from "@mui/material";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import CommonInput from "../CommonInput";
+import {
+  fetchAllDepartments,
+  fetchAllDesignation,
+  fetchAllEmployeeDetails,
+  fetchAllSkills,
+  fetchAllTeams,
+} from "@/api";
 
-// Validation schema using Yup
+// Fixed validation schema using Yup
 const schema = yup.object().shape({
   managerId: yup.string().required("Manager is required"),
   designationId: yup.string().required("Designation is required"),
   teamId: yup.string().required("Team Name is required"),
   department: yup.string().required("Department is required"),
-  primarySkills: yup.string().required("Primary Skills are required"),
-  secondarySkills: yup.string().required("Secondary Skills are required"),
+  primarySkills: yup
+    .array()
+    .of(yup.string())
+    .min(1, "At least one primary skill is required")
+    .required("Primary Skills are required"),
+  secondarySkills: yup
+    .array()
+    .of(yup.string())
+    .min(1, "At least one secondary skill is required")
+    .required("Secondary Skills are required"),
 });
 
-const managerOtions = [
-  { value: "manager a", label: "Manager A" },
-  { value: "manager b", label: "Manager B" },
-];
+const TeamsAndSkillTab = ({
+  onBack,
+  onSubmit,
+  userId = null,
+  defaultValues = {},
+  isLoading,
+}) => {
+  const [managerList, setMangerList] = useState([]);
+  const [designationList, setDesignationList] = useState([]);
+  const [departmentList, setDepartmentList] = useState([]);
+  const [teamList, setTeamList] = useState([]);
+  const [skillList, setSkillList] = useState([]);
 
-const designationOptions = [
-  { value: "developer", label: "Developer" },
-  { value: "designer", label: "Designer" },
-  { value: "manager", label: "Manager" },
-];
+  // const getDefaultValues = () => {
+  //   if (!userId) {
+  //     return {
+  //       managerId: "",
+  //       designationId: "",
+  //       teamId: "",
+  //       department: "",
+  //       primarySkills: [],
+  //       secondarySkills: [],
+  //     };
+  //   }
+  //   return {
+  //     managerId: defaultValues?.managerId || "",
+  //     designationId: defaultValues?.designationId || "",
+  //     teamId: defaultValues?.teamId || "",
+  //     department: defaultValues?.department || "",
+  //     primarySkills: Array.isArray(defaultValues?.primarySkills) ? defaultValues.primarySkills : [],
+  //     secondarySkills: Array.isArray(defaultValues?.secondarySkills) ? defaultValues.secondarySkills : [],
+  //   };
+  // };
 
-const teamOptions = [
-  { value: "team alpha", label: "Team Alpha" },
-  { value: "team beta", label: "Team Beta" },
-];
-
-const TeamsAndSkillTab = ({ onBack, onSubmit }) => {
   const {
-    register,
+    setValue,
     handleSubmit,
     control,
-    trigger,
+    reset,
     formState: { errors },
   } = useForm({
-    // resolver: yupResolver(schema),
+    resolver: yupResolver(schema),
+    // defaultValues: getDefaultValues(),
+    defaultValues: defaultValues || {
+      managerId: "",
+      designationId: "",
+      teamId: "",
+      department: "",
+      primarySkills: [],
+      secondarySkills: [],
+    },
+
+    // mode: "onChange", // Enable real-time validation
   });
 
   const handleStep2Submit = (data) => {
+
     const formData = new FormData();
 
     Object.keys(data).forEach((key) => {
-      formData.append(key, data[key]);
+      if (key === "primarySkills" || key === "secondarySkills") {
+        // Handle array fields properly
+        if (Array.isArray(data[key]) && data[key].length > 0) {
+          data[key].forEach((value) => {
+            formData.append(`${key}[]`, value);
+          });
+        }
+      } else if (
+        data[key] !== null &&
+        data[key] !== undefined &&
+        data[key] !== ""
+      ) {
+        formData.append(key, data[key]);
+      }
+
+      formData.append(key, data[key])
     });
+
     formData.append("step", 2);
 
-    console.log("Form data:", Object.fromEntries(formData));
+    console.log("FormData entries:", Object.fromEntries(formData));
+
     if (onSubmit) {
       onSubmit(formData);
     }
   };
+
+  const handleFetchManager = async () => {
+    try {
+      const params = {
+        pagination: false,
+      };
+      const response = await fetchAllEmployeeDetails({ params });
+      if (response?.data?.data?.user) {
+        setMangerList(response.data.data.user);
+      }
+    } catch (e) {
+      console.log("Error fetching managers:", e);
+    }
+  };
+
+  const handleFetchDesignation = async () => {
+    try {
+      const params = {
+        pagination: false,
+      };
+      const response = await fetchAllDesignation({ params });
+      if (response?.data?.data?.designations) {
+        setDesignationList(response.data.data.designations);
+      }
+    } catch (e) {
+      console.log("Error fetching designations:", e);
+    }
+  };
+
+  const handleFetchDepartment = async () => {
+    try {
+      const params = {
+        pagination: false,
+      };
+      const response = await fetchAllDepartments({ params });
+      if (response?.data?.data?.departments) {
+        setDepartmentList(response.data.data.departments);
+      }
+    } catch (e) {
+      console.log("Error fetching departments:", e);
+    }
+  };
+
+  const handleFetchSkills = async () => {
+    try {
+      const params = {
+        pagination: false,
+      };
+      const response = await fetchAllSkills({ params });
+      if (response?.data?.data?.skill) {
+        setSkillList(response.data.data.skill);
+      }
+    } catch (e) {
+      console.log("Error fetching skills:", e);
+    }
+  };
+
+  const handleFetchTeams = async () => {
+    try {
+      const params = {
+        pagination: false,
+      };
+      const response = await fetchAllTeams({ params });
+      if (response?.data?.data?.team) {
+        setTeamList(response.data.data.team);
+      }
+    } catch (e) {
+      console.log("Error fetching teams:", e);
+    }
+  };
+
+  // Fixed useEffect - removed incorrect setValue calls
+  useEffect(() => {
+    // if (userId && defaultValues) {
+    //   reset(getDefaultValues());
+    // }
+  }, [userId, defaultValues, reset]);
+
+  useEffect(() => {
+    const fetchAllData = async () => {
+      await Promise.all([
+        handleFetchManager(),
+        handleFetchDesignation(),
+        handleFetchDepartment(),
+        handleFetchSkills(),
+        handleFetchTeams(),
+      ]);
+    };
+
+    fetchAllData();
+  }, []);
 
   return (
     <Box
@@ -98,11 +239,12 @@ const TeamsAndSkillTab = ({ onBack, onSubmit }) => {
                     error={!!errors.managerId}
                     helperText={errors.managerId?.message}
                   >
-                    {managerOtions.map((option) => (
-                      <MenuItem key={option.value} value={option.value}>
-                        {option.label}
-                      </MenuItem>
-                    ))}
+                    {managerList?.length > 0 &&
+                      managerList.map((option) => (
+                        <MenuItem key={option?._id} value={option?._id}>
+                          {option.fullName}
+                        </MenuItem>
+                      ))}
                   </CommonInput>
                 )}
               />
@@ -122,11 +264,19 @@ const TeamsAndSkillTab = ({ onBack, onSubmit }) => {
                     error={!!errors.designationId}
                     helperText={errors.designationId?.message}
                   >
+
+                    {designationList?.length > 0 &&
+                      designationList.map((option) => (
+                        <MenuItem key={option?._id} value={option?._id}>
+                          {option.label}
+                        </MenuItem>
+                      ))}
                     {designationOptions.map((option) => (
                       <MenuItem key={option.value} value={option.value}>
                         {option.label}
                     </MenuItem>
                     ))}
+
                   </CommonInput>
                 )}
               />
@@ -146,11 +296,12 @@ const TeamsAndSkillTab = ({ onBack, onSubmit }) => {
                     error={!!errors.teamId}
                     helperText={errors.teamId?.message}
                   >
-                    {teamOptions.map((option) => (
-                      <MenuItem key={option.value} value={option.value}>
-                        {option.label}
-                      </MenuItem>
-                    ))}
+                    {teamList?.length > 0 &&
+                      teamList.map((option) => (
+                        <MenuItem key={option._id} value={option._id}>
+                          {option.label}
+                        </MenuItem>
+                      ))}
                   </CommonInput>
                 )}
               />
@@ -163,46 +314,92 @@ const TeamsAndSkillTab = ({ onBack, onSubmit }) => {
                 render={({ field }) => (
                   <CommonInput
                     {...field}
+                    select
                     fullWidth
                     label="Department"
                     variant="outlined"
                     error={!!errors.department}
                     helperText={errors.department?.message}
-                  />
+                  >
+                    {departmentList?.length > 0 &&
+                      departmentList.map((option) => (
+                        <MenuItem key={option._id} value={option._id}>
+                          {option.label}
+                        </MenuItem>
+                      ))}
+                  </CommonInput>
                 )}
               />
             </Grid>
 
-            <Grid item size={{ xs: 12 }}>
+            <Grid item size={{ xs: 12, md: 6 }}>
               <Controller
                 name="primarySkills"
                 control={control}
                 render={({ field }) => (
                   <CommonInput
                     {...field}
+                    select
                     fullWidth
                     label="Primary Skills"
                     variant="outlined"
                     error={!!errors.primarySkills}
                     helperText={errors.primarySkills?.message}
-                  />
+                    SelectProps={{
+                      multiple: true,
+                      value: field.value || [],
+                      onChange: (e) => {
+                        const value =
+                          typeof e.target.value === "string"
+                            ? e.target.value.split(",")
+                            : e.target.value;
+                        field.onChange(value);
+                      },
+                    }}
+                  >
+                    {skillList?.length > 0 &&
+                      skillList.map((option) => (
+                        <MenuItem key={option._id} value={option._id}>
+                          {option.label}
+                        </MenuItem>
+                      ))}
+                  </CommonInput>
                 )}
               />
             </Grid>
 
-            <Grid item size={{ xs: 12 }}>
+            <Grid item size={{ xs: 12, md: 6 }}>
               <Controller
                 name="secondarySkills"
                 control={control}
                 render={({ field }) => (
                   <CommonInput
                     {...field}
+                    select
                     fullWidth
                     label="Secondary Skills"
                     variant="outlined"
                     error={!!errors.secondarySkills}
                     helperText={errors.secondarySkills?.message}
-                  />
+                    SelectProps={{
+                      multiple: true,
+                      value: field.value || [],
+                      onChange: (e) => {
+                        const value =
+                          typeof e.target.value === "string"
+                            ? e.target.value.split(",")
+                            : e.target.value;
+                        field.onChange(value);
+                      },
+                    }}
+                  >
+                    {skillList?.length > 0 &&
+                      skillList.map((option) => (
+                        <MenuItem key={option._id} value={option._id}>
+                          {option.label}
+                        </MenuItem>
+                      ))}
+                  </CommonInput>
                 )}
               />
             </Grid>
@@ -225,12 +422,17 @@ const TeamsAndSkillTab = ({ onBack, onSubmit }) => {
               variant="contained"
               color="success"
               type="submit"
+              disabled={isLoading}
               sx={{
                 background:
                   "linear-gradient(90deg, rgb(239, 131, 29) 0%, rgb(245, 134, 55) 27%, rgb(244, 121, 56) 100%)",
               }}
             >
-              Submit
+              {isLoading ? (
+                <CircularProgress size={20} color="inherit" />
+              ) : (
+                "Next"
+              )}
             </Button>
           </Box>
         </Stack>

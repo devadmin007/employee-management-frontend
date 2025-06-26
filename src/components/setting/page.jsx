@@ -1,40 +1,67 @@
-import React from "react";
-import { Box, Stack, Grid, Button } from "@mui/material";
+import React, { useEffect } from "react";
+import { Box, Stack, Grid, Button, CircularProgress } from "@mui/material";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import CommonInput from "../CommonInput";
 
-// ✅ Validation schema includes `shift`
 const schema = yup.object().shape({
   joiningDate: yup.date().required("Joining Date is required"),
   probationDate: yup.date().required("Probation Date is required"),
-  userType: yup.string().required("User Type is required"),
+  panNo: yup.string().required("Probation Date is required"),
+  uanDetail: yup.string().nullable(),
+  pfNo: yup.string().nullable(),
+  uanDetail: yup.string().nullable(),
+  previousExperience: yup.string().nullable(),
 });
 
-const userTypeOptions = [
-  { value: "Full-Time", label: "Full-Time" },
-  { value: "Part-Time", label: "Part-Time" },
-  { value: "Intern", label: "Intern" },
-];
-
-const SettingTab = ({ onBack, onSubmit }) => {
+const SettingTab = ({
+  onBack,
+  onSubmit,
+  defaultValues = {},
+  userId = null,
+  isLoading,
+}) => {
+  // const getDefaultValues = () => {
+  //   // If userId is null, return blank/default values
+  //   if (!userId) {
+  //     return {
+  //       joiningDate: "",
+  //       probationDate: "",
+  //       panNo: "",
+  //       pfNo: "",
+  //       uanDetail: "",
+  //       previousExperience: "",
+  //     };
+  //   }
+  //   // Otherwise, use the provided defaultValues with fallbacks
+  //   return {
+  //     joiningDate: defaultValues?.joiningDate || "",
+  //     probationDate: defaultValues?.probationDate || "",
+  //     panNo: defaultValues?.panNo || "",
+  //     pfNo: defaultValues?.pfNo || "",
+  //     uanDetail: defaultValues?.uanDetail || "",
+  //     previousExperience: defaultValues?.previousExperience || "",
+  //   };
+  // };
   const {
     control,
-    register,
+    setValue,
     handleSubmit,
     trigger,
     formState: { errors },
   } = useForm({
-    // resolver: yupResolver(schema),
-    defaultValues: {
-      joiningDate: null,
-      probationDate: null,
-      relievingDate: null,
-      esicStartDate: null,
-      esicEndDate: null,
-      userType: "",
+    resolver: yupResolver(schema),
+    // defaultValues: getDefaultValues(),
+    defaultValues: defaultValues || {
+      joiningDate: "",
+      probationDate: "",
+      panNo: "",
+      pfNo: "",
+      uanDetail: "",
+      previousExperience: "",
     },
+    // mode: "onChange", // Enable real-time validation
   });
 
   const handleFormSubmit = (data) => {
@@ -50,6 +77,12 @@ const SettingTab = ({ onBack, onSubmit }) => {
       onSubmit(formData);
     }
   };
+
+  // useEffect(() => {
+  //   if (userId && defaultValues) {
+  //     reset(getDefaultValues());
+  //   }
+  // }, [userId, defaultValues])
 
   return (
     <Box
@@ -108,6 +141,23 @@ const SettingTab = ({ onBack, onSubmit }) => {
 
             <Grid item size={{ xs: 12, md: 6 }}>
               <Controller
+                name="panNo"
+                control={control}
+                render={({ field }) => (
+                  <CommonInput
+                    {...field}
+                    fullWidth
+                    label="Pan Number"
+                    variant="outlined"
+                    error={!!errors.panNo}
+                    helperText={errors.panNo?.message}
+                  />
+                )}
+              />
+            </Grid>
+
+            <Grid item size={{ xs: 12, md: 6 }}>
+              <Controller
                 name="relieivingDate"
                 control={control}
                 render={({ field }) => (
@@ -122,23 +172,6 @@ const SettingTab = ({ onBack, onSubmit }) => {
                     }}
                     error={!!errors.relieivingDate}
                     helperText={errors.relieivingDate?.message}
-                  />
-                )}
-              />
-            </Grid>
-
-            <Grid item size={{ xs: 12, md: 6 }}>
-              <Controller
-                name="panNo"
-                control={control}
-                render={({ field }) => (
-                  <CommonInput
-                    {...field}
-                    fullWidth
-                    label="Pan Number"
-                    variant="outlined"
-                    error={!!errors.panNo}
-                    helperText={errors.panNo?.message}
                   />
                 )}
               />
@@ -186,7 +219,7 @@ const SettingTab = ({ onBack, onSubmit }) => {
                   <CommonInput
                     {...field}
                     fullWidth
-                    label="Previous Experience (Yrs"
+                    label="Previous Experience (Yrs)"
                     variant="outlined"
                     error={!!errors.previousExperience}
                     helperText={errors.previousExperience?.message}
@@ -194,30 +227,6 @@ const SettingTab = ({ onBack, onSubmit }) => {
                 )}
               />
             </Grid>
-
-            {/* <Grid item size={{ xs: 12, md: 6 }}>
-              <Controller
-                name="userType"
-                control={control}
-                render={({ field }) => (
-                  <CommonInput
-                    {...field}
-                    select
-                    fullWidth
-                    label="User Type"
-                    variant="outlined"
-                    error={!!errors.gender}
-                    helperText={errors.gender?.message}
-                  >
-                    {userTypeOptions.map((option) => (
-                      <MenuItem key={option.value} value={option.value}>
-                        {option.label}
-                      </MenuItem>
-                    ))}
-                  </CommonInput>
-                )}
-              />
-            </Grid> */}
           </Grid>
 
           <Box
@@ -237,12 +246,17 @@ const SettingTab = ({ onBack, onSubmit }) => {
               variant="contained"
               color="success"
               type="submit"
+              disabled={isLoading}
               sx={{
                 background:
                   "linear-gradient(90deg, rgb(239, 131, 29) 0%, rgb(245, 134, 55) 27%, rgb(244, 121, 56) 100%)",
               }}
             >
-              Submit
+              {isLoading ? (
+                <CircularProgress size={20} color="inherit" />
+              ) : (
+                "Next"
+              )}
             </Button>
           </Box>
         </Stack>
