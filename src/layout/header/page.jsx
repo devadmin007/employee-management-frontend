@@ -4,9 +4,10 @@ import React, { useState } from "react";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import LogoutIcon from "@mui/icons-material/Logout";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { logoutUser } from "@/redux/slice/authSlice";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/hooks/useAuth";
 
 const HeaderContent = styled(Box)(({ theme }) => ({
   height: "60px",
@@ -17,6 +18,8 @@ const HeaderContent = styled(Box)(({ theme }) => ({
 const Header = () => {
   const dispatch = useDispatch();
   const router = useRouter();
+  const { logout } = useAuth();
+  const userInfo = useSelector((state) => state.auth.userData);
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
 
@@ -30,13 +33,14 @@ const Header = () => {
 
   const handleLogout = () => {
     dispatch(logoutUser());
-    router.push("/login");
+    logout();
+    // router.push("/login");
   };
 
   return (
     <HeaderContent>
       <Avatar onClick={handleMenuClick} sx={{ bgcolor: "#15283C", m: 2 }}>
-        P
+        A
       </Avatar>
       <Menu
         anchorEl={anchorEl}
@@ -45,6 +49,16 @@ const Header = () => {
         anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
         transformOrigin={{ vertical: "top", horizontal: "right" }}
       >
+        <MenuItem>
+          <Box
+            display="flex"
+            alignItems="center"
+            justifyContent="space-between"
+            width="100%"
+          >
+            <Typography> {userInfo?.firstName}</Typography>
+          </Box>
+        </MenuItem>
         <MenuItem onClick={handleLogout}>
           <LogoutIcon sx={{ mr: 1 }} />
           <Typography variant="inherit">Logout</Typography>
