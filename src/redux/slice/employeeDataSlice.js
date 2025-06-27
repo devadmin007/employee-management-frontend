@@ -22,14 +22,14 @@ const employeeDataSlcie = createSlice({
         teamAndSkillDetail,
         settingDetail,
         bankDetail,
-        roleID,
+        // roleID = null,
         // employeeID,
       } = action.payload;
 
       switch (type) {
         case "personalInfo":
           state.employeeDetails.personalDetails = { ...(personalDetail ?? {}) };
-          state.countryDetails.roleId = roleID ?? null;
+          // state.countryDetails.roleId = roleID ?? null;
           break;
 
         case "teamAndSkillInfo":

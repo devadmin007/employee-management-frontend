@@ -22,7 +22,6 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import CommonInput from "../CommonInput";
 import * as yup from "yup";
 import { getAllRoles } from "@/api";
-import moment from "moment";
 
 // Fixed yup schema with proper validation
 const personalInfoSchema = yup.object().shape({
@@ -30,16 +29,16 @@ const personalInfoSchema = yup.object().shape({
     .mixed()
     .nullable()
     .test("fileSize", "Image is too large", (value) => {
-      if (!value) return true; 
-      if (typeof value === "string") return true; 
+      if (!value) return true;
+      if (typeof value === "string") return true;
       if (value instanceof File) {
         return value.size <= 2000000;
       }
       return true;
     })
     .test("fileType", "Unsupported file format", (value) => {
-      if (!value) return true; 
-      if (typeof value === "string") return true; 
+      if (!value) return true;
+      if (typeof value === "string") return true;
       if (value instanceof File) {
         return ["image/jpeg", "image/png", "image/jpg"].includes(value.type);
       }
@@ -99,8 +98,6 @@ const PersonalInfoTab = ({
   userId = null,
   isLoading,
 }) => {
-  console.log("defaultValues 102", defaultValues, userId);
-
   const [preview, setPreview] = useState(null);
   const [sameAsPermanent, setSameAsPermanent] = useState(false);
   const [roles, setRoles] = useState([]);
@@ -148,8 +145,12 @@ const PersonalInfoTab = ({
     Object.keys(data).forEach((key) => {
       if (key === "permenentAddress" || key === "currentAddress") {
         formData.append(key, JSON.stringify(data[key]));
-      } else if (key === "image" && data[key] instanceof File) {
-        formData.append("image", data[key]);
+      } else if (key === "image") {
+        if (data[key] instanceof File) {
+          formData.append("image", data[key]);
+        } else if (typeof data[key] === "string" && data[key]) {
+          formData.append("image", data[key]);
+        }
       } else if (data[key] !== null && data[key] !== undefined) {
         formData.append(key, data[key]);
       }
@@ -186,7 +187,6 @@ const PersonalInfoTab = ({
     if (e.target.checked) {
       const permenentAddress = watch("permenentAddress");
       setValue("currentAddress", permenentAddress);
-      // Trigger validation for current address fields
       trigger("currentAddress");
     } else {
       setValue("currentAddress", {
@@ -215,69 +215,87 @@ const PersonalInfoTab = ({
   }, []);
 
   useEffect(() => {
-
     if (userId && defaultValues) {
       setValue("role", defaultValues?.role || "");
       setValue("firstName", defaultValues?.firstName || "");
       setValue("lastName", defaultValues?.lastName || "");
       setValue("phoneNumber", defaultValues?.phoneNumber || "");
       setValue("personalNumber", defaultValues?.personalNumber || "");
-      setValue(
-        "dateOfBirth",
-        defaultValues?.dateOfBirth
-          ? moment(defaultValues?.dateOfBirth).format("DD/MM/YYY")
-          : ""
-      );
-      setValue("gender", defaultValues?.gender || "Male");
-      setValue(
-        "permenentAddress.street",
-        defaultValues?.permenentAddress?.street || ""
-      );
-      setValue(
-        "permenentAddress.city",
-        defaultValues?.permenentAddress?.city || ""
-      );
-      setValue(
-        "permenentAddress.state",
-        defaultValues?.permenentAddress?.state || ""
-      );
-      setValue(
-        "permenentAddress.zip",
-        defaultValues?.permenentAddress?.zip || ""
-      );
-      setValue(
-        "permenentAddress.country",
-        defaultValues?.permenentAddress?.country || ""
-      );
-      setValue(
-        "currentAddress.street",
-        defaultValues?.currentAddress?.street || ""
-      );
-      setValue(
-        "currentAddress.city",
-        defaultValues?.currentAddress?.city || ""
-      );
-      setValue(
-        "currentAddress.state",
-        defaultValues?.currentAddress?.state || ""
-      );
-      setValue("currentAddress.zip", defaultValues?.currentAddress?.zip || "");
-      setValue(
-        "currentAddress.country",
-        defaultValues?.currentAddress?.country || ""
-      );
+      setValue("dateOfBirth", defaultValues?.dateOfBirth || "");
+      setValue("gender", defaultValues?.gender || "male");
 
+      // Helper function to parse address (handles both string and object formats)
+      const parseAddress = (address) => {
+        if (!address) {
+          return {
+            street: "",
+            city: "",
+            state: "",
+            zip: "",
+            country: "",
+          };
+        }
+
+        // If it's a string, try to parse it as JSON
+        if (typeof address === "string") {
+          try {
+            return JSON.parse(address);
+          } catch (error) {
+            console.error("Error parsing address JSON:", error);
+            return {
+              street: "",
+              city: "",
+              state: "",
+              zip: "",
+              country: "",
+            };
+          }
+        }
+
+        // If it's already an object, return it as is
+        if (typeof address === "object" && address !== null) {
+          return address;
+        }
+
+        // Fallback to empty address
+        return {
+          street: "",
+          city: "",
+          state: "",
+          zip: "",
+          country: "",
+        };
+      };
+
+      // Parse permanent address
+      const permanentAddress = parseAddress(defaultValues?.permenentAddress);
+      setValue("permenentAddress.street", permanentAddress?.street || "");
+      setValue("permenentAddress.city", permanentAddress?.city || "");
+      setValue("permenentAddress.state", permanentAddress?.state || "");
+      setValue("permenentAddress.zip", permanentAddress?.zip || "");
+      setValue("permenentAddress.country", permanentAddress?.country || "");
+
+      // Parse current address
+      const currentAddress = parseAddress(defaultValues?.currentAddress);
+      setValue("currentAddress.street", currentAddress?.street || "");
+      setValue("currentAddress.city", currentAddress?.city || "");
+      setValue("currentAddress.state", currentAddress?.state || "");
+      setValue("currentAddress.zip", currentAddress?.zip || "");
+      setValue("currentAddress.country", currentAddress?.country || "");
+
+      // Handle image
       if (defaultValues?.image) {
         setPreview(defaultValues.image);
+        setValue("image", defaultValues.image);
       }
-      if (defaultValues?.permenentAddress && defaultValues?.currentAddress) {
-        const isSame =
-          JSON.stringify(defaultValues.permenentAddress) ===
-          JSON.stringify(defaultValues.currentAddress);
+
+      // Check if addresses are the same
+      if (permanentAddress && currentAddress) {
+        const isSame = JSON.stringify(permanentAddress) === JSON.stringify(currentAddress);
         setSameAsPermanent(isSame);
       }
     }
-  }, [userId, defaultValues]);
+  }, [userId, defaultValues, setValue]);
 
   return (
     <Box

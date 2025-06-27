@@ -20,15 +20,6 @@ const BankDetailsTab = ({
   userId = null,
   isLoading,
 }) => {
-  // const getDefaultValues = () => ({
-  //   bankDetails: {
-  //     accountNumber: userId ? (defaultValues?.bankDetails?.accountNumber || "") : "",
-  //     ifscCode: userId ? (defaultValues?.bankDetails?.ifscCode || "") : "",
-  //     branchName: userId ? (defaultValues?.bankDetails?.branchName || "") : "",
-  //     accountHolderName: userId ? (defaultValues?.bankDetails?.accountHolderName || "") : "",
-  //     bankName: userId ? (defaultValues?.bankDetails?.bankName || "") : "",
-  //   }
-  // });
 
   const {
     control,
@@ -37,15 +28,11 @@ const BankDetailsTab = ({
     formState: { errors },
   } = useForm({
     resolver: yupResolver(schema),
-    // defaultValues: getDefaultValues(),
-    // mode: "onChange",
-    defaultValues: defaultValues || {
+    defaultValues: {
       bankDetails: {
         accountNumber: "",
         ifscCode: "",
         branchName: "",
-        accountHolderName: "",
-        bankName: "",
       },
     },
   });
@@ -63,11 +50,13 @@ const BankDetailsTab = ({
     }
   };
 
-  // useEffect(() => {
-  //   if (userId && defaultValues) {
-  //     reset(getDefaultValues());
-  //   }
-  // }, [userId, defaultValues])
+  useEffect(() => {
+    if (userId && defaultValues) {
+      setValue("bankDetails.accountNumber", defaultValues?.accountNumber || "")
+      setValue("bankDetails.ifscCode", defaultValues?.ifscCode || "")
+      setValue("bankDetails.branchName", defaultValues?.branchName || "")
+    }
+  }, [userId, defaultValues])
 
   return (
     <Box

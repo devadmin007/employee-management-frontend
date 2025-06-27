@@ -374,11 +374,11 @@ export const updateDepartmentApi = async (id, updatedDesignation) => {
   return result;
 };
 
-export const updateEmployeeeApi = async (id, payload) => {
+export const updateEmployeeeApi = async (payload) => {
   let result;
 
   try {
-    result = await axiosInstanceApi.patch(`/update-userdetails/${id}`, payload);
+    result = await axiosInstanceApi.put(`/update-userdetails`, payload);
   } catch (e) {
     result = e;
   }

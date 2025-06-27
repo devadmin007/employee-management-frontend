@@ -159,12 +159,16 @@ const TeamsAndSkillTab = ({
     }
   };
 
-  // Fixed useEffect - removed incorrect setValue calls
-  // useEffect(() => {
-  //   // if (userId && defaultValues) {
-  //   //   reset(getDefaultValues());
-  //   // }
-  // }, [userId, defaultValues, reset]);
+  useEffect(() => {
+    if (userId && defaultValues) {
+      setValue("managerId", defaultValues?.managerId || ""),
+        setValue("designationId", defaultValues?.designationId || ""),
+        setValue("teamId", defaultValues?.teamId || ""),
+        setValue("department", defaultValues?.department || ""),
+        setValue("primarySkills", defaultValues?.primarySkills || []),
+        setValue("secondarySkills", defaultValues?.secondarySkills || [])
+    }
+  }, [userId, defaultValues]);
 
   useEffect(() => {
     const fetchAllData = async () => {
