@@ -59,13 +59,9 @@ const Sidebar = () => {
   const pathname = usePathname();
   const { roleId } = useAuth();
 
-  console.log("roleId 61", roleId);
-
-
-  // Define role-based filtering logic
   const getFilteredMenuItems = () => {
-    if (roleId === "ADMIN") {
-      return sidemenu_items; // Show all items for roleId 1
+    if (roleId === "ADMIN" || roleId === "HR") {
+      return sidemenu_items;
     } else if (roleId === "EMPLOYEE") {
       return sidemenu_items.filter((item) =>
         ["Dashboard", "Leave", "Employee", "Holidays"].includes(item.label)
@@ -83,7 +79,7 @@ const Sidebar = () => {
       <Link href="/dashboard">
         <SidebarLogo>
           <Image
-            src="/assets/techniThunder-logo2.svg"
+            src="/assets/technithunder-logo2.svg"
             width={200}
             height={70}
             alt="Picture of the author"
