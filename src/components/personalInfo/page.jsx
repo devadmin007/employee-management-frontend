@@ -99,7 +99,7 @@ const PersonalInfoTab = ({
   userId = null,
   isLoading,
 }) => {
-  // console.log("defaultValues 102", defaultValues, userId);
+  console.log("defaultValues 102", defaultValues, userId);
 
   const [preview, setPreview] = useState(null);
   const [sameAsPermanent, setSameAsPermanent] = useState(false);
@@ -115,8 +115,7 @@ const PersonalInfoTab = ({
     formState: { errors },
   } = useForm({
     resolver: yupResolver(personalInfoSchema),
-    // defaultValues: getDefaultValues(),
-    defaultValues: defaultValues || {
+    defaultValues: {
       role: "",
       firstName: "",
       lastName: "",

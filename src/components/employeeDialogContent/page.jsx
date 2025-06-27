@@ -189,6 +189,7 @@ export default function EmployeeStepperForm({
       const response = await getEmployeeByIdApi(id);
 
       const data = response?.data?.data;
+      console.log("data",data);
 
       const personalDetails = {
         role: data?.role,
@@ -208,16 +209,16 @@ export default function EmployeeStepperForm({
         designationId: data?.userDetails?.designationId || "-",
         teamId: data?.userDetails?.teamId || "-",
         department: data?.userDetails?.department || "-",
-        primarySkills: data?.userDetails?.phoneNumber || [],
-        secondarySkills: data?.userDetails?.personalNumber || [],
+        primarySkills: data?.userDetails?.primarySkills || [],
+        secondarySkills: data?.userDetails?.secondarySkills || [],
       };
 
       const settingDetails = {
-        joiningDate: data?.userDetails?.joiningDate || "-" || "",
-        probationDate: data?.userDetails?.probationDate || "-" || "",
-        panNo: data?.userDetails?.panNo || "-" || "",
-        pfNo: data?.userDetails?.pfNo || "-" || "",
-        uanDetail: data?.userDetails?.uanDetail || "-" || "",
+        joiningDate: data?.userDetails?.joiningDate || "-",
+        probationDate: data?.userDetails?.probationDate || "-",
+        panNo: data?.userDetails?.panNo || "-" ,
+        pfNo: data?.userDetails?.pfNo || "-" ,
+        uanDetail: data?.userDetails?.uanDetail || "-",
         previousExperience: data?.userDetails?.previousExperience || "-",
       };
 
@@ -320,6 +321,8 @@ export default function EmployeeStepperForm({
   };
 
   useEffect(() => {
+    console.log("userId",userId);
+    
     if (!userId) return;
     fetchEmployeeById(userId);
   }, [userId]);

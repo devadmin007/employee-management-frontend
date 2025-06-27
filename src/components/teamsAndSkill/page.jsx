@@ -43,27 +43,6 @@ const TeamsAndSkillTab = ({
   const [teamList, setTeamList] = useState([]);
   const [skillList, setSkillList] = useState([]);
 
-  // const getDefaultValues = () => {
-  //   if (!userId) {
-  //     return {
-  //       managerId: "",
-  //       designationId: "",
-  //       teamId: "",
-  //       department: "",
-  //       primarySkills: [],
-  //       secondarySkills: [],
-  //     };
-  //   }
-  //   return {
-  //     managerId: defaultValues?.managerId || "",
-  //     designationId: defaultValues?.designationId || "",
-  //     teamId: defaultValues?.teamId || "",
-  //     department: defaultValues?.department || "",
-  //     primarySkills: Array.isArray(defaultValues?.primarySkills) ? defaultValues.primarySkills : [],
-  //     secondarySkills: Array.isArray(defaultValues?.secondarySkills) ? defaultValues.secondarySkills : [],
-  //   };
-  // };
-
   const {
     setValue,
     handleSubmit,
@@ -72,8 +51,7 @@ const TeamsAndSkillTab = ({
     formState: { errors },
   } = useForm({
     resolver: yupResolver(schema),
-    // defaultValues: getDefaultValues(),
-    defaultValues: defaultValues || {
+    defaultValues: {
       managerId: "",
       designationId: "",
       teamId: "",
@@ -81,17 +59,13 @@ const TeamsAndSkillTab = ({
       primarySkills: [],
       secondarySkills: [],
     },
-
-    // mode: "onChange", // Enable real-time validation
   });
 
   const handleStep2Submit = (data) => {
 
     const formData = new FormData();
-
     Object.keys(data).forEach((key) => {
       if (key === "primarySkills" || key === "secondarySkills") {
-        // Handle array fields properly
         if (Array.isArray(data[key]) && data[key].length > 0) {
           data[key].forEach((value) => {
             formData.append(`${key}[]`, value);
@@ -104,8 +78,6 @@ const TeamsAndSkillTab = ({
       ) {
         formData.append(key, data[key]);
       }
-
-      formData.append(key, data[key])
     });
 
     formData.append("step", 2);
@@ -188,11 +160,11 @@ const TeamsAndSkillTab = ({
   };
 
   // Fixed useEffect - removed incorrect setValue calls
-  useEffect(() => {
-    // if (userId && defaultValues) {
-    //   reset(getDefaultValues());
-    // }
-  }, [userId, defaultValues, reset]);
+  // useEffect(() => {
+  //   // if (userId && defaultValues) {
+  //   //   reset(getDefaultValues());
+  //   // }
+  // }, [userId, defaultValues, reset]);
 
   useEffect(() => {
     const fetchAllData = async () => {
@@ -271,12 +243,6 @@ const TeamsAndSkillTab = ({
                           {option.label}
                         </MenuItem>
                       ))}
-                    {designationOptions.map((option) => (
-                      <MenuItem key={option.value} value={option.value}>
-                        {option.label}
-                    </MenuItem>
-                    ))}
-
                   </CommonInput>
                 )}
               />

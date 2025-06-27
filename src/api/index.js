@@ -305,6 +305,7 @@ export const fetchAllSkills = async ({ params }) => {
   } catch (error) {
     result = error;
   }
+  return result;
 };
 
 export const getAllDepartmentApi = async (page, limit, search) => {
@@ -335,6 +336,7 @@ export const fetchAllTeams = async ({ params }) => {
   } catch (error) {
     result = error;
   }
+  return result;
 };
 
 export const getDepartmentByIdApi = async (id) => {
