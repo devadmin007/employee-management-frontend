@@ -503,3 +503,26 @@ export const updateLeaveApi = async (id, updatedDesignation) => {
   }
   return result;
 };
+
+export const getAllSalaryApi = async (page, limit, search) => {
+  let result;
+  try {
+    result = await axiosInstanceApi.get(
+      `/salary-list?page=${page}&itemsPerPage=${limit}${search && `&search=${search}`}&pagination=true`
+    );
+  } catch (e) {
+    result = e;
+  }
+  return result;
+};
+
+
+export const getSalaryByIdApi = async (id) => {
+  let result;
+  try {
+    result = await axiosInstanceApi.get(`/salary/${id}`);
+  } catch (e) {
+    result = e;
+  }
+  return result;
+};
