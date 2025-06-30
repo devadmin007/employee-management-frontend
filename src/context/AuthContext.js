@@ -16,14 +16,14 @@ const AuthProvider = ({ children }) => {
   const pathname = usePathname();
 
   const allowedRoutesRole1 = [
-    "/dashboard",
     "/leave",
     "/employee",
     "/holidays",
+    "/salary",
     "/customizations",
   ];
-  const allowedRoutesRole2 = ["/dashboard", "/leave", "/employee", "/holidays"];
-  const allowedRoutesRole3 = ["/dashboard", "/leave", "/employee", "/holidays"];
+  const allowedRoutesRole2 = [ "/leave", "/employee", "/holidays","/salary"];
+  const allowedRoutesRole3 = [ "/leave", "/employee", "/holidays","/salary"];
 
   // Define public routes that don't require authentication
   const publicRoutes = ["/login", "/signup"];

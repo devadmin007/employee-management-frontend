@@ -89,7 +89,7 @@ const Sidebar = ({ onClose }) => {
       return sidemenu_items;
     } else if (roleId === "EMPLOYEE" || roleId === "PROJECT_MANAGER") {
       return sidemenu_items.filter((item) =>
-        ["Dashboard", "Leave", "Employee", "Holidays"].includes(item.label)
+        ["Employee", "Leave", "Holidays","Salary"].includes(item.label)
       );
     }
     return [];
@@ -97,7 +97,7 @@ const Sidebar = ({ onClose }) => {
 
   return (
     <SidebarContent>
-      <Link href="/dashboard" onClick={onClose}>
+      <Link href="/employee" onClick={onClose}>
         <SidebarLogo>
           <Image
             src="/assets/technithunder-logo2.svg"

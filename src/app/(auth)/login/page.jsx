@@ -71,8 +71,8 @@ const Login = () => {
       const response = await loginApi(data);
       if (response?.data?.status == "success") {
         dispatch(setUserData(response?.data?.data));
-        login(response?.data?.data)
-        // router.push("/dashboard");
+        login(response?.data?.data);
+        router.push("/employee");
         // console.log(response?.data?.data);
         // localStorage.setItem("token", response?.data?.data?.token);
         // toast.success(response.data.message);
