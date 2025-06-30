@@ -33,7 +33,9 @@ export default function EmployeeStepperForm({
   onClose,
   userId = null,
   EmployeeStepperForm,
-  fetchEmployee = () => { }
+  fetchEmployee = () => { },
+  formData = {},
+  setFormData = () => { }
 }) {
 
   const dispatch = useDispatch();
@@ -43,7 +45,7 @@ export default function EmployeeStepperForm({
   const [empId, setEmpId] = useState(null);
   const [isBack, setIsBack] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [formData, setFormData] = useState({});
+  // const [formData, setFormData] = useState({});
   const mode = !userId ? "create" : "update";
   if (activeStep > 3) {
     fetchEmployee();
@@ -185,7 +187,7 @@ export default function EmployeeStepperForm({
     setIsLoading(false);
     setFormData((prevData) => ({
       ...prevData,
-      [stepKeys[activeStep]]: data,
+      [stepKeys[activeStep]]: Object.fromEntries(data.entries()),
     }));
     setActiveStep((prevStep) => prevStep + 1);
   };
@@ -270,10 +272,10 @@ export default function EmployeeStepperForm({
           <PersonalInfoTab
             onBack={onClose}
             onSubmit={onSubmit}
-            defaultValues={{
-              ...employeeDetails?.employeeDetails?.personalDetails,
-              firstName: employeeDetails?.employeeDetails?.personalDetails?.firstName || "",
-            } || formData
+            defaultValues={
+              formData?.personalDetail || 
+              employeeDetails?.employeeDetails?.personalDetails
+              // firstName: employeeDetails?.employeeDetails?.personalDetails?.firstName || "",
             }
             userId={userId}
             isLoading={isLoading}
@@ -285,7 +287,8 @@ export default function EmployeeStepperForm({
             onBack={handleBack}
             onSubmit={onSubmit}
             defaultValues={
-              employeeDetails?.employeeDetails?.teamAndSkillDetails || formData
+              formData?.teamAndSkillDetail ||
+              employeeDetails?.employeeDetails?.teamAndSkillDetails
             }
             userId={userId}
             isLoading={isLoading}
@@ -297,7 +300,8 @@ export default function EmployeeStepperForm({
             onBack={handleBack}
             onSubmit={onSubmit}
             defaultValues={
-              employeeDetails?.employeeDetails?.settingDetails || formData
+              formData?.settingDetail ||
+              employeeDetails?.employeeDetails?.settingDetails
             }
             userId={userId}
             isLoading={isLoading}
@@ -309,7 +313,8 @@ export default function EmployeeStepperForm({
             onBack={handleBack}
             onSubmit={onSubmit}
             defaultValues={
-              employeeDetails?.employeeDetails?.bankDetails || formData
+              formData?.bankDetail ||
+              employeeDetails?.employeeDetails?.bankDetails
             }
             userId={userId}
             isLoading={isLoading}
