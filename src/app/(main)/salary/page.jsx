@@ -110,10 +110,9 @@ const Page = () => {
       let result;
 
       if (roleId === "ADMIN" || roleId === "HR") {
-        result = await getAllSalaryApi(page, limit, search); // Show all
+        result = await getAllSalaryApi(page, limit, search); 
       } else {
         result = await getAllSalaryApi(page, limit, search, userId);
-        // Or call a separate getMySalaryApi() if backend supports it
       }
 
       if (result?.data?.status === "success") {

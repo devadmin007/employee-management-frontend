@@ -89,7 +89,7 @@ const Sidebar = ({ onClose }) => {
       return sidemenu_items;
     } else if (roleId === "EMPLOYEE" || roleId === "PROJECT_MANAGER") {
       return sidemenu_items.filter((item) =>
-        ["Employee", "Leave", "Holidays","Salary"].includes(item.label)
+        [ "Leave", "Holidays","Salary"].includes(item.label)
       );
     }
     return [];
@@ -122,6 +122,7 @@ const Sidebar = ({ onClose }) => {
                 height={22}
                 width={22}
                 alt={`${item.label} icon`}
+                
               />
             )}
             <SidebarMenuContainerItemText>

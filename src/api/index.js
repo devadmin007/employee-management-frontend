@@ -447,7 +447,6 @@ export const updateHolidayApi = async (id, updatedSkill) => {
   return result;
 };
 
-
 export const createLeaveApi = async (payload) => {
   let result;
   try {
@@ -458,11 +457,11 @@ export const createLeaveApi = async (payload) => {
   return result;
 };
 
-export const getAllLeaveApi = async (page, limit, search) => {
+export const getAllLeaveApi = async (page, limit, search, role) => {
   let result;
   try {
     result = await axiosInstanceApi.get(
-      `/leave-list?page=${page}&itemsPerPage=${limit}${search && `&search=${search}`}&pagination=true`
+      `/leave-list?page=${page}&itemsPerPage=${limit}${search && `&search=${search}`}&pagination=true${role && `&filter=${role}`}`
     );
   } catch (e) {
     result = e;
@@ -516,11 +515,20 @@ export const getAllSalaryApi = async (page, limit, search) => {
   return result;
 };
 
-
 export const getSalaryByIdApi = async (id) => {
   let result;
   try {
     result = await axiosInstanceApi.get(`/salary/${id}`);
+  } catch (e) {
+    result = e;
+  }
+  return result;
+};
+
+export const approveLeave = async (id, payload) => {
+  let result;
+  try {
+    result = await axiosInstanceApi.post(`/leave-approval/${id}`, payload);
   } catch (e) {
     result = e;
   }
