@@ -1,55 +1,91 @@
-import { Box, Stack, styled, Typography } from "@mui/material";
+import {
+  Box,
+  Stack,
+  styled,
+  Typography,
+  useTheme,
+  useMediaQuery,
+  IconButton,
+} from "@mui/material";
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import CloseIcon from "@mui/icons-material/Close";
 
 const customizationsArray = [
   { title: "Skills", url: "/customizations/skills" },
   { title: "Departments", url: "/customizations/departments" },
   { title: "Designations", url: "/customizations/designations" },
-  // { title: "Manager", url: "/customizations/manager" },
   { title: "Teams", url: "/customizations/teams" },
 ];
 
 const Text = styled(Link, {
-  shouldForwardProp: (prop) => prop !== "active", // prevent prop from reaching DOM
+  shouldForwardProp: (prop) => prop !== "active",
 })(({ theme, active }) => ({
-  fontSize: "18px",
-  height: "60px",
-  paddingBlock: "15px",
+  fontSize: "16px",
+  height: "50px",
+  paddingBlock: "12px",
+  paddingInline: "16px",
   borderBottom: "1.5px solid #EEEEEE",
-  fontWeight: "200",
-  paddingInline: "20px",
+  fontWeight: "500",
   textDecoration: "none",
   color: active ? "white" : "black",
   backgroundColor: active ? "#FFA500" : "transparent",
   fontFamily: theme.typography.fontFamily,
   transition: "all 0.3s ease",
+  [theme.breakpoints.down("sm")]: {
+    fontSize: "14px",
+    paddingInline: "12px",
+  },
 }));
 
-const CustomizedSidebar = () => {
+const CustomizedSidebar = ({ onLinkClick }) => {
   const pathname = usePathname();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
   return (
-    <Box sx={{ py: 2, borderRight: "8px solid #EEEEEE", height: "100%" }}>
-      <Typography
+    <Box
+      sx={{
+        py: 2,
+        height: "100%",
+        backgroundColor: "white",
+        borderRight: "7px solid #EEEEEE",
+      }}
+    >
+      <Box
         sx={{
-          textAlign: "start",
-          fontWeight: "500",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
           borderBottom: "1px solid #EEEEEE",
+          px: 2,
           py: 1,
-          px: "20px",
-          fontSize: "18px",
         }}
       >
-        Customizations
-      </Typography>
+        <Typography
+          sx={{
+            fontWeight: "600",
+            fontSize: isMobile ? "16px" : "18px",
+          }}
+        >
+          Customizations
+        </Typography>
+
+        {onLinkClick && (
+          <IconButton onClick={onLinkClick}>
+            <CloseIcon />
+          </IconButton>
+        )}
+      </Box>
+
       <Stack>
         {customizationsArray.map((element, index) => (
           <Text
             key={index}
             href={element.url}
             active={pathname === element.url}
-            sx={{ fontSize:'16px',fontWeight:'500' }}
+            onClick={onLinkClick}
           >
             {element.title}
           </Text>

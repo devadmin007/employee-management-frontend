@@ -8,7 +8,14 @@ import { sidemenu_items } from "@/data";
 
 const SidebarMenuContainerItemText = styled(Typography)(({ theme }) => ({
   fontSize: "18px",
+  [theme.breakpoints.down("md")]: {
+    fontSize: "16px",
+  },
+  [theme.breakpoints.down("sm")]: {
+    fontSize: "14px",
+  },
 }));
+
 const SidebarContent = styled(Box)(({ theme }) => ({
   height: "100vh",
   display: "flex",
@@ -18,6 +25,7 @@ const SidebarContent = styled(Box)(({ theme }) => ({
 const SidebarLogo = styled(Box)(({ theme }) => ({
   height: "70px",
   width: "100%",
+  display: "flex",
   alignItems: "center",
   justifyContent: "center",
   paddingBlock: "5px",
@@ -31,6 +39,12 @@ const SidebarMenuContainer = styled(Box)(({ theme }) => ({
   color: "white",
   paddingInline: "30px",
   paddingBlock: "17px",
+  [theme.breakpoints.down("md")]: {
+    paddingInline: "20px",
+  },
+  [theme.breakpoints.down("sm")]: {
+    paddingInline: "16px",
+  },
 }));
 
 const SidebarMenuContainerItem = styled(Link, {
@@ -53,20 +67,27 @@ const SidebarMenuContainerItem = styled(Link, {
     backgroundColor: active ? "orange" : "#173351",
     color: "white",
   },
+  [theme.breakpoints.down("md")]: {
+    height: "48px",
+    fontSize: "18px",
+    gap: 12,
+  },
+  [theme.breakpoints.down("sm")]: {
+    height: "44px",
+    fontSize: "16px",
+    gap: 10,
+  },
 }));
 
-const Sidebar = () => {
+// Main Sidebar component
+const Sidebar = ({ onClose }) => {
   const pathname = usePathname();
   const { roleId } = useAuth();
 
   const getFilteredMenuItems = () => {
     if (roleId === "ADMIN" || roleId === "HR") {
       return sidemenu_items;
-    } else if (roleId === "EMPLOYEE") {
-      return sidemenu_items.filter((item) =>
-        ["Dashboard", "Leave", "Employee", "Holidays"].includes(item.label)
-      );
-    } else if (roleId === "PROJECT_MANAGER") {
+    } else if (roleId === "EMPLOYEE" || roleId === "PROJECT_MANAGER") {
       return sidemenu_items.filter((item) =>
         ["Dashboard", "Leave", "Employee", "Holidays"].includes(item.label)
       );
@@ -76,24 +97,24 @@ const Sidebar = () => {
 
   return (
     <SidebarContent>
-      <Link href="/dashboard">
+      <Link href="/dashboard" onClick={onClose}>
         <SidebarLogo>
           <Image
             src="/assets/technithunder-logo2.svg"
             width={200}
             height={70}
-            alt="Picture of the author"
-            
+            alt="Logo"
           />
         </SidebarLogo>
       </Link>
 
-        <SidebarMenuContainer>
+      <SidebarMenuContainer>
         {getFilteredMenuItems().map((item, index) => (
           <SidebarMenuContainerItem
             key={index}
             href={item.to}
-            active={pathname === (item.to) || pathname.startsWith((item.to) + "/")}
+            active={pathname === item.to || pathname.startsWith(item.to + "/")}
+            onClick={onClose}
           >
             {item.icon && (
               <Image
