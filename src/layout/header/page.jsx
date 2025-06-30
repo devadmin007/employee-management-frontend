@@ -1,25 +1,27 @@
 "use client";
-import { Avatar, Box, Button, styled, Typography } from "@mui/material";
-import React, { useState } from "react";
-import Menu from "@mui/material/Menu";
-import MenuItem from "@mui/material/MenuItem";
+import {
+  Avatar,
+  Box,
+  Menu,
+  MenuItem,
+  Typography,
+  IconButton,
+  useMediaQuery,
+} from "@mui/material";
 import LogoutIcon from "@mui/icons-material/Logout";
+import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { logoutUser } from "@/redux/slice/authSlice";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
-
-const HeaderContent = styled(Box)(({ theme }) => ({
-  height: "60px",
-  display: "flex",
-  flexDirection: "row-reverse",
-}));
+import { useTheme } from "@mui/material/styles";
 
 const Header = () => {
   const dispatch = useDispatch();
   const router = useRouter();
   const { logout } = useAuth();
   const userInfo = useSelector((state) => state.auth.userData);
+
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
 
@@ -37,34 +39,55 @@ const Header = () => {
     // router.push("/login");
   };
 
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
   return (
-    <HeaderContent>
-      <Avatar onClick={handleMenuClick} sx={{ bgcolor: "#15283C", m: 2 }}>
-        A
-      </Avatar>
+    <Box
+      sx={{
+        height: 60,
+        width: "100%",
+        px: 2,
+        display: "flex",
+        justifyContent: "flex-end",
+        alignItems: "center",
+        zIndex: 10,
+      }}
+    >
+      <IconButton onClick={handleMenuClick} sx={{ p: 0 }}>
+        <Avatar
+          sx={{ bgcolor: "#15283C", width: 40, height: 40, fontSize: 16 }}
+        >
+          {"A"}
+        </Avatar>
+      </IconButton>
+
       <Menu
         anchorEl={anchorEl}
         open={open}
         onClose={handleClose}
         anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
         transformOrigin={{ vertical: "top", horizontal: "right" }}
+        PaperProps={{
+          sx: {
+            mt: 1,
+            minWidth: 180,
+            borderRadius: 2,
+          },
+        }}
       >
-        <MenuItem>
-          <Box
-            display="flex"
-            alignItems="center"
-            justifyContent="space-between"
-            width="100%"
-          >
-            <Typography> {userInfo?.firstName}</Typography>
-          </Box>
+        <MenuItem onClick={handleClose}>
+          <Typography variant="body1" sx={{ fontWeight: 500 }}>
+            {userInfo?.firstName || "User"}
+          </Typography>
         </MenuItem>
+
         <MenuItem onClick={handleLogout}>
-          <LogoutIcon sx={{ mr: 1 }} />
-          <Typography variant="inherit">Logout</Typography>
+          <LogoutIcon fontSize="small" sx={{ mr: 1 }} />
+          <Typography variant="body1">Logout</Typography>
         </MenuItem>
       </Menu>
-    </HeaderContent>
+    </Box>
   );
 };
 

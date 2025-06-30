@@ -102,17 +102,23 @@ const CommonTable = ({
           </Typography>
         )}
 
-        <Stack direction={"row"} spacing={3}>
-          <Box>
-            {showSearch && (
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          spacing={2}
+          alignItems={{ xs: "stretch", sm: "center" }}
+          justifyContent="flex-start"
+          width="100%"
+        >
+          {/* Search Input */}
+          {showSearch && (
+            <Box sx={{ flex: 1, maxWidth: { xs: "100%", sm: 400 } }}>
               <TextField
+                fullWidth
                 size="small"
                 placeholder={searchPlaceholder}
                 value={localSearchValue}
                 onChange={handleSearchChange}
                 sx={{
-                  minWidth: 250,
-                  maxWidth: 400,
                   "& .MuiOutlinedInput-root": {
                     borderRadius: 2,
                   },
@@ -137,29 +143,33 @@ const CommonTable = ({
                   ),
                 }}
               />
-            )}
-          </Box>
+            </Box>
+          )}
 
+          {/* Action Button */}
           {showActionButton &&
             (actionButton || (
-              <Button
-                variant="contained"
-                onClick={onActionClick}
-                sx={{
-                  minWidth: "120px",
-                  height: "40px",
-                  fontSize: 16,
-                  background:
-                    "linear-gradient(90deg, rgb(239, 131, 29) 0%, rgb(245, 134, 55) 27%, rgb(244, 121, 56) 100%)",
-                  textTransform: "none",
-                  "&:hover": {
+              <Box sx={{ width: { xs: "100%", sm: "auto" } }}>
+                <Button
+                  fullWidth={true}
+                  onClick={onActionClick}
+                  variant="contained"
+                  sx={{
+                    minWidth: 120,
+                    height: 40,
+                    fontSize: 16,
+                    textTransform: "none",
                     background:
-                      "linear-gradient(90deg, rgb(229, 121, 19) 0%, rgb(235, 124, 45) 27%, rgb(234, 111, 46) 100%)",
-                  },
-                }}
-              >
-                {actionButtonText}
-              </Button>
+                      "linear-gradient(90deg, rgb(239, 131, 29) 0%, rgb(245, 134, 55) 27%, rgb(244, 121, 56) 100%)",
+                    "&:hover": {
+                      background:
+                        "linear-gradient(90deg, rgb(229, 121, 19) 0%, rgb(235, 124, 45) 27%, rgb(234, 111, 46) 100%)",
+                    },
+                  }}
+                >
+                  {actionButtonText}
+                </Button>
+              </Box>
             ))}
         </Stack>
       </Paper>
