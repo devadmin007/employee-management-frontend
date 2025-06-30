@@ -25,3 +25,8 @@ export const sidemenu_items = [
     icon: "/icons/Customizations.svg",
   },
 ];
+
+export const genderOptions = [
+  { value: "male", label: "Male" },
+  { value: "female", label: "Female" },
+];

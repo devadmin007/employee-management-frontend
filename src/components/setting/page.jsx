@@ -2,18 +2,8 @@ import React, { useEffect } from "react";
 import { Box, Stack, Grid, Button, CircularProgress } from "@mui/material";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
 import CommonInput from "../CommonInput";
-
-const schema = yup.object().shape({
-  joiningDate: yup.date().required("Joining Date is required"),
-  probationDate: yup.date().required("Probation Date is required"),
-  panNo: yup.string().required("Probation Date is required"),
-  uanDetail: yup.string().nullable(),
-  pfNo: yup.string().nullable(),
-  uanDetail: yup.string().nullable(),
-  previousExperience: yup.string().nullable(),
-});
+import settingSchema from "@/schemas/setttingSchema";
 
 const SettingTab = ({
   onBack,
@@ -22,28 +12,7 @@ const SettingTab = ({
   userId = null,
   isLoading,
 }) => {
-  // const getDefaultValues = () => {
-  //   // If userId is null, return blank/default values
-  //   if (!userId) {
-  //     return {
-  //       joiningDate: "",
-  //       probationDate: "",
-  //       panNo: "",
-  //       pfNo: "",
-  //       uanDetail: "",
-  //       previousExperience: "",
-  //     };
-  //   }
-  //   // Otherwise, use the provided defaultValues with fallbacks
-  //   return {
-  //     joiningDate: defaultValues?.joiningDate || "",
-  //     probationDate: defaultValues?.probationDate || "",
-  //     panNo: defaultValues?.panNo || "",
-  //     pfNo: defaultValues?.pfNo || "",
-  //     uanDetail: defaultValues?.uanDetail || "",
-  //     previousExperience: defaultValues?.previousExperience || "",
-  //   };
-  // };
+
   const {
     control,
     setValue,
@@ -51,17 +20,15 @@ const SettingTab = ({
     trigger,
     formState: { errors },
   } = useForm({
-    resolver: yupResolver(schema),
-    // defaultValues: getDefaultValues(),
-    defaultValues: defaultValues || {
-      joiningDate: "",
-      probationDate: "",
-      panNo: "",
-      pfNo: "",
-      uanDetail: "",
-      previousExperience: "",
+    resolver: yupResolver(settingSchema),
+    defaultValues: {
+      joiningDate: defaultValues?.joiningDate || "",
+      probationDate: defaultValues?.probationDate || "",
+      panNo: defaultValues?.panNo || "",
+      pfNo: defaultValues?.pfNo || "",
+      uanDetail: defaultValues?.uanDetail || "",
+      previousExperience: defaultValues?.previousExperience || "",
     },
-    // mode: "onChange", // Enable real-time validation
   });
 
   const handleFormSubmit = (data) => {
@@ -78,11 +45,16 @@ const SettingTab = ({
     }
   };
 
-  // useEffect(() => {
-  //   if (userId && defaultValues) {
-  //     reset(getDefaultValues());
-  //   }
-  // }, [userId, defaultValues])
+  useEffect(() => {
+    if (userId && defaultValues) {
+      setValue("joiningDate", defaultValues?.joiningDate || "-"),
+        setValue("probationDate", defaultValues?.probationDate || "-"),
+        setValue("panNo", defaultValues?.panNo || "-"),
+        setValue("pfNo", defaultValues?.pfNo || "-"),
+        setValue("uanDetail", defaultValues?.uanDetail || "-"),
+        setValue("previousExperience", defaultValues?.previousExperience || "-")
+    }
+  }, [userId, defaultValues])
 
   return (
     <Box

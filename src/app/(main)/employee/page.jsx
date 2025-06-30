@@ -24,6 +24,8 @@ import { fetchAllEmployeeDetails } from "@/api";
 import EditIcon from "@mui/icons-material/Edit";
 import { toast } from "react-toastify";
 import DebaunceInput from "@/utils/DebaunceInput";
+import { useDispatch } from "react-redux";
+import { clearEmployeeData } from "@/redux/slice/employeeDataSlice";
 
 const Page = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -34,6 +36,8 @@ const Page = () => {
   const [employeeId, setEmployeeId] = useState("");
   const [rows, setRows] = useState([]);
   const [totalRows, setTotalRows] = useState(0);
+  const [formData, setFormData] = useState({});
+  const dispatch = useDispatch();
 
   const columns = [
     {
@@ -81,7 +85,11 @@ const Page = () => {
     setPage(1);
   };
 
-  const handleClickOpen = () => setOpen(true);
+  const handleClickOpen = () => {
+    dispatch(clearEmployeeData());
+    setFormData({})
+    setOpen(true);
+  }
   const handleClose = () => {
     setOpen(false);
   };
@@ -181,6 +189,8 @@ const Page = () => {
         onClose={handleClose}
         userId={employeeId}
         fetchEmployee={fetchEmployee}
+        formData={formData}
+        setFormData={setFormData}
       />
 
       <Box>

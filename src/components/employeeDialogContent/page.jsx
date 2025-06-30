@@ -23,14 +23,18 @@ import {
 import SuccessModal from "../SuccessModal/page";
 import { useDispatch, useSelector } from "react-redux";
 import { addEmployeeDataInfo } from "@/redux/slice/employeeDataSlice";
+import moment from "moment";
 
 const steps = ["Personal Info", "Team & Skill", "Settings", "Bank Details"];
+const stepKeys = ["personalDetail", "teamAndSkillDetail", "settingDetail", "bankDetail"];
 
 export default function EmployeeStepperForm({
   open,
   onClose,
   userId = null,
-  EmployeeStepperForm,
+  fetchEmployee = () => { },
+  formData = {},
+  setFormData = () => { }
 }) {
 
   const dispatch = useDispatch();
@@ -40,13 +44,12 @@ export default function EmployeeStepperForm({
   const [empId, setEmpId] = useState(null);
   const [isBack, setIsBack] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    personalInfo: {},
-    teamAndSkill: {},
-    settings: {},
-    bankDetails: {},
-  });
+  // const [formData, setFormData] = useState({});
   const mode = !userId ? "create" : "update";
+  if (activeStep > 3) {
+    fetchEmployee();
+  }
+
 
   const handleNext = () => {
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -74,7 +77,7 @@ export default function EmployeeStepperForm({
           if (response?.data) {
             setEmpId(response?.data?.data?.userId);
 
-            setFormData((prev) => ({ ...prev, personalInfo: plainData }));
+            // setFormData((prev) => ({ ...prev, personalInfo: plainData }));
             dispatch(
               addEmployeeDataInfo({
                 type,
@@ -83,10 +86,10 @@ export default function EmployeeStepperForm({
             );
           }
         } else if (mode === "update" || isBack) {
-          const response = await updateEmployeeeApi(userId, data);
+          const response = await updateEmployeeeApi(data);
           if (response?.data) {
             setEmpId(response?.data?.data?.userId);
-            setFormData((prev) => ({ ...prev, personalInfo: plainData }));
+            // setFormData((prev) => ({ ...prev, personalInfo: plainData }));
             dispatch(
               addEmployeeDataInfo({
                 type,
@@ -181,13 +184,16 @@ export default function EmployeeStepperForm({
     }
 
     setIsLoading(false);
+    setFormData((prevData) => ({
+      ...prevData,
+      [stepKeys[activeStep]]: Object.fromEntries(data.entries()),
+    }));
     setActiveStep((prevStep) => prevStep + 1);
   };
 
   const fetchEmployeeById = async (id) => {
     try {
       const response = await getEmployeeByIdApi(id);
-
       const data = response?.data?.data;
 
       const personalDetails = {
@@ -197,37 +203,32 @@ export default function EmployeeStepperForm({
         image: data?.image,
         phoneNumber: data?.userDetails?.phoneNumber,
         personalNumber: data?.userDetails?.personalNumber,
-        dateOfBirth: data?.userDetails?.dateOfBirth || "-",
-        gender: data?.userDetails?.gender || "-",
-        permenentAddress: data?.userDetails?.permenentAddress || "-",
-        currentAddress: data?.userDetails?.currentAddress || "-",
+        // dateOfBirth: moment(data?.userDetails?.joiningDate).format("MM/DD/YYYY") || "",
+        dateOfBirth: new Date(data?.userDetails?.joiningDate).toLocaleDateString(),
+        gender: data?.userDetails?.gender || "Male",
+        permenentAddress: data?.userDetails?.permenentAddress || "",
+        currentAddress: data?.userDetails?.currentAddress || "",
       };
 
       const teamAndSkillDetails = {
-        managerId: data?.userDetails?.managerId || "-",
-        designationId: data?.userDetails?.designationId || "-",
-        teamId: data?.userDetails?.teamId || "-",
-        department: data?.userDetails?.department || "-",
-        primarySkills: data?.userDetails?.phoneNumber || [],
-        secondarySkills: data?.userDetails?.personalNumber || [],
+        managerId: data?.userDetails?.managerId || "",
+        designationId: data?.userDetails?.designationId || "",
+        teamId: data?.userDetails?.teamId || "",
+        department: data?.userDetails?.department || "",
+        primarySkills: data?.userDetails?.primarySkills || [],
+        secondarySkills: data?.userDetails?.secondarySkills || [],
       };
 
       const settingDetails = {
-        joiningDate: data?.userDetails?.joiningDate || "-" || "",
-        probationDate: data?.userDetails?.probationDate || "-" || "",
-        panNo: data?.userDetails?.panNo || "-" || "",
-        pfNo: data?.userDetails?.pfNo || "-" || "",
-        uanDetail: data?.userDetails?.uanDetail || "-" || "",
-        previousExperience: data?.userDetails?.previousExperience || "-",
+        joiningDate: data?.userDetails?.joiningDate || "",
+        probationDate: data?.userDetails?.probationDate || "",
+        panNo: data?.userDetails?.panNo || "",
+        pfNo: data?.userDetails?.pfNo || "",
+        uanDetail: data?.userDetails?.uanDetail || "",
+        previousExperience: data?.userDetails?.previousExperience || "",
       };
 
-      const bankDetails = {
-        accountNumber: data?.userDetails?.accountNumber || "-",
-        ifscCode: data?.userDetails?.ifscCode || "-",
-        branchName: data?.userDetails?.branchName || "-",
-        accountHolderName: data?.userDetails?.accountHolderName || "-",
-        bankName: data?.userDetails?.bankName || "-",
-      };
+      const bankDetails = data?.bankDetails || {};
 
       dispatch(
         addEmployeeDataInfo({
@@ -266,7 +267,9 @@ export default function EmployeeStepperForm({
             onBack={onClose}
             onSubmit={onSubmit}
             defaultValues={
-              employeeDetails?.employeeDetails?.personalDetails || formData
+              formData?.personalDetail ||
+              employeeDetails?.employeeDetails?.personalDetails
+              // firstName: employeeDetails?.employeeDetails?.personalDetails?.firstName || "",
             }
             userId={userId}
             isLoading={isLoading}
@@ -278,7 +281,8 @@ export default function EmployeeStepperForm({
             onBack={handleBack}
             onSubmit={onSubmit}
             defaultValues={
-              employeeDetails?.employeeDetails?.personalDetails || formData
+              formData?.teamAndSkillDetail ||
+              employeeDetails?.employeeDetails?.teamAndSkillDetails
             }
             userId={userId}
             isLoading={isLoading}
@@ -290,7 +294,8 @@ export default function EmployeeStepperForm({
             onBack={handleBack}
             onSubmit={onSubmit}
             defaultValues={
-              employeeDetails?.employeeDetails?.personalDetails || formData
+              formData?.settingDetail ||
+              employeeDetails?.employeeDetails?.settingDetails
             }
             userId={userId}
             isLoading={isLoading}
@@ -302,7 +307,8 @@ export default function EmployeeStepperForm({
             onBack={handleBack}
             onSubmit={onSubmit}
             defaultValues={
-              employeeDetails?.employeeDetails?.personalDetails || formData
+              formData?.bankDetail ||
+              employeeDetails?.employeeDetails?.bankDetails
             }
             userId={userId}
             isLoading={isLoading}
@@ -313,7 +319,7 @@ export default function EmployeeStepperForm({
           <SuccessModal
             onClose={onClose}
             setActiveStep={setActiveStep}
-            EmployeeStepperForm={EmployeeStepperForm}
+            fetchEmployee={fetchEmployee}
           />
         );
     }

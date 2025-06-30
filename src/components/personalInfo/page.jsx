@@ -20,77 +20,10 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { yupResolver } from "@hookform/resolvers/yup";
 import CommonInput from "../CommonInput";
-import * as yup from "yup";
 import { getAllRoles } from "@/api";
-import moment from "moment";
-
-// Fixed yup schema with proper validation
-const personalInfoSchema = yup.object().shape({
-  image: yup
-    .mixed()
-    .nullable()
-    .test("fileSize", "Image is too large", (value) => {
-      if (!value) return true; 
-      if (typeof value === "string") return true; 
-      if (value instanceof File) {
-        return value.size <= 2000000;
-      }
-      return true;
-    })
-    .test("fileType", "Unsupported file format", (value) => {
-      if (!value) return true; 
-      if (typeof value === "string") return true; 
-      if (value instanceof File) {
-        return ["image/jpeg", "image/png", "image/jpg"].includes(value.type);
-      }
-      return true;
-    }),
-  role: yup.string().required("Role is required"),
-  firstName: yup.string().required("First Name is required"),
-  lastName: yup.string().required("Last Name is required"),
-  phoneNumber: yup
-    .string()
-    .required("Phone Number is required")
-    .matches(/^\d{10,15}$/, "Enter a valid Phone Number"),
-  personalNumber: yup
-    .string()
-    .required("Emergency Mobile is required")
-    .matches(/^\d{10,15}$/, "Enter a valid Emergency Mobile"),
-  dateOfBirth: yup
-    .string()
-    .required("Date of birth is required")
-    .test("is-date", "Invalid date format", (value) => {
-      if (!value) return false;
-      const date = new Date(value);
-      return date instanceof Date && !isNaN(date.getTime());
-    }),
-  gender: yup.string().required("Gender is required"),
-  permenentAddress: yup.object().shape({
-    street: yup.string().required("Address is required"),
-    city: yup.string().required("City is required"),
-    state: yup.string().required("State is required"),
-    zip: yup
-      .string()
-      .required("Zip Code is required")
-      .matches(/^\d{4,10}$/, "Enter a valid zip code"),
-    country: yup.string().required("Country is required"),
-  }),
-  currentAddress: yup.object().shape({
-    street: yup.string().required("Address is required"),
-    city: yup.string().required("City is required"),
-    state: yup.string().required("State is required"),
-    zip: yup
-      .string()
-      .required("Zip Code is required")
-      .matches(/^\d{4,10}$/, "Enter a valid zip code"),
-    country: yup.string().required("Country is required"),
-  }),
-});
-
-const genderOptions = [
-  { value: "male", label: "Male" },
-  { value: "female", label: "Female" },
-];
+import personalInfoSchema from "@/schemas/personalInfoSchema";
+import { parseAddress } from "@/utils/helper";
+import { genderOptions } from "@/data";
 
 const PersonalInfoTab = ({
   onBack,
@@ -99,11 +32,12 @@ const PersonalInfoTab = ({
   userId = null,
   isLoading,
 }) => {
-  // console.log("defaultValues 102", defaultValues, userId);
-
   const [preview, setPreview] = useState(null);
   const [sameAsPermanent, setSameAsPermanent] = useState(false);
   const [roles, setRoles] = useState([]);
+
+  const permenentAddress = parseAddress(defaultValues?.permenentAddress);
+  const currentAddress = parseAddress(defaultValues?.currentAddress);
 
   const {
     setValue,
@@ -115,42 +49,44 @@ const PersonalInfoTab = ({
     formState: { errors },
   } = useForm({
     resolver: yupResolver(personalInfoSchema),
-    // defaultValues: getDefaultValues(),
-    defaultValues: defaultValues || {
-      role: "",
-      firstName: "",
-      lastName: "",
-      phoneNumber: "",
-      personalNumber: "",
-      dateOfBirth: "",
-      gender: "",
-      image: null,
+    defaultValues: {
+      role: defaultValues?.role || "",
+      firstName: defaultValues?.firstName || "",
+      lastName: defaultValues?.firstName || "",
+      phoneNumber: defaultValues?.phoneNumber || "",
+      personalNumber: defaultValues?.personalNumber || "",
+      dateOfBirth: defaultValues?.dateOfBirth || "",
+      gender: defaultValues?.gender || "",
+      image: defaultValues?.image || null,
       permenentAddress: {
-        street: "",
-        city: "",
-        state: "",
-        zip: "",
-        country: "",
+        street: permenentAddress?.street || "",
+        city: permenentAddress?.city || "",
+        state: permenentAddress?.state || "",
+        zip: permenentAddress?.zip || "",
+        country: permenentAddress?.country || "",
       },
       currentAddress: {
-        street: "",
-        city: "",
-        state: "",
-        zip: "",
-        country: "",
-      },
+        street: currentAddress?.street || "",
+        city: currentAddress?.city || "",
+        state: currentAddress?.state || "",
+        zip: currentAddress?.zip || "",
+        country: currentAddress?.country || "",
+      }
     },
   });
 
   const handleFormSubmit = (data) => {
-
     const formData = new FormData();
 
     Object.keys(data).forEach((key) => {
       if (key === "permenentAddress" || key === "currentAddress") {
         formData.append(key, JSON.stringify(data[key]));
-      } else if (key === "image" && data[key] instanceof File) {
-        formData.append("image", data[key]);
+      } else if (key === "image") {
+        if (data[key] instanceof File) {
+          formData.append("image", data[key]);
+        } else if (typeof data[key] === "string" && data[key]) {
+          formData.append("image", data[key]);
+        }
       } else if (data[key] !== null && data[key] !== undefined) {
         formData.append(key, data[key]);
       }
@@ -187,7 +123,6 @@ const PersonalInfoTab = ({
     if (e.target.checked) {
       const permenentAddress = watch("permenentAddress");
       setValue("currentAddress", permenentAddress);
-      // Trigger validation for current address fields
       trigger("currentAddress");
     } else {
       setValue("currentAddress", {
@@ -216,69 +151,79 @@ const PersonalInfoTab = ({
   }, []);
 
   useEffect(() => {
-
     if (userId && defaultValues) {
       setValue("role", defaultValues?.role || "");
       setValue("firstName", defaultValues?.firstName || "");
       setValue("lastName", defaultValues?.lastName || "");
       setValue("phoneNumber", defaultValues?.phoneNumber || "");
       setValue("personalNumber", defaultValues?.personalNumber || "");
-      setValue(
-        "dateOfBirth",
-        defaultValues?.dateOfBirth
-          ? moment(defaultValues?.dateOfBirth).format("DD/MM/YYY")
-          : ""
-      );
-      setValue("gender", defaultValues?.gender || "Male");
-      setValue(
-        "permenentAddress.street",
-        defaultValues?.permenentAddress?.street || ""
-      );
-      setValue(
-        "permenentAddress.city",
-        defaultValues?.permenentAddress?.city || ""
-      );
-      setValue(
-        "permenentAddress.state",
-        defaultValues?.permenentAddress?.state || ""
-      );
-      setValue(
-        "permenentAddress.zip",
-        defaultValues?.permenentAddress?.zip || ""
-      );
-      setValue(
-        "permenentAddress.country",
-        defaultValues?.permenentAddress?.country || ""
-      );
-      setValue(
-        "currentAddress.street",
-        defaultValues?.currentAddress?.street || ""
-      );
-      setValue(
-        "currentAddress.city",
-        defaultValues?.currentAddress?.city || ""
-      );
-      setValue(
-        "currentAddress.state",
-        defaultValues?.currentAddress?.state || ""
-      );
-      setValue("currentAddress.zip", defaultValues?.currentAddress?.zip || "");
-      setValue(
-        "currentAddress.country",
-        defaultValues?.currentAddress?.country || ""
-      );
+      setValue("dateOfBirth", defaultValues?.dateOfBirth || "");
+      setValue("gender", defaultValues?.gender || "male");
 
+      // Parse permanent address
+      const permanentAddress = parseAddress(defaultValues?.permenentAddress);
+      setValue("permenentAddress.street", permanentAddress?.street || "");
+      setValue("permenentAddress.city", permanentAddress?.city || "");
+      setValue("permenentAddress.state", permanentAddress?.state || "");
+      setValue("permenentAddress.zip", permanentAddress?.zip || "");
+      setValue("permenentAddress.country", permanentAddress?.country || "");
+
+      // Parse current address
+      const currentAddress = parseAddress(defaultValues?.currentAddress);
+      setValue("currentAddress.street", currentAddress?.street || "");
+      setValue("currentAddress.city", currentAddress?.city || "");
+      setValue("currentAddress.state", currentAddress?.state || "");
+      setValue("currentAddress.zip", currentAddress?.zip || "");
+      setValue("currentAddress.country", currentAddress?.country || "");
+
+      // Handle image
       if (defaultValues?.image) {
         setPreview(defaultValues.image);
+        setValue("image", defaultValues.image);
       }
-      if (defaultValues?.permenentAddress && defaultValues?.currentAddress) {
+
+      // Check if addresses are the same
+      if (permanentAddress && currentAddress) {
         const isSame =
-          JSON.stringify(defaultValues.permenentAddress) ===
-          JSON.stringify(defaultValues.currentAddress);
+          JSON.stringify(permanentAddress) === JSON.stringify(currentAddress);
         setSameAsPermanent(isSame);
       }
     }
-  }, [userId, defaultValues]);
+    if (defaultValues?.image) {
+      // Check if image is a File object
+      if (defaultValues.image instanceof File) {
+        // Create a FileReader to convert File to data URL for preview
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setPreview(reader.result);
+        };
+        reader.readAsDataURL(defaultValues.image);
+        setValue("image", defaultValues.image);
+      }
+      // Check if image is a valid string URL or base64
+      else if (
+        typeof defaultValues.image === "string" &&
+        defaultValues.image.trim() !== ""
+      ) {
+        setPreview(defaultValues.image);
+        setValue("image", defaultValues.image);
+      }
+      else if (
+        typeof defaultValues.image === "object" &&
+        defaultValues.image !== null &&
+        !Array.isArray(defaultValues.image) &&
+        Object.keys(defaultValues.image).length > 0
+      ) {
+        if (defaultValues.image.url) {
+          setPreview(defaultValues.image.url);
+          setValue("image", defaultValues.image.url);
+        } else if (defaultValues.image.path) {
+          setPreview(defaultValues.image.path);
+          setValue("image", defaultValues.image.path);
+        }
+      }
+    }
+  }, [userId, defaultValues, setValue]);
 
   return (
     <Box
@@ -421,6 +366,9 @@ const PersonalInfoTab = ({
                     label="Mobile Number"
                     variant="outlined"
                     size="medium"
+                    onChange={(e) => {
+                      field?.onChange(e.target.value.replace(/[^0-9]/g, ''));
+                    }}
                     error={!!errors.phoneNumber}
                     helperText={errors.phoneNumber?.message}
                   />
@@ -439,6 +387,9 @@ const PersonalInfoTab = ({
                     label="Emergency Mobile"
                     variant="outlined"
                     size="medium"
+                    onChange={(e) => {
+                      field?.onChange(e.target.value.replace(/[^0-9]/g, ''));
+                    }}
                     error={!!errors.personalNumber}
                     helperText={errors.personalNumber?.message}
                   />

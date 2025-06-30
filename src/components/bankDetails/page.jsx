@@ -1,17 +1,10 @@
 import React, { useEffect } from "react";
-import { Box, Stack, Grid, Button } from "@mui/material";
+import { Box, Stack, Grid, Button, CircularProgress } from "@mui/material";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
 import CommonInput from "../CommonInput";
-
-const schema = yup.object().shape({
-  bankDetails: yup.object().shape({
-    accountNumber: yup.string().required("Account Number is required"),
-    ifscCode: yup.string().required("IFSC Code is required"),
-    branchName: yup.string().required("Branch Name is required"),
-  }),
-});
+import bankSchema from "@/schemas/bankSchema";
+import { bankInfo } from "@/utils/helper";
 
 const BankDetailsTab = ({
   onBack,
@@ -20,15 +13,8 @@ const BankDetailsTab = ({
   userId = null,
   isLoading,
 }) => {
-  // const getDefaultValues = () => ({
-  //   bankDetails: {
-  //     accountNumber: userId ? (defaultValues?.bankDetails?.accountNumber || "") : "",
-  //     ifscCode: userId ? (defaultValues?.bankDetails?.ifscCode || "") : "",
-  //     branchName: userId ? (defaultValues?.bankDetails?.branchName || "") : "",
-  //     accountHolderName: userId ? (defaultValues?.bankDetails?.accountHolderName || "") : "",
-  //     bankName: userId ? (defaultValues?.bankDetails?.bankName || "") : "",
-  //   }
-  // });
+
+  const bankInfoDetails = bankInfo(defaultValues?.bankDetails);
 
   const {
     control,
@@ -36,16 +22,12 @@ const BankDetailsTab = ({
     setValue,
     formState: { errors },
   } = useForm({
-    resolver: yupResolver(schema),
-    // defaultValues: getDefaultValues(),
-    // mode: "onChange",
-    defaultValues: defaultValues || {
+    resolver: yupResolver(bankSchema),
+    defaultValues: {
       bankDetails: {
-        accountNumber: "",
-        ifscCode: "",
-        branchName: "",
-        accountHolderName: "",
-        bankName: "",
+        accountNumber: bankInfoDetails?.accountNumber || "",
+        ifscCode: bankInfoDetails?.ifscCode || "",
+        branchName: bankInfoDetails?.branchName || "",
       },
     },
   });
@@ -63,11 +45,13 @@ const BankDetailsTab = ({
     }
   };
 
-  // useEffect(() => {
-  //   if (userId && defaultValues) {
-  //     reset(getDefaultValues());
-  //   }
-  // }, [userId, defaultValues])
+  useEffect(() => {
+    if (userId && defaultValues) {
+      setValue("bankDetails.accountNumber", defaultValues?.accountNumber || "")
+      setValue("bankDetails.ifscCode", defaultValues?.ifscCode || "")
+      setValue("bankDetails.branchName", defaultValues?.branchName || "")
+    }
+  }, [userId, defaultValues])
 
   return (
     <Box

@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { MenuItem, Box, Stack, Grid, Button, CircularProgress } from "@mui/material";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
 import CommonInput from "../CommonInput";
 import {
   fetchAllDepartments,
@@ -11,24 +10,7 @@ import {
   fetchAllSkills,
   fetchAllTeams,
 } from "@/api";
-
-// Fixed validation schema using Yup
-const schema = yup.object().shape({
-  managerId: yup.string().required("Manager is required"),
-  designationId: yup.string().required("Designation is required"),
-  teamId: yup.string().required("Team Name is required"),
-  department: yup.string().required("Department is required"),
-  primarySkills: yup
-    .array()
-    .of(yup.string())
-    .min(1, "At least one primary skill is required")
-    .required("Primary Skills are required"),
-  secondarySkills: yup
-    .array()
-    .of(yup.string())
-    .min(1, "At least one secondary skill is required")
-    .required("Secondary Skills are required"),
-});
+import teamsAndSkillSchema from "@/schemas/teamsAndSkillSchema";
 
 const TeamsAndSkillTab = ({
   onBack,
@@ -43,27 +25,6 @@ const TeamsAndSkillTab = ({
   const [teamList, setTeamList] = useState([]);
   const [skillList, setSkillList] = useState([]);
 
-  // const getDefaultValues = () => {
-  //   if (!userId) {
-  //     return {
-  //       managerId: "",
-  //       designationId: "",
-  //       teamId: "",
-  //       department: "",
-  //       primarySkills: [],
-  //       secondarySkills: [],
-  //     };
-  //   }
-  //   return {
-  //     managerId: defaultValues?.managerId || "",
-  //     designationId: defaultValues?.designationId || "",
-  //     teamId: defaultValues?.teamId || "",
-  //     department: defaultValues?.department || "",
-  //     primarySkills: Array.isArray(defaultValues?.primarySkills) ? defaultValues.primarySkills : [],
-  //     secondarySkills: Array.isArray(defaultValues?.secondarySkills) ? defaultValues.secondarySkills : [],
-  //   };
-  // };
-
   const {
     setValue,
     handleSubmit,
@@ -71,27 +32,22 @@ const TeamsAndSkillTab = ({
     reset,
     formState: { errors },
   } = useForm({
-    resolver: yupResolver(schema),
-    // defaultValues: getDefaultValues(),
-    defaultValues: defaultValues || {
-      managerId: "",
-      designationId: "",
-      teamId: "",
-      department: "",
-      primarySkills: [],
-      secondarySkills: [],
+    resolver: yupResolver(teamsAndSkillSchema),
+    defaultValues: {
+      managerId: defaultValues?.managerId || "",
+      designationId: defaultValues?.designationId || "",
+      teamId: defaultValues?.teamId || "",
+      department: defaultValues?.department || "",
+      primarySkills: defaultValues?.primarySkills || [],
+      secondarySkills: defaultValues?.secondarySkills ||[],
     },
-
-    // mode: "onChange", // Enable real-time validation
   });
 
   const handleStep2Submit = (data) => {
 
     const formData = new FormData();
-
     Object.keys(data).forEach((key) => {
       if (key === "primarySkills" || key === "secondarySkills") {
-        // Handle array fields properly
         if (Array.isArray(data[key]) && data[key].length > 0) {
           data[key].forEach((value) => {
             formData.append(`${key}[]`, value);
@@ -104,8 +60,6 @@ const TeamsAndSkillTab = ({
       ) {
         formData.append(key, data[key]);
       }
-
-      formData.append(key, data[key])
     });
 
     formData.append("step", 2);
@@ -187,12 +141,16 @@ const TeamsAndSkillTab = ({
     }
   };
 
-  // Fixed useEffect - removed incorrect setValue calls
   useEffect(() => {
-    // if (userId && defaultValues) {
-    //   reset(getDefaultValues());
-    // }
-  }, [userId, defaultValues, reset]);
+    if (userId && defaultValues) {
+      setValue("managerId", defaultValues?.managerId || ""),
+        setValue("designationId", defaultValues?.designationId || ""),
+        setValue("teamId", defaultValues?.teamId || ""),
+        setValue("department", defaultValues?.department || ""),
+        setValue("primarySkills", defaultValues?.primarySkills || []),
+        setValue("secondarySkills", defaultValues?.secondarySkills || [])
+    }
+  }, [userId, defaultValues]);
 
   useEffect(() => {
     const fetchAllData = async () => {
@@ -271,12 +229,6 @@ const TeamsAndSkillTab = ({
                           {option.label}
                         </MenuItem>
                       ))}
-                    {designationOptions.map((option) => (
-                      <MenuItem key={option.value} value={option.value}>
-                        {option.label}
-                    </MenuItem>
-                    ))}
-
                   </CommonInput>
                 )}
               />
