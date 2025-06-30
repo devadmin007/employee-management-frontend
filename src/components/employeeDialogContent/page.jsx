@@ -32,7 +32,6 @@ export default function EmployeeStepperForm({
   open,
   onClose,
   userId = null,
-  EmployeeStepperForm,
   fetchEmployee = () => { },
   formData = {},
   setFormData = () => { }
@@ -229,13 +228,8 @@ export default function EmployeeStepperForm({
         previousExperience: data?.userDetails?.previousExperience || "",
       };
 
-      const bankDetails = {
-        accountNumber: data?.userDetails?.bankDetails?.accountNumber || "",
-        ifscCode: data?.userDetails?.bankDetails?.ifscCode || "",
-        branchName: data?.userDetails?.bankDetails?.branchName || "",
-        accountHolderName: data?.userDetails?.bankDetails?.accountHolderName || "",
-        bankName: data?.userDetails?.bankDetails?.bankName || "",
-      };
+      const bankDetails = data?.bankDetails || {};
+
       dispatch(
         addEmployeeDataInfo({
           type: "personalInfo",
@@ -273,7 +267,7 @@ export default function EmployeeStepperForm({
             onBack={onClose}
             onSubmit={onSubmit}
             defaultValues={
-              formData?.personalDetail || 
+              formData?.personalDetail ||
               employeeDetails?.employeeDetails?.personalDetails
               // firstName: employeeDetails?.employeeDetails?.personalDetails?.firstName || "",
             }
@@ -325,7 +319,7 @@ export default function EmployeeStepperForm({
           <SuccessModal
             onClose={onClose}
             setActiveStep={setActiveStep}
-            EmployeeStepperForm={EmployeeStepperForm}
+            fetchEmployee={fetchEmployee}
           />
         );
     }

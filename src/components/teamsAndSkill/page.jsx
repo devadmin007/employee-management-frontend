@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { MenuItem, Box, Stack, Grid, Button, CircularProgress } from "@mui/material";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
 import CommonInput from "../CommonInput";
 import {
   fetchAllDepartments,
@@ -11,24 +10,7 @@ import {
   fetchAllSkills,
   fetchAllTeams,
 } from "@/api";
-
-// Fixed validation schema using Yup
-const schema = yup.object().shape({
-  managerId: yup.string().required("Manager is required"),
-  designationId: yup.string().required("Designation is required"),
-  teamId: yup.string().required("Team Name is required"),
-  department: yup.string().required("Department is required"),
-  primarySkills: yup
-    .array()
-    .of(yup.string())
-    .min(1, "At least one primary skill is required")
-    .required("Primary Skills are required"),
-  secondarySkills: yup
-    .array()
-    .of(yup.string())
-    .min(1, "At least one secondary skill is required")
-    .required("Secondary Skills are required"),
-});
+import teamsAndSkillSchema from "@/schemas/teamsAndSkillSchema";
 
 const TeamsAndSkillTab = ({
   onBack,
@@ -50,14 +32,14 @@ const TeamsAndSkillTab = ({
     reset,
     formState: { errors },
   } = useForm({
-    resolver: yupResolver(schema),
+    resolver: yupResolver(teamsAndSkillSchema),
     defaultValues: {
-      managerId: "",
-      designationId: "",
-      teamId: "",
-      department: "",
-      primarySkills: [],
-      secondarySkills: [],
+      managerId: defaultValues?.managerId || "",
+      designationId: defaultValues?.designationId || "",
+      teamId: defaultValues?.teamId || "",
+      department: defaultValues?.department || "",
+      primarySkills: defaultValues?.primarySkills || [],
+      secondarySkills: defaultValues?.secondarySkills ||[],
     },
   });
 

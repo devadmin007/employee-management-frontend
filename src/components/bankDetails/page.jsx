@@ -2,16 +2,9 @@ import React, { useEffect } from "react";
 import { Box, Stack, Grid, Button, CircularProgress } from "@mui/material";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
 import CommonInput from "../CommonInput";
-
-const schema = yup.object().shape({
-  bankDetails: yup.object().shape({
-    accountNumber: yup.string().required("Account Number is required"),
-    ifscCode: yup.string().required("IFSC Code is required"),
-    branchName: yup.string().required("Branch Name is required"),
-  }),
-});
+import bankSchema from "@/schemas/bankSchema";
+import { bankInfo } from "@/utils/helper";
 
 const BankDetailsTab = ({
   onBack,
@@ -21,18 +14,20 @@ const BankDetailsTab = ({
   isLoading,
 }) => {
 
+  const bankInfoDetails = bankInfo(defaultValues?.bankDetails);
+
   const {
     control,
     handleSubmit,
     setValue,
     formState: { errors },
   } = useForm({
-    resolver: yupResolver(schema),
+    resolver: yupResolver(bankSchema),
     defaultValues: {
       bankDetails: {
-        accountNumber: "",
-        ifscCode: "",
-        branchName: "",
+        accountNumber: bankInfoDetails?.accountNumber || "",
+        ifscCode: bankInfoDetails?.ifscCode || "",
+        branchName: bankInfoDetails?.branchName || "",
       },
     },
   });

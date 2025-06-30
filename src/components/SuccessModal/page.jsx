@@ -6,7 +6,7 @@ import Typography from "@mui/material/Typography";
 import CardContent from "@mui/material/CardContent";
 import Image from "next/image";
 
-const SuccessModal = ({ onClose, setActiveStep, EmployeeStepperForm }) => {
+const SuccessModal = ({ onClose, setActiveStep, fetchEmployee = () => { } }) => {
   const router = useRouter();
   const [seconds, setSeconds] = useState(3);
 
@@ -17,7 +17,7 @@ const SuccessModal = ({ onClose, setActiveStep, EmployeeStepperForm }) => {
           clearInterval(countdown);
           onClose?.();
           setActiveStep?.(0);
-          EmployeeStepperForm?.();
+          fetchEmployee?.()
           router.push("/employee/");
           return 0;
         }

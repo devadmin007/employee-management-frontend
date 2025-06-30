@@ -59,14 +59,14 @@ const PersonalInfoTab = ({
       gender: defaultValues?.gender || "",
       image: defaultValues?.image || null,
       permenentAddress: {
-        street: permenentAddress?.street || "", 
+        street: permenentAddress?.street || "",
         city: permenentAddress?.city || "",
         state: permenentAddress?.state || "",
         zip: permenentAddress?.zip || "",
         country: permenentAddress?.country || "",
       },
       currentAddress: {
-        street: currentAddress?.street || "", 
+        street: currentAddress?.street || "",
         city: currentAddress?.city || "",
         state: currentAddress?.state || "",
         zip: currentAddress?.zip || "",
@@ -366,6 +366,9 @@ const PersonalInfoTab = ({
                     label="Mobile Number"
                     variant="outlined"
                     size="medium"
+                    onChange={(e) => {
+                      field?.onChange(e.target.value.replace(/[^0-9]/g, ''));
+                    }}
                     error={!!errors.phoneNumber}
                     helperText={errors.phoneNumber?.message}
                   />
@@ -384,6 +387,9 @@ const PersonalInfoTab = ({
                     label="Emergency Mobile"
                     variant="outlined"
                     size="medium"
+                    onChange={(e) => {
+                      field?.onChange(e.target.value.replace(/[^0-9]/g, ''));
+                    }}
                     error={!!errors.personalNumber}
                     helperText={errors.personalNumber?.message}
                   />
