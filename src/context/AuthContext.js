@@ -119,7 +119,6 @@ const AuthProvider = ({ children }) => {
   }, [isAuthenticated, roleId, pathname, router]);
 
   const login = (data) => {
-
     localStorage.setItem("token", data?.token);
     localStorage.setItem("roleId", data?.role);
     setIsAuthenticated(true);

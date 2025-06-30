@@ -30,31 +30,28 @@ export const parseAddress = (address) => {
   return defaultAddress;
 };
 
-export const bankInfo = (info) => {
-  const defaultInfo = {
-    accountNumber: "",
-    ifscCode: "",
-    branchName: "",
+export const extractBankDetails = (data) => {
+  if (!data) return { accountNumber: "", ifscCode: "", branchName: "" };
+
+  if (data.bankDetails) {
+    return {
+      accountNumber: data.bankDetails.accountNumber || "",
+      ifscCode: data.bankDetails.ifscCode || "",
+      branchName: data.bankDetails.branchName || "",
+    };
+  }
+
+  if (data["bankDetails[accountNumber]"]) {
+    return {
+      accountNumber: data["bankDetails[accountNumber]"] || "",
+      ifscCode: data["bankDetails[ifscCode]"] || "",
+      branchName: data["bankDetails[branchName]"] || "",
+    };
+  }
+
+  return {
+    accountNumber: data.accountNumber || "",
+    ifscCode: data.ifscCode || "",
+    branchName: data.branchName || "",
   };
-
-  if (!info) {
-    return defaultInfo;
-  }
-
-  // If it's a string, try to parse it as JSON
-  if (typeof info === "string") {
-    try {
-      return JSON.parse(info);
-    } catch (error) {
-      console.error("Error parsing info JSON:", error);
-      return defaultAddress;
-    }
-  }
-
-  if (typeof info === "object" && info !== null) {
-    return info;
-  }
-
-  // Fallback to empty address
-  return defaultInfo;
 };

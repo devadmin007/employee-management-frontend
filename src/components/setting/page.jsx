@@ -24,6 +24,8 @@ const SettingTab = ({
     defaultValues: {
       joiningDate: defaultValues?.joiningDate || "",
       probationDate: defaultValues?.probationDate || "",
+      relieivingDate: defaultValues?.relieivingDate || "",
+      currentSalary: defaultValues?.currentSalary || "",
       panNo: defaultValues?.panNo || "",
       pfNo: defaultValues?.pfNo || "",
       uanDetail: defaultValues?.uanDetail || "",
@@ -49,6 +51,7 @@ const SettingTab = ({
     if (userId && defaultValues) {
       setValue("joiningDate", defaultValues?.joiningDate || "-"),
         setValue("probationDate", defaultValues?.probationDate || "-"),
+        setValue("relieivingDate", defaultValues?.relieivingDate || ""),
         setValue("panNo", defaultValues?.panNo || "-"),
         setValue("pfNo", defaultValues?.pfNo || "-"),
         setValue("uanDetail", defaultValues?.uanDetail || "-"),
@@ -106,6 +109,23 @@ const SettingTab = ({
                     }}
                     error={!!errors.probationDate}
                     helperText={errors.probationDate?.message}
+                  />
+                )}
+              />
+            </Grid>
+
+            <Grid item size={{ xs: 12, md: 6 }}>
+              <Controller
+                name="currentSalary"
+                control={control}
+                render={({ field }) => (
+                  <CommonInput
+                    {...field}
+                    fullWidth
+                    label="Current Salary"
+                    variant="outlined"
+                    error={!!errors.currentSalary}
+                    helperText={errors.currentSalary?.message}
                   />
                 )}
               />

@@ -4,7 +4,7 @@ import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import CommonInput from "../CommonInput";
 import bankSchema from "@/schemas/bankSchema";
-import { bankInfo } from "@/utils/helper";
+import { extractBankDetails } from "@/utils/helper";
 
 const BankDetailsTab = ({
   onBack,
@@ -14,8 +14,6 @@ const BankDetailsTab = ({
   isLoading,
 }) => {
 
-  const bankInfoDetails = bankInfo(defaultValues?.bankDetails);
-
   const {
     control,
     handleSubmit,
@@ -24,11 +22,7 @@ const BankDetailsTab = ({
   } = useForm({
     resolver: yupResolver(bankSchema),
     defaultValues: {
-      bankDetails: {
-        accountNumber: bankInfoDetails?.accountNumber || "",
-        ifscCode: bankInfoDetails?.ifscCode || "",
-        branchName: bankInfoDetails?.branchName || "",
-      },
+      bankDetails: extractBankDetails(defaultValues),
     },
   });
 
@@ -47,9 +41,10 @@ const BankDetailsTab = ({
 
   useEffect(() => {
     if (userId && defaultValues) {
-      setValue("bankDetails.accountNumber", defaultValues?.accountNumber || "")
-      setValue("bankDetails.ifscCode", defaultValues?.ifscCode || "")
-      setValue("bankDetails.branchName", defaultValues?.branchName || "")
+      const bankDetails = extractBankDetails(defaultValues);
+      setValue("bankDetails.accountNumber", bankDetails?.accountNumber || "")
+      setValue("bankDetails.ifscCode", bankDetails?.ifscCode || "")
+      setValue("bankDetails.branchName", bankDetails?.branchName || "")
     }
   }, [userId, defaultValues])
 

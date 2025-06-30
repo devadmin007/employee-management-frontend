@@ -56,6 +56,8 @@ const PersonalInfoTab = ({
       phoneNumber: defaultValues?.phoneNumber || "",
       personalNumber: defaultValues?.personalNumber || "",
       dateOfBirth: defaultValues?.dateOfBirth || "",
+      email: defaultValues?.email || "",
+      personalEmail: defaultValues?.personalEmail || "",
       gender: defaultValues?.gender || "",
       image: defaultValues?.image || null,
       permenentAddress: {
@@ -159,6 +161,8 @@ const PersonalInfoTab = ({
       setValue("personalNumber", defaultValues?.personalNumber || "");
       setValue("dateOfBirth", defaultValues?.dateOfBirth || "");
       setValue("gender", defaultValues?.gender || "male");
+      setValue("email", defaultValues?.email || "");
+      setValue("personalEmail", defaultValues?.personalEmail || "");
 
       // Parse permanent address
       const permanentAddress = parseAddress(defaultValues?.permenentAddress);
@@ -392,6 +396,44 @@ const PersonalInfoTab = ({
                     }}
                     error={!!errors.personalNumber}
                     helperText={errors.personalNumber?.message}
+                  />
+                )}
+              />
+            </Grid>
+
+            <Grid item size={{ xs: 12, md: 6 }}>
+              <Controller
+                name="email"
+                control={control}
+                render={({ field }) => (
+                  <CommonInput
+                    {...field}
+                    fullWidth
+                    label="Email Address"
+                    variant="outlined"
+                    type="email"
+                    useBuiltInLabel={true}
+                    error={!!errors.email}
+                    helperText={errors.email?.message}
+                  />
+                )}
+              />
+            </Grid>
+
+            <Grid item size={{ xs: 12, md: 6 }}>
+              <Controller
+                name="personalEmail"
+                control={control}
+                render={({ field }) => (
+                  <CommonInput
+                    {...field}
+                    fullWidth
+                    label="Personal Email Address"
+                    variant="outlined"
+                    type="email"
+                    useBuiltInLabel={true}
+                    error={!!errors.personalEmail}
+                    helperText={errors.personalEmail?.message}
                   />
                 )}
               />
