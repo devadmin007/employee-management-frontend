@@ -10,6 +10,7 @@ import CommonDeleteModal from "@/components/CommonDelete";
 import CommonTable from "@/components/CommonTable";
 import AddLeave from "@/components/leave/AddLeaveModal";
 import {
+  approveLeave,
   createLeaveApi,
   deleteLeaveApi,
   getAllLeaveApi,
@@ -17,8 +18,11 @@ import {
   updateLeaveApi,
 } from "@/api";
 import { toast } from "react-toastify";
+import { useSelector } from "react-redux";
+import { Chip } from "@mui/material";
 
 const Page = () => {
+  const user = useSelector((state) => state.auth.userData);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [deleteId, setDeleteId] = useState("");
@@ -37,6 +41,28 @@ const Page = () => {
   const [rows, setRows] = useState([]);
   const [totalCount, setTotalCount] = useState(0); // Total records count
   const [totalPages, setTotalPages] = useState(1); // Total pages
+  console.log("=>user", user);
+
+  useEffect(() => {
+    getLeave();
+  }, [page, search, limit]);
+
+  const handleStatusChange = async (id, status) => {
+    try {
+      let obj = {
+        status: status,
+      };
+      console.log(obj);
+      const response = await approveLeave(id, obj);
+      console.log(response);
+      if (response?.data?.status === "success") {
+        getLeave();
+        toast.success(response?.data?.message);
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  };
 
   const columns = [
     {
@@ -73,7 +99,111 @@ const Page = () => {
 
     { field: "leave_type", headerName: "Leave Type", flex: 1, minWidth: 140 },
 
-    { field: "status", headerName: "Status", flex: 1, minWidth: 140 },
+    // {
+    //   field: "status",
+    //   headerName: "Status",
+    //   flex: 1,
+    //   minWidth: 160,
+    //   renderCell: (params) => {
+    //     const status = params.row.status;
+    //     const id = params.row._id;
+
+    //     if (
+    //       (user?.role === "PROJECT_MANAGER" ||
+    //         user?.role === "ADMIN" ||
+    //         user?.role === "HR") &&
+    //       status === "PENDING"
+    //     ) {
+    //       return (
+    //         <Stack direction="row" spacing={1}>
+    //           <Tooltip title="Approve">
+    //             <IconButton
+    //               color="success"
+    //               onClick={() => handleStatusChange(id, "APPROVED")}
+    //               size="small"
+    //             >
+    //               ✅
+    //             </IconButton>
+    //           </Tooltip>
+    //           <Tooltip title="Reject">
+    //             <IconButton
+    //               color="error"
+    //               onClick={() => handleStatusChange(id, "REJECT")}
+    //               size="small"
+    //             >
+    //               ❌
+    //             </IconButton>
+    //           </Tooltip>
+    //         </Stack>
+    //       );
+    //     }
+
+    //     return <Typography>{status}</Typography>;
+    //   },
+    // },
+    {
+      field: "status",
+      headerName: "Status",
+      flex: 1,
+      minWidth: 160,
+      renderCell: (params) => {
+        const status = params.row.status;
+        const id = params.row._id;
+
+        const getColor = (status) => {
+          switch (status) {
+            case "APPROVED":
+              return "success";
+            case "REJECT":
+              return "error";
+            case "PENDING":
+              return "warning";
+            default:
+              return "default";
+          }
+        };
+
+        if (
+          (user?.role === "PROJECT_MANAGER" ||
+            user?.role === "ADMIN" ||
+            user?.role === "HR") &&
+          status === "PENDING"
+        ) {
+          return (
+            <Stack direction="row" spacing={1}>
+              <Tooltip title="Approve">
+                <IconButton
+                  color="success"
+                  onClick={() => handleStatusChange(id, "APPROVED")}
+                  size="small"
+                >
+                  ✅
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Reject">
+                <IconButton
+                  color="error"
+                  onClick={() => handleStatusChange(id, "REJECTED")}
+                  size="small"
+                >
+                  ❌
+                </IconButton>
+              </Tooltip>
+            </Stack>
+          );
+        }
+
+        return (
+          <Chip
+            label={status}
+            color={getColor(status)}
+            variant="outlined"
+            sx={{ fontWeight: 600, width: "110px" }}
+          />
+        );
+      },
+    },
+
     {
       field: "approver_full_name",
       headerName: "Approver",
@@ -112,14 +242,17 @@ const Page = () => {
     },
   ];
 
-  useEffect(() => {
-    getLeave();
-  }, [page, search, limit]);
-
   const getLeave = async () => {
     setIsLoading(true);
     try {
-      const result = await getAllLeaveApi(page, limit, search);
+      const role = user?.role;
+      const result = await getAllLeaveApi(
+        page,
+        limit,
+        search,
+        (role === "PROJECT_MANAGER" || role === "ADMIN" || role === "HR") &&
+          "REQUESTED"
+      );
       console.log(result);
       if (result?.data?.status === "success") {
         setRows(result.data.data.data);

@@ -22,8 +22,8 @@ const AuthProvider = ({ children }) => {
     "/salary",
     "/customizations",
   ];
-  const allowedRoutesRole2 = [ "/leave", "/employee", "/holidays","/salary"];
-  const allowedRoutesRole3 = [ "/leave", "/employee", "/holidays","/salary"];
+  const allowedRoutesRole2 = ["/leave", "/holidays", "/salary"];
+  const allowedRoutesRole3 = ["/leave", "/holidays", "/salary"];
 
   // Define public routes that don't require authentication
   const publicRoutes = ["/login", "/signup"];
@@ -119,7 +119,6 @@ const AuthProvider = ({ children }) => {
   }, [isAuthenticated, roleId, pathname, router]);
 
   const login = (data) => {
-
     localStorage.setItem("token", data?.token);
     localStorage.setItem("roleId", data?.role);
     setIsAuthenticated(true);

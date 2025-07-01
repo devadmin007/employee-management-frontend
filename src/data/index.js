@@ -18,7 +18,7 @@ export const sidemenu_items = [
   {
     label: "Salary",
     to: "/salary",
-    icon: "/icons/holiday.svg",
+    icon: "/icons/give-money.svg",
   },
   {
     label: "Customizations",
