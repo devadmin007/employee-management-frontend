@@ -204,7 +204,7 @@ const Page = () => {
               <Tooltip title="Reject">
                 <IconButton
                   color="error"
-                  onClick={() => handleStatusChange(id, "REJECTED")}
+                  onClick={() => handleStatusChange(id, "REJECT")}
                   size="small"
                 >
                   ❌
@@ -592,7 +592,7 @@ const Page = () => {
         noDataMessage=""
         showSearch={true}
         showActionButton={true}
-        actionButtonText="Add Leave"
+        actionButtonText="Apply Leave"
         onActionClick={handleClickOpen}
         // Pagination props
         rowsPerPage={limit}

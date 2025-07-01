@@ -12,6 +12,7 @@ import { DataGrid } from "@mui/x-data-grid";
 import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";
 import CommonPagination from "../CommonPagination";
+import { useSelector } from "react-redux";
 
 const CommonTable = ({
   rows,
@@ -41,6 +42,9 @@ const CommonTable = ({
 }) => {
   const [localSearchValue, setLocalSearchValue] = useState(searchValue);
   const [searchTimer, setSearchTimer] = useState(null);
+
+  const roleId = useSelector((state) => state?.auth?.userData?.role);
+  console.log("ROLE ID:", roleId);
 
   useEffect(() => {
     setLocalSearchValue(searchValue);
@@ -146,6 +150,7 @@ const CommonTable = ({
           )}
 
           {showActionButton &&
+            roleId !== "ADMIN" &&
             (actionButton || (
               <Box sx={{ width: { xs: "100%", sm: "auto" } }}>
                 <Button
