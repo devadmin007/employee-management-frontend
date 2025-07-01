@@ -80,7 +80,7 @@ const Page = () => {
       minWidth: 140,
       renderCell: (params) => {
         const date = new Date(params.value);
-        return <Typography>{date.toLocaleDateString()}</Typography>;
+        return <Typography sx={{my:2 }}>{date.toLocaleDateString()}</Typography>;
       },
     },
     {

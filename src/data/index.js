@@ -23,7 +23,7 @@ export const sidemenu_items = [
   {
     label: "Customizations",
     to: "/customizations/teams",
-    icon: "/icons/Customizations.svg",
+    icon: "/icons/customizations.svg",
   },
 ];
 

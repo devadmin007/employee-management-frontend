@@ -81,7 +81,11 @@ const Page = () => {
       minWidth: 140,
       renderCell: (params) => {
         const date = new Date(params.value);
-        return <Typography>{moment(date).format("DD/MM/YYYY")}</Typography>;
+        return (
+          <Typography sx={{ my: 2 }}>
+            {moment(date).format("DD/MM/YYYY")}
+          </Typography>
+        );
       },
     },
     {
@@ -237,9 +241,7 @@ const Page = () => {
   const updateDesignationData = async (data) => {
     // Check if the data has actually changed
     if (data.designation.trim() === originalDesignationValue.trim()) {
-      toast.warning(
-        "No changes detected. "
-      );
+      toast.warning("No changes detected. ");
       return;
     }
     setIsUpdating(true);
