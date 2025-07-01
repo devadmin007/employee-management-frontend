@@ -13,7 +13,9 @@ import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { useDispatch } from "react-redux";
 import { setUserData } from "@/redux/slice/authSlice";
-import { Stack } from "@mui/material";
+import { Stack, InputAdornment, IconButton } from "@mui/material";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import { useAuth } from "@/hooks/useAuth";
 
 const loginSchema = yup.object().shape({
@@ -52,6 +54,9 @@ const Login = () => {
   const { login } = useAuth();
   const router = useRouter();
   const dispatch = useDispatch();
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
   const {
     control,
     handleSubmit,
@@ -63,7 +68,6 @@ const Login = () => {
     },
     resolver: yupResolver(loginSchema),
   });
-  const [isLoading, setIsLoading] = useState(false);
 
   const onSubmit = async (data) => {
     setIsLoading(true);
@@ -73,9 +77,6 @@ const Login = () => {
         dispatch(setUserData(response?.data?.data));
         login(response?.data?.data);
         router.push("/employee");
-        // console.log(response?.data?.data);
-        // localStorage.setItem("token", response?.data?.data?.token);
-        // toast.success(response.data.message);
       }
     } catch (e) {
       console.log(e);
@@ -115,6 +116,7 @@ const Login = () => {
         >
           Welcome user, please login to continue
         </Typography>
+
         <form onSubmit={handleSubmit(onSubmit)}>
           <Box sx={{ my: 3 }}>
             <Box sx={{ mt: 1, width: "100%" }}>
@@ -126,7 +128,7 @@ const Login = () => {
                   <TextField
                     {...field}
                     variant="outlined"
-                    placeholder="Enter User Name"
+                    placeholder="Enter Email"
                     fullWidth
                     error={Boolean(errors.email)}
                     helperText={errors.email?.message}
@@ -145,15 +147,28 @@ const Login = () => {
                   <TextField
                     {...field}
                     placeholder="Enter Password"
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     variant="outlined"
                     fullWidth
                     error={Boolean(errors.password)}
                     helperText={errors.password?.message}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton
+                            onClick={() => setShowPassword((prev) => !prev)}
+                            edge="end"
+                          >
+                            {showPassword ? <VisibilityOff /> : <Visibility />}
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    }}
                   />
                 )}
               />
             </Box>
+
             <Stack
               direction={"row"}
               spacing={1}
@@ -173,7 +188,7 @@ const Login = () => {
 
           <Box sx={{ textAlign: "center" }}>
             <Button
-              loading={isLoading}
+              disabled={isLoading}
               type="submit"
               variant="contained"
               sx={{
@@ -188,9 +203,8 @@ const Login = () => {
                   "linear-gradient(90deg, rgb(239, 131, 29) 0%, rgb(245, 134, 55) 27%, rgb(244, 121, 56) 100%)",
                 textTransform: "none",
               }}
-              // onClick={handleLogin}
             >
-              Login
+              {isLoading ? "Logging in..." : "Login"}
             </Button>
           </Box>
         </form>

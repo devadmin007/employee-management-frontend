@@ -51,7 +51,7 @@ const SidebarMenuContainerItem = styled(Link, {
   shouldForwardProp: (prop) => prop !== "active",
 })(({ theme, active }) => ({
   color: "white",
-  backgroundColor: active ? "orange" : "#15283C",
+  backgroundColor: active ? "#F58238" : "#15283C",
   textDecoration: "none",
   height: "55px",
   fontSize: "20px",
@@ -62,10 +62,10 @@ const SidebarMenuContainerItem = styled(Link, {
   paddingLeft: theme.spacing(1),
   paddingRight: theme.spacing(1),
   borderRadius: 8,
-  minWidth:'200px',
+  minWidth: "200px",
   transition: "all 0.3s ease",
   "&:hover": {
-    backgroundColor: active ? "orange" : "#173351",
+    backgroundColor: active ? "#F58238" : "#173351",
     color: "white",
   },
   [theme.breakpoints.down("md")]: {
@@ -90,7 +90,7 @@ const Sidebar = ({ onClose }) => {
       return sidemenu_items;
     } else if (roleId === "EMPLOYEE" || roleId === "PROJECT_MANAGER") {
       return sidemenu_items.filter((item) =>
-        [ "Leave", "Holidays","Salary"].includes(item.label)
+        ["Leave", "Holidays", "Salary"].includes(item.label)
       );
     }
     return [];
@@ -123,7 +123,6 @@ const Sidebar = ({ onClose }) => {
                 height={22}
                 width={22}
                 alt={`${item.label} icon`}
-                
               />
             )}
             <SidebarMenuContainerItemText>
