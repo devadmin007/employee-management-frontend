@@ -83,10 +83,18 @@ const AuthProvider = ({ children }) => {
       pathname.startsWith(route)
     );
 
+    // If user is not authenticated and trying to access protected routes
     if (!isAuthenticated && !isLoading && !isPublicRoute) {
       router.replace("/login");
     }
-  }, [isAuthenticated, isLoading, pathname, router]);
+
+    // If user is authenticated and trying to access public routes (login/signup)
+    if (isAuthenticated && !isLoading && isPublicRoute) {
+      const defaultRoute = getDefaultRouteForRole(roleId);
+      router.replace(defaultRoute);
+      return;
+    }
+  }, [isAuthenticated, isLoading, pathname, router, roleId]);
 
   useEffect(() => {
     // Check if current route is public

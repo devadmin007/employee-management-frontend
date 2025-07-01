@@ -87,6 +87,7 @@ const Page = () => {
 
   const handleClickOpen = () => {
     dispatch(clearEmployeeData());
+    setEmployeeId("");
     setFormData({})
     setOpen(true);
   }
@@ -123,6 +124,12 @@ const Page = () => {
   useEffect(() => {
     fetchEmployee();
   }, [page, limit, searchQuery]);
+
+  useEffect(() => {
+    if (open === false) {
+      fetchEmployee();
+    }
+  }, [open]);
 
   return (
     <Stack sx={{ p: 4 }}>

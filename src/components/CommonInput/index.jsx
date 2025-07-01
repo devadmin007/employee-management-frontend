@@ -16,8 +16,10 @@ const CommonInput = ({
   containerProps = {},
   useBuiltInLabel = false,
   disable = false,
+  children,
   ...props
 }) => {
+  const hasChildren = React.Children.count(children) > 0;
   return (
     <Box {...containerProps}>
       <TextField
@@ -29,6 +31,7 @@ const CommonInput = ({
         error={error}
         helperText={helperText}
         disabled={disable}
+        select={hasChildren}
         {...props}
         sx={{
           "& .MuiOutlinedInput-notchedOutline": {
@@ -36,7 +39,9 @@ const CommonInput = ({
           },
           ...props?.sx,
         }}
-      />
+      >
+        {children}
+      </TextField>
     </Box>
   );
 };

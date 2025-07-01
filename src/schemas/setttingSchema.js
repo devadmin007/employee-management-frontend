@@ -17,7 +17,17 @@ const settingSchema = yup.object().shape({
       const date = new Date(value);
       return date instanceof Date && !isNaN(date.getTime());
     }),
-  panNo: yup.string().required("Probation Date is required"),
+  // relievingDate: yup
+  //   .string()
+  //   .nullable()
+  //   .notRequired()
+  //   .test("is-date", "Invalid date format", (value) => {
+  //     if (!value) return true;
+  //     const date = new Date(value);
+  //     return date instanceof Date && !isNaN(date.getTime());
+  //   }),
+  currentSalary: yup.string().required("Current Salary is requierd"),
+  panNo: yup.string().required("Pan Number is required"),
   uanDetail: yup.string().nullable(),
   pfNo: yup.string().nullable(),
   uanDetail: yup.string().nullable(),

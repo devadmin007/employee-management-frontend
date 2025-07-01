@@ -23,6 +23,16 @@ const personalInfoSchema = yup.object().shape({
   role: yup.string().required("Role is required"),
   firstName: yup.string().required("First Name is required"),
   lastName: yup.string().required("Last Name is required"),
+  email: yup
+    .string()
+    .email("Invalid email format")
+    .matches(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Invalid email format")
+    .required("Email is required"),
+  personalEmail: yup
+    .string()
+    .email("Invalid email format")
+    .matches(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Invalid email format")
+    .required("PersonalEmail is required"),
   phoneNumber: yup
     .string()
     .required("Phone Number is required")
@@ -61,6 +71,5 @@ const personalInfoSchema = yup.object().shape({
     country: yup.string().required("Country is required"),
   }),
 });
-
 
 export default personalInfoSchema;

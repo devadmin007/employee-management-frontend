@@ -32,24 +32,22 @@ export default function EmployeeStepperForm({
   open,
   onClose,
   userId = null,
-  fetchEmployee = () => { },
+  fetchEmployee = () => {},
   formData = {},
-  setFormData = () => { }
+  setFormData = () => {},
 }) {
-
   const dispatch = useDispatch();
   const employeeDetails = useSelector((state) => state.employeeData);
 
   const [activeStep, setActiveStep] = useState(0);
   const [empId, setEmpId] = useState(null);
+
   const [isBack, setIsBack] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  // const [formData, setFormData] = useState({});
-  const mode = !userId ? "create" : "update";
-  if (activeStep > 3) {
-    fetchEmployee();
-  }
-
+  const [mode, setMode] = useState(!userId ? "create" : "update");
+  // if (activeStep > 3) {
+  //   fetchEmployee();
+  // }
 
   const handleNext = () => {
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -126,7 +124,7 @@ export default function EmployeeStepperForm({
             await handleDispatchAction(
               plainData,
               "settingInfo",
-              "settingDetails",
+              "settingDetail",
               mode
             );
             break;
@@ -143,7 +141,7 @@ export default function EmployeeStepperForm({
         }
       }
     } else if (mode === "update") {
-      data.append("userId", userId);
+      data.append("userId", userId === null ? empId : userId);
       if (activeStep === 0) {
         await handleDispatchAction(
           plainData,
@@ -165,7 +163,7 @@ export default function EmployeeStepperForm({
             await handleDispatchAction(
               plainData,
               "settingInfo",
-              "settingDetails",
+              "settingDetail",
               mode
             );
             break;
@@ -184,10 +182,50 @@ export default function EmployeeStepperForm({
     }
 
     setIsLoading(false);
-    setFormData((prevData) => ({
-      ...prevData,
-      [stepKeys[activeStep]]: Object.fromEntries(data.entries()),
-    }));
+    setFormData((prevData) => {
+      const plainData = {};
+
+      for (const [key, value] of data.entries()) {
+        const isArrayField = key.endsWith("[]");
+        const cleanKey = isArrayField ? key.slice(0, -2) : key;
+
+        // Check for nested structure like bankDetails[accountNumber]
+        const nestedMatch = cleanKey.match(/^([^\[]+)\[([^\]]+)\]$/);
+
+        if (nestedMatch) {
+          // This is a nested field (e.g., bankDetails[accountNumber])
+          const parentKey = nestedMatch[1];
+          const childKey = nestedMatch[2];
+
+          if (!plainData[parentKey]) {
+            plainData[parentKey] = {};
+          }
+
+          plainData[parentKey][childKey] = value;
+        }
+        else if (isArrayField) {
+          if (!plainData[cleanKey]) {
+            plainData[cleanKey] = [];
+          }
+          plainData[cleanKey].push(value);
+        }
+        else {
+          if (plainData.hasOwnProperty(cleanKey)) {
+            if (!Array.isArray(plainData[cleanKey])) {
+              plainData[cleanKey] = [plainData[cleanKey]];
+            }
+            plainData[cleanKey].push(value);
+          } else {
+            plainData[cleanKey] = value;
+          }
+        }
+      }
+
+      return {
+        ...prevData,
+        [stepKeys[activeStep]]: plainData,
+      };
+    });
     setActiveStep((prevStep) => prevStep + 1);
   };
 
@@ -201,10 +239,11 @@ export default function EmployeeStepperForm({
         firstName: data?.firstName,
         lastName: data?.lastName,
         image: data?.image,
+        email: data?.email,
+        personalEmail: data?.personalEmail,
         phoneNumber: data?.userDetails?.phoneNumber,
         personalNumber: data?.userDetails?.personalNumber,
-        // dateOfBirth: moment(data?.userDetails?.joiningDate).format("MM/DD/YYYY") || "",
-        dateOfBirth: new Date(data?.userDetails?.joiningDate).toLocaleDateString(),
+        dateOfBirth: moment(data?.userDetails?.dateOfBirth).format("YYYY-MM-DD") || "",
         gender: data?.userDetails?.gender || "Male",
         permenentAddress: data?.userDetails?.permenentAddress || "",
         currentAddress: data?.userDetails?.currentAddress || "",
@@ -220,40 +259,40 @@ export default function EmployeeStepperForm({
       };
 
       const settingDetails = {
-        joiningDate: data?.userDetails?.joiningDate || "",
-        probationDate: data?.userDetails?.probationDate || "",
+        joiningDate: moment(data?.userDetails?.joiningDate).format("YYYY-MM-DD") || "",
+        probationDate: moment(data?.userDetails?.probationDate).format("YYYY-MM-DD") || "",
+        relieivingDate: moment(data?.userDetails?.relieivingDate).format("YYYY-MM-DD") || "",
         panNo: data?.userDetails?.panNo || "",
         pfNo: data?.userDetails?.pfNo || "",
         uanDetail: data?.userDetails?.uanDetail || "",
         previousExperience: data?.userDetails?.previousExperience || "",
+        currentSalary: data?.userDetails?.currentSalary || "",
       };
 
-      const bankDetails = data?.bankDetails || {};
+      const bankDetails = {
+        accountNumber: data?.userDetails?.bankDetails?.accountNumber || "",
+        branchName: data?.userDetails?.bankDetails?.branchName || "",
+        ifscCode: data?.userDetails?.bankDetails?.ifscCode || "",
+      };
 
-      dispatch(
-        addEmployeeDataInfo({
-          type: "personalInfo",
-          personalDetail: personalDetails,
-        })
-      );
-      dispatch(
-        addEmployeeDataInfo({
-          type: "teamAndSkillInfo",
-          teamAndSkillDetail: teamAndSkillDetails,
-        })
-      );
-      dispatch(
-        addEmployeeDataInfo({
-          type: "settingInfo",
-          settingDetail: settingDetails,
-        })
-      );
-      dispatch(
-        addEmployeeDataInfo({
-          type: "bankInfo",
-          bankDetail: bankDetails,
-        })
-      );
+      const dataSections = [
+        { type: "personalInfo", key: "personalDetail", data: personalDetails },
+        { type: "teamAndSkillInfo", key: "teamAndSkillDetail", data: teamAndSkillDetails },
+        { type: "settingInfo", key: "settingDetail", data: settingDetails },
+        { type: "bankInfo", key: "bankDetail", data: bankDetails },
+      ];
+
+      // Dispatch all actions in one loop
+      dataSections.forEach(({ type, key, data }) => {
+        dispatch(addEmployeeDataInfo({ type, [key]: data }));
+      });
+
+      setFormData({
+        personalDetail: personalDetails,
+        teamAndSkillDetail: teamAndSkillDetails,
+        settingDetail: settingDetails,
+        bankDetail: bankDetails,
+      });
     } catch (error) {
       console.log("error", error);
     }
@@ -326,9 +365,17 @@ export default function EmployeeStepperForm({
   };
 
   useEffect(() => {
-    if (!userId) return;
-    fetchEmployeeById(userId);
+    setMode(!userId ? "create" : "update");
+    if (userId){
+      fetchEmployeeById(userId);
+    }
   }, [userId]);
+
+  useEffect(() => {
+  if (isBack) {
+    setMode("update");
+  }
+}, [isBack]);
 
   return (
     <Dialog
