@@ -3,7 +3,19 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { IconButton, Stack, Tooltip, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  FormControl,
+  IconButton,
+  InputLabel,
+  MenuItem,
+  Select,
+  Stack,
+  TextField,
+  Tooltip,
+  Typography,
+} from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CommonDeleteModal from "@/components/CommonDelete";
@@ -20,6 +32,10 @@ import {
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import { Chip } from "@mui/material";
+import { Grid, useMediaQuery, useTheme } from "@mui/material";
+import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import dayjs from "dayjs";
 
 const Page = () => {
   const user = useSelector((state) => state.auth.userData);
@@ -43,9 +59,17 @@ const Page = () => {
   const [totalPages, setTotalPages] = useState(1); // Total pages
   console.log("=>user", user);
 
+  const [statusFilter, setStatusFilter] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+  const isActionAllowed = user?.role !== "EMPLOYEE" || status === "PENDING";
+
   useEffect(() => {
     getLeave();
-  }, [page, search, limit]);
+  }, [page, search, limit, statusFilter, startDate, endDate]);
 
   const handleStatusChange = async (id, status) => {
     try {
@@ -83,7 +107,11 @@ const Page = () => {
       minWidth: 140,
       renderCell: (params) => {
         const date = new Date(params.value);
-        return <Typography>{date.toLocaleDateString()}</Typography>;
+        return (
+          <Typography sx={{ textAlign: "center", my: 2 }}>
+            {date.toLocaleDateString("en-GB")}
+          </Typography>
+        );
       },
     },
     {
@@ -91,56 +119,49 @@ const Page = () => {
       headerName: "Leave Date",
       flex: 1,
       minWidth: 140,
+
       renderCell: (params) => {
         const date = new Date(params.value);
-        return <Typography>{date.toLocaleDateString()}</Typography>;
+        return (
+          <Typography sx={{ textAlign: "center", my: 2 }}>
+            {date.toLocaleDateString("en-GB")}
+          </Typography>
+        );
       },
     },
 
-    { field: "leave_type", headerName: "Leave Type", flex: 1, minWidth: 140 },
+    {
+      field: "leave_type",
+      headerName: "Leave Type",
+      flex: 1,
+      minWidth: 140,
+      renderCell: (params) => {
+        const type = params.value?.toUpperCase(); // Ensure it's uppercase
+        let chipProps = {
+          label: type,
+          variant: "outlined",
+          sx: { fontWeight: 600, width: "120px" },
+        };
 
-    // {
-    //   field: "status",
-    //   headerName: "Status",
-    //   flex: 1,
-    //   minWidth: 160,
-    //   renderCell: (params) => {
-    //     const status = params.row.status;
-    //     const id = params.row._id;
+        switch (type) {
+          case "FULL_DAY":
+            chipProps.color = "error"; // red
+            break;
+          case "FIRST_HALF":
+            chipProps.color = "warning"; // orange
+            break;
+          case "SECOND_HALF":
+            chipProps.color = "info"; // blue
+            break;
+          default:
+            chipProps.color = "default";
+            chipProps.label = type || "-";
+        }
 
-    //     if (
-    //       (user?.role === "PROJECT_MANAGER" ||
-    //         user?.role === "ADMIN" ||
-    //         user?.role === "HR") &&
-    //       status === "PENDING"
-    //     ) {
-    //       return (
-    //         <Stack direction="row" spacing={1}>
-    //           <Tooltip title="Approve">
-    //             <IconButton
-    //               color="success"
-    //               onClick={() => handleStatusChange(id, "APPROVED")}
-    //               size="small"
-    //             >
-    //               ✅
-    //             </IconButton>
-    //           </Tooltip>
-    //           <Tooltip title="Reject">
-    //             <IconButton
-    //               color="error"
-    //               onClick={() => handleStatusChange(id, "REJECT")}
-    //               size="small"
-    //             >
-    //               ❌
-    //             </IconButton>
-    //           </Tooltip>
-    //         </Stack>
-    //       );
-    //     }
+        return <Chip {...chipProps} />;
+      },
+    },
 
-    //     return <Typography>{status}</Typography>;
-    //   },
-    // },
     {
       field: "status",
       headerName: "Status",
@@ -212,58 +233,127 @@ const Page = () => {
     },
     { field: "comments", headerName: "Notes", flex: 1, minWidth: 140 },
 
-    {
+    // {
+    //   field: "actions",
+    //   headerName: "Actions",
+    //   width: 120,
+    //   sortable: false,
+    //   renderCell: (params) => {
+    //     const status = params.row.status;
+    //     const isActionAllowed =
+    //       status === "PENDING" || user?.role !== "EMPLOYEE"; // Only allow delete/edit if PENDING or user is not EMPLOYEE
+
+    //     if (!isActionAllowed) {
+    //       return <Typography sx={{ pl: 4 }}>-</Typography>;
+    //     }
+
+    //     return (
+    //       <Stack direction="row" spacing={1}>
+    //         <Tooltip title="Edit Leave">
+    //           <IconButton
+    //             color="primary"
+    //             onClick={() =>
+    //               handleClickOpenDialogForFormToEditTeam(params?.id)
+    //             }
+    //             size="small"
+    //           >
+    //             <EditIcon sx={{ color: "#1976D2" }} />
+    //           </IconButton>
+    //         </Tooltip>
+    //         <Tooltip title="Cancel Leave">
+    //           <IconButton
+    //             color="error"
+    //             onClick={() => handleClickOpenDialog(params?.id)}
+    //             size="small"
+    //           >
+    //             <DeleteIcon sx={{ color: "#d32f2f" }} />
+    //           </IconButton>
+    //         </Tooltip>
+    //       </Stack>
+    //     );
+    //   },
+    // },
+  ];
+
+  if (user?.role !== "ADMIN") {
+    columns.push({
       field: "actions",
       headerName: "Actions",
       width: 120,
       sortable: false,
-      renderCell: (params) => (
-        <Stack direction="row" spacing={1}>
-          <Tooltip title="Edit Leave">
-            <IconButton
-              color="primary"
-              onClick={() => handleClickOpenDialogForFormToEditTeam(params?.id)}
-              size="small"
-            >
-              <EditIcon sx={{ color: "#1976D2" }} />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="cancel leave">
-            <IconButton
-              color="error"
-              onClick={() => handleClickOpenDialog(params?.id)}
-              size="small"
-            >
-              <DeleteIcon sx={{ color: "#d32f2f" }} />
-            </IconButton>
-          </Tooltip>
-        </Stack>
-      ),
-    },
-  ];
+      renderCell: (params) => {
+        const status = params.row.status;
+        const isEmployee = user?.role === "EMPLOYEE";
+        const isHRorPM =
+          user?.role === "HR" || user?.role === "PROJECT_MANAGER";
+
+        // EMPLOYEE: can edit/delete only if status is PENDING
+        if (isEmployee) {
+          if (status !== "PENDING") {
+            return <Typography sx={{ pl: 4 }}>-</Typography>;
+          }
+
+          return (
+            <Stack direction="row" spacing={1}>
+              <Tooltip title="Edit Leave">
+                <IconButton
+                  color="primary"
+                  onClick={() =>
+                    handleClickOpenDialogForFormToEditTeam(params?.id)
+                  }
+                  size="small"
+                >
+                  <EditIcon sx={{ color: "#1976D2" }} />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Cancel Leave">
+                <IconButton
+                  color="error"
+                  onClick={() => handleClickOpenDialog(params?.id)}
+                  size="small"
+                >
+                  <DeleteIcon sx={{ color: "#d32f2f" }} />
+                </IconButton>
+              </Tooltip>
+            </Stack>
+          );
+        }
+
+        // HR or PM: no edit/delete access — show dash
+        if (isHRorPM) {
+          return <Typography sx={{ pl: 4 }}>-</Typography>;
+        }
+
+        // Default for safety — no actions
+        return null;
+      },
+    });
+  }
 
   const getLeave = async () => {
     setIsLoading(true);
     try {
       const role = user?.role;
+      const roleFilter =
+        role === "PROJECT_MANAGER" || role === "ADMIN" || role === "HR"
+          ? "REQUESTED"
+          : "";
+
       const result = await getAllLeaveApi(
         page,
         limit,
         search,
-        (role === "PROJECT_MANAGER" || role === "ADMIN" || role === "HR") &&
-          "REQUESTED"
+        roleFilter,
+        statusFilter,
+        startDate && endDate ? startDate : "", // only pass if both present
+        startDate && endDate ? endDate : ""
       );
-      console.log(result);
+
       if (result?.data?.status === "success") {
         setRows(result.data.data.data);
-
-        // Get totalCount from API response
         const totalCount = result.data.data.totalCount;
         setTotalCount(totalCount);
-
-        // Calculate total pages based on totalCount and limit
-        const calculatedTotalPages = Math.ceil(totalCount / limit);
-        setTotalPages(calculatedTotalPages);
+        setTotalPages(Math.ceil(totalCount / limit));
       }
     } catch (e) {
       console.error(e);
@@ -393,6 +483,99 @@ const Page = () => {
     setOpenAddLeaveModal(false);
   };
 
+  const leaveFilters = (
+    <Box sx={{ mt: 2, width: "100%" }}>
+      <LocalizationProvider dateAdapter={AdapterDayjs}>
+        <Grid container spacing={2}>
+          <Grid item xs={12} sm={6} md={3}>
+            <FormControl size="small" fullWidth>
+              <InputLabel>Status</InputLabel>
+              <Select
+                label="Status"
+                value={statusFilter}
+                sx={{ minWidth: "100px" }}
+                onChange={(e) => {
+                  setStatusFilter(e.target.value);
+                  setPage(1);
+                }}
+              >
+                <MenuItem value="">All</MenuItem>
+                <MenuItem value="PENDING">Pending</MenuItem>
+                <MenuItem value="APPROVED">Approved</MenuItem>
+                <MenuItem value="REJECT">Reject</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+
+          <Grid item xs={12} sm={6} md={3}>
+            <DatePicker
+              label="Start Date"
+              format="DD/MM/YYYY"
+              value={startDate ? dayjs(startDate) : null}
+              onChange={(date) => {
+                setStartDate(date ? date.format("YYYY-MM-DD") : "");
+                setPage(1);
+              }}
+              slotProps={{
+                textField: {
+                  fullWidth: true,
+                  size: "small",
+                },
+              }}
+            />
+          </Grid>
+
+          <Grid item xs={12} sm={6} md={3}>
+            <DatePicker
+              label="End Date"
+              format="DD/MM/YYYY"
+              value={endDate ? dayjs(endDate) : null}
+              onChange={(date) => {
+                setEndDate(date ? date.format("YYYY-MM-DD") : "");
+                setPage(1);
+              }}
+              slotProps={{
+                textField: {
+                  fullWidth: true,
+                  size: "small",
+                },
+              }}
+            />
+          </Grid>
+
+          <Grid item xs={12} sm={6} md={3}>
+            <Tooltip title="Clear Filters">
+              <Button
+                onClick={() => {
+                  setStatusFilter("");
+                  setStartDate("");
+                  setEndDate("");
+                  setSearch("");
+                  setPage(1);
+                }}
+                variant="contained"
+                fullWidth
+                sx={{
+                  height: 40,
+                  fontSize: 16,
+                  textTransform: "none",
+                  background:
+                    "linear-gradient(90deg, rgb(239, 131, 29) 0%, rgb(245, 134, 55) 27%, rgb(244, 121, 56) 100%)",
+                  "&:hover": {
+                    background:
+                      "linear-gradient(90deg, rgb(229, 121, 19) 0%, rgb(235, 124, 45) 27%, rgb(234, 111, 46) 100%)",
+                  },
+                }}
+              >
+                Clear Filter
+              </Button>
+            </Tooltip>
+          </Grid>
+        </Grid>
+      </LocalizationProvider>
+    </Box>
+  );
+
   return (
     <Stack sx={{ p: 4 }}>
       <CommonTable
@@ -418,6 +601,7 @@ const Page = () => {
         rowsPerPageOptions={[5, 10, 25, 50]}
         totalRows={totalCount} // Total records count
         currentPageRows={rows?.length}
+        filterComponent={leaveFilters}
       />
 
       <AddLeave

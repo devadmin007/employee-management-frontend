@@ -31,13 +31,13 @@ const CommonTable = ({
   onActionClick,
   actionButtonText = "Add",
   showActionButton = false,
-  // Pagination props
   rowsPerPage = 5,
   onRowsPerPageChange,
   showRowsPerPage = false,
   rowsPerPageOptions = [5, 10, 25, 50],
   totalRows = 0,
   currentPageRows = 0,
+  filterComponent = null, // ✅ NEW PROP
 }) => {
   const [localSearchValue, setLocalSearchValue] = useState(searchValue);
   const [searchTimer, setSearchTimer] = useState(null);
@@ -109,7 +109,6 @@ const CommonTable = ({
           justifyContent="flex-start"
           width="100%"
         >
-          {/* Search Input */}
           {showSearch && (
             <Box sx={{ flex: 1, maxWidth: { xs: "100%", sm: 400 } }}>
               <TextField
@@ -146,7 +145,6 @@ const CommonTable = ({
             </Box>
           )}
 
-          {/* Action Button */}
           {showActionButton &&
             (actionButton || (
               <Box sx={{ width: { xs: "100%", sm: "auto" } }}>
@@ -172,6 +170,11 @@ const CommonTable = ({
               </Box>
             ))}
         </Stack>
+
+        {/* ✅ Filter section below search */}
+        {filterComponent && (
+          <Box sx={{ mt: 2, width: "100%" }}>{filterComponent}</Box>
+        )}
       </Paper>
 
       <Paper sx={{ width: "100%", p: 2 }}>

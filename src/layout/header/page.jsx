@@ -9,18 +9,32 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import LogoutIcon from "@mui/icons-material/Logout";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { logoutUser } from "@/redux/slice/authSlice";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@mui/material/styles";
+import { getFetchedUserDetailsApi } from "@/api";
 
 const Header = () => {
   const dispatch = useDispatch();
   const router = useRouter();
   const { logout } = useAuth();
   const userInfo = useSelector((state) => state.auth.userData);
+  // let id = "68638836e425e73104e14100";
+
+  // useEffect(() => {
+  //   fetchedDetails();
+  // }, [id]);
+  // const fetchedDetails = async (id) => {
+  //   try {
+  //     const result = await getFetchedUserDetailsApi(id);
+  //     console.log(result);
+  //   } catch (e) {
+  //     console.log(e);
+  //   }
+  // };
 
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
@@ -31,6 +45,7 @@ const Header = () => {
 
   const handleClose = () => {
     setAnchorEl(null);
+    console.log(userInfo);
   };
 
   const handleLogout = () => {

@@ -62,6 +62,7 @@ const SidebarMenuContainerItem = styled(Link, {
   paddingLeft: theme.spacing(1),
   paddingRight: theme.spacing(1),
   borderRadius: 8,
+  minWidth:'200px',
   transition: "all 0.3s ease",
   "&:hover": {
     backgroundColor: active ? "orange" : "#173351",

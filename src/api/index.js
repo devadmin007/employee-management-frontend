@@ -459,16 +459,43 @@ export const createLeaveApi = async (payload) => {
   return result;
 };
 
-export const getAllLeaveApi = async (page, limit, search, role) => {
-  let result;
+export const getAllLeaveApi = async (
+  page,
+  limit,
+  search,
+  roleFilter = "",
+  statusFilter = "",
+  startDate = "",
+  endDate = ""
+) => {
   try {
-    result = await axiosInstanceApi.get(
-      `/leave-list?page=${page}&itemsPerPage=${limit}${search && `&search=${search}`}&pagination=true${role && `&filter=${role}`}`
-    );
+    let url = `/leave-list?page=${page}&itemsPerPage=${limit}&pagination=true`;
+
+    if (search) {
+      url += `&search=${search}`;
+    }
+
+    if (roleFilter) {
+      url += `&filter=${roleFilter}`;
+    }
+
+    if (statusFilter) {
+      url += `&status=${statusFilter}`;
+    }
+
+    if (startDate) {
+      url += `&startDate=${startDate}`;
+    }
+
+    if (endDate) {
+      url += `&endDate=${endDate}`;
+    }
+
+    const result = await axiosInstanceApi.get(url);
+    return result;
   } catch (e) {
-    result = e;
+    return e;
   }
-  return result;
 };
 
 export const deleteLeaveApi = async (id) => {
@@ -531,6 +558,16 @@ export const approveLeave = async (id, payload) => {
   let result;
   try {
     result = await axiosInstanceApi.post(`/leave-approval/${id}`, payload);
+  } catch (e) {
+    result = e;
+  }
+  return result;
+};
+
+export const getFetchedUserDetailsApi = async (id) => {
+  let result;
+  try {
+    result = await axiosInstanceApi.get(`/fetched-userdetails/${id}`);
   } catch (e) {
     result = e;
   }
