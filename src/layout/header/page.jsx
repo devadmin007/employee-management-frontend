@@ -253,6 +253,10 @@ const Header = () => {
                 <strong>Branch Name:</strong>{" "}
                 {userData?.data?.userDetails?.bankDetails?.branchName}
               </Typography>{" "}
+              <Typography>
+                <strong>Leave Details:</strong>{" "}
+                {userData?.data?.userDetails?.leaveDetails?.leave}
+              </Typography>{" "}
               {/* Add more fields if needed */}
             </Stack>
           ) : (
