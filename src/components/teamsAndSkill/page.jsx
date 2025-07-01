@@ -1,5 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { MenuItem, Box, Stack, Grid, Button, CircularProgress } from "@mui/material";
+import {
+  MenuItem,
+  Box,
+  Stack,
+  Grid,
+  Button,
+  CircularProgress,
+  Chip,
+  Autocomplete,
+  TextField
+} from "@mui/material";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import CommonInput from "../CommonInput";
@@ -11,6 +21,7 @@ import {
   fetchAllTeams,
 } from "@/api";
 import teamsAndSkillSchema from "@/schemas/teamsAndSkillSchema";
+import CancelIcon from "@mui/icons-material/Cancel";
 
 const TeamsAndSkillTab = ({
   onBack,
@@ -18,35 +29,41 @@ const TeamsAndSkillTab = ({
   userId = null,
   defaultValues = {},
   isLoading,
+  role,
 }) => {
   const [managerList, setMangerList] = useState([]);
   const [designationList, setDesignationList] = useState([]);
   const [departmentList, setDepartmentList] = useState([]);
   const [teamList, setTeamList] = useState([]);
   const [skillList, setSkillList] = useState([]);
+  const [selectedPrimarySkills, setSelectedPrimarySkills] = useState([]);
+  const [selectedSecondarySkills, setSelectedSecondarySkills] = useState([]);
 
   const {
     setValue,
     handleSubmit,
     control,
-    reset,
     formState: { errors },
   } = useForm({
-    resolver: yupResolver(teamsAndSkillSchema),
+    resolver: yupResolver(teamsAndSkillSchema(role)),
     defaultValues: {
       managerId: defaultValues?.managerId || "",
       designationId: defaultValues?.designationId || "",
       teamId: defaultValues?.teamId || "",
       department: defaultValues?.department || "",
       primarySkills: defaultValues?.primarySkills || [],
-      secondarySkills: defaultValues?.secondarySkills ||[],
+      secondarySkills: defaultValues?.secondarySkills || [],
     },
   });
 
+  const isManagerFieldDisabled = role !== "EMPLOYEE";
   const handleStep2Submit = (data) => {
 
     const formData = new FormData();
     Object.keys(data).forEach((key) => {
+      if (key === "managerId" && isManagerFieldDisabled) {
+        return;
+      }
       if (key === "primarySkills" || key === "secondarySkills") {
         if (Array.isArray(data[key]) && data[key].length > 0) {
           data[key].forEach((value) => {
@@ -64,7 +81,7 @@ const TeamsAndSkillTab = ({
 
     formData.append("step", 2);
 
-    console.log("FormData entries:", Object.fromEntries(formData));
+    // console.log("FormData entries:", Object.fromEntries(formData));
 
     if (onSubmit) {
       onSubmit(formData);
@@ -144,13 +161,48 @@ const TeamsAndSkillTab = ({
   useEffect(() => {
     if (userId && defaultValues) {
       setValue("managerId", defaultValues?.managerId || ""),
-        setValue("designationId", defaultValues?.designationId || ""),
-        setValue("teamId", defaultValues?.teamId || ""),
-        setValue("department", defaultValues?.department || ""),
-        setValue("primarySkills", defaultValues?.primarySkills || []),
-        setValue("secondarySkills", defaultValues?.secondarySkills || [])
+      setValue("designationId", defaultValues?.designationId || ""),
+      setValue("teamId", defaultValues?.teamId || "")
     }
   }, [userId, defaultValues]);
+
+  useEffect(() => {
+    if (departmentList.length > 0 && defaultValues?.department) {
+      const defaultDepartment = departmentList.find(
+        dept => dept._id === defaultValues.department._id
+      );
+
+      if (defaultDepartment) {
+        setValue("department", defaultDepartment._id);
+      }
+    }
+  }, [departmentList, defaultValues]);
+
+  useEffect(() => {
+    if (skillList.length > 0 && defaultValues) {
+      if (defaultValues?.primarySkills) {
+        const primarySkills = skillList.filter(skill =>
+        // Check if defaultValues.primarySkills contains objects with _id
+        (defaultValues.primarySkills[0]?.hasOwnProperty?.('_id')
+          ? defaultValues.primarySkills.some(defaultSkill => defaultSkill._id === skill._id)
+          : defaultValues.primarySkills.includes(skill._id)
+        ));
+        setSelectedPrimarySkills(primarySkills);
+        setValue("primarySkills", primarySkills.map(skill => skill._id));
+      }
+
+      if (defaultValues?.secondarySkills) {
+        const secondarySkills = skillList.filter(skill =>
+        // Check if defaultValues.secondarySkills contains objects with _id
+        (defaultValues.secondarySkills[0]?.hasOwnProperty?.('_id')
+          ? defaultValues.secondarySkills.some(defaultSkill => defaultSkill._id === skill._id)
+          : defaultValues.secondarySkills.includes(skill._id)
+        ));
+        setSelectedSecondarySkills(secondarySkills);
+        setValue("secondarySkills", secondarySkills.map(skill => skill._id));
+      }
+    }
+  }, [skillList, defaultValues]);
 
   useEffect(() => {
     const fetchAllData = async () => {
@@ -165,6 +217,24 @@ const TeamsAndSkillTab = ({
 
     fetchAllData();
   }, []);
+
+  // Function to handle primary skill selection
+  const handlePrimarySkillChange = (event, newValue) => {
+    setSelectedPrimarySkills(newValue);
+    setValue(
+      "primarySkills",
+      newValue.map(skill => skill._id)
+    );
+  };
+
+  // Function to handle secondary skill selection
+  const handleSecondarySkillChange = (event, newValue) => {
+    setSelectedSecondarySkills(newValue);
+    setValue(
+      "secondarySkills",
+      newValue.map(skill => skill._id)
+    );
+  };
 
   return (
     <Box
@@ -196,6 +266,7 @@ const TeamsAndSkillTab = ({
                     variant="outlined"
                     error={!!errors.managerId}
                     helperText={errors.managerId?.message}
+                    disabled={isManagerFieldDisabled}
                   >
                     {managerList?.length > 0 &&
                       managerList.map((option) => (
@@ -285,74 +356,60 @@ const TeamsAndSkillTab = ({
             </Grid>
 
             <Grid item size={{ xs: 12, md: 6 }}>
-              <Controller
-                name="primarySkills"
-                control={control}
-                render={({ field }) => (
-                  <CommonInput
-                    {...field}
-                    select
-                    fullWidth
+              <Autocomplete
+                multiple
+                options={skillList}
+                getOptionLabel={(option) => option.label}
+                value={selectedPrimarySkills}
+                onChange={handlePrimarySkillChange}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
                     label="Primary Skills"
                     variant="outlined"
                     error={!!errors.primarySkills}
                     helperText={errors.primarySkills?.message}
-                    SelectProps={{
-                      multiple: true,
-                      value: field.value || [],
-                      onChange: (e) => {
-                        const value =
-                          typeof e.target.value === "string"
-                            ? e.target.value.split(",")
-                            : e.target.value;
-                        field.onChange(value);
-                      },
-                    }}
-                  >
-                    {skillList?.length > 0 &&
-                      skillList.map((option) => (
-                        <MenuItem key={option._id} value={option._id}>
-                          {option.label}
-                        </MenuItem>
-                      ))}
-                  </CommonInput>
+                  />
                 )}
+                renderTags={(value, getTagProps) =>
+                  value.map((option, index) => (
+                    <Chip
+                      key={option._id}
+                      label={option.label}
+                      deleteIcon={<CancelIcon />}
+                      {...getTagProps({ index })}
+                    />
+                  ))
+                }
               />
             </Grid>
 
             <Grid item size={{ xs: 12, md: 6 }}>
-              <Controller
-                name="secondarySkills"
-                control={control}
-                render={({ field }) => (
-                  <CommonInput
-                    {...field}
-                    select
-                    fullWidth
+              <Autocomplete
+                multiple
+                options={skillList}
+                getOptionLabel={(option) => option.label}
+                value={selectedSecondarySkills}
+                onChange={handleSecondarySkillChange}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
                     label="Secondary Skills"
                     variant="outlined"
                     error={!!errors.secondarySkills}
                     helperText={errors.secondarySkills?.message}
-                    SelectProps={{
-                      multiple: true,
-                      value: field.value || [],
-                      onChange: (e) => {
-                        const value =
-                          typeof e.target.value === "string"
-                            ? e.target.value.split(",")
-                            : e.target.value;
-                        field.onChange(value);
-                      },
-                    }}
-                  >
-                    {skillList?.length > 0 &&
-                      skillList.map((option) => (
-                        <MenuItem key={option._id} value={option._id}>
-                          {option.label}
-                        </MenuItem>
-                      ))}
-                  </CommonInput>
+                  />
                 )}
+                renderTags={(value, getTagProps) =>
+                  value.map((option, index) => (
+                    <Chip
+                      key={option._id}
+                      label={option.label}
+                      deleteIcon={<CancelIcon />}
+                      {...getTagProps({ index })}
+                    />
+                  ))
+                }
               />
             </Grid>
           </Grid>

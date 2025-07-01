@@ -24,6 +24,9 @@ import { getAllRoles } from "@/api";
 import personalInfoSchema from "@/schemas/personalInfoSchema";
 import { parseAddress } from "@/utils/helper";
 import { genderOptions } from "@/data";
+import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import dayjs from 'dayjs';
 
 const PersonalInfoTab = ({
   onBack,
@@ -439,27 +442,37 @@ const PersonalInfoTab = ({
               />
             </Grid>
 
-            <Grid item size={{ xs: 12, md: 6 }}>
-              <Controller
-                name="dateOfBirth"
-                control={control}
-                render={({ field }) => (
-                  <CommonInput
-                    {...field}
-                    fullWidth
-                    label="Date of Birth"
-                    variant="outlined"
-                    useBuiltInLabel={true}
-                    type="date"
-                    InputLabelProps={{
-                      shrink: true,
-                    }}
-                    error={!!errors.dateOfBirth}
-                    helperText={errors.dateOfBirth?.message}
-                  />
-                )}
-              />
-            </Grid>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <Grid item size={{ xs: 12, md: 6 }}>
+                <Controller
+                  name="dateOfBirth"
+                  control={control}
+                  render={({ field }) => (
+                    <DatePicker
+                      label="Date of Birth"
+                      format="DD/MM/YYYY"
+                      value={field.value ? dayjs(field.value) : null}
+                      onChange={(date) => {
+                        if (date) {
+                          const formattedDate = date.format('YYYY-MM-DD');
+                          field.onChange(formattedDate);
+                        } else {
+                          field.onChange(null);
+                        }
+                      }}
+                      slotProps={{
+                        textField: {
+                          fullWidth: true,
+                          error: !!errors.dateOfBirth,
+                          helperText: errors.dateOfBirth?.message,
+                        },
+                      }}
+                    />
+                  )}
+                />
+              </Grid>
+            </LocalizationProvider>
+
 
             <Grid item size={{ xs: 12, md: 6 }}>
               <Controller

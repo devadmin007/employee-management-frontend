@@ -1,7 +1,9 @@
 import * as yup from "yup";
 
-const teamsAndSkillSchema = yup.object().shape({
-  managerId: yup.string().required("Manager is required"),
+const teamsAndSkillSchema = (role) => yup.object().shape({
+  managerId: role !== "EMPLOYEE" 
+    ? yup.string().optional()
+    : yup.string().required("Manager is required"),
   designationId: yup.string().required("Designation is required"),
   teamId: yup.string().required("Team Name is required"),
   department: yup.string().required("Department is required"),
