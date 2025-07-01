@@ -51,24 +51,74 @@ const personalInfoSchema = yup.object().shape({
     }),
   gender: yup.string().required("Gender is required"),
   permenentAddress: yup.object().shape({
-    street: yup.string().required("Address is required"),
-    city: yup.string().required("City is required"),
-    state: yup.string().required("State is required"),
+    street: yup
+      .string()
+      .required("Address is required")
+      .min(5, "Address must be at least 5 characters")
+      .max(100, "Address cannot exceed 100 characters"),
+    city: yup
+      .string()
+      .required("City is required")
+      .min(2, "City must be at least 2 characters")
+      .max(50, "City cannot exceed 50 characters")
+      .matches(/^[a-zA-Z\s\-']+$/, "City can only contain letters and hyphens"),
+    state: yup
+      .string()
+      .required("State is required")
+      .min(2, "State must be at least 2 characters")
+      .max(50, "State cannot exceed 50 characters"),
     zip: yup
       .string()
-      .required("Zip Code is required")
-      .matches(/^\d{4,10}$/, "Enter a valid zip code"),
-    country: yup.string().required("Country is required"),
+      .required("Zip code is required")
+      .matches(/^[0-9\-]+$/, "Zip code can only contain numbers and hyphens")
+      .test(
+        "zip-length",
+        "Zip code must be between 4 and 10 characters",
+        (val) =>
+          val &&
+          val.replace(/\D/g, "").length >= 4 &&
+          val.replace(/\D/g, "").length <= 10
+      ),
+    country: yup
+      .string()
+      .required("Country is required")
+      .min(2, "Country must be at least 2 characters")
+      .max(50, "Country cannot exceed 50 characters"),
   }),
   currentAddress: yup.object().shape({
-    street: yup.string().required("Address is required"),
-    city: yup.string().required("City is required"),
-    state: yup.string().required("State is required"),
+    street: yup
+      .string()
+      .required("Address is required")
+      .min(5, "Address must be at least 5 characters")
+      .max(100, "Address cannot exceed 100 characters"),
+    city: yup
+      .string()
+      .required("City is required")
+      .min(2, "City must be at least 2 characters")
+      .max(50, "City cannot exceed 50 characters")
+      .matches(/^[a-zA-Z\s\-']+$/, "City can only contain letters and hyphens"),
+    state: yup
+      .string()
+      .required("State is required")
+      .min(2, "State must be at least 2 characters")
+      .max(50, "State cannot exceed 50 characters"),
     zip: yup
       .string()
-      .required("Zip Code is required")
-      .matches(/^\d{4,10}$/, "Enter a valid zip code"),
-    country: yup.string().required("Country is required"),
+      .required("Zip code is required")
+      .matches(/^[0-9\-]+$/, "Zip code can only contain numbers and hyphens")
+      .test(
+        "zip-length",
+        "Zip code must be between 4 and 10 characters",
+        (val) =>
+          val &&
+          val.replace(/\D/g, "").length >= 4 &&
+          val.replace(/\D/g, "").length <= 10
+      ),
+    country: yup
+      .string()
+      .required("Country is required")
+      .min(2, "Country must be at least 2 characters")
+      .max(50, "Country cannot exceed 50 characters"),
   }),
 });
 

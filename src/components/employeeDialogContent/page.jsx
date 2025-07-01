@@ -32,9 +32,9 @@ export default function EmployeeStepperForm({
   open,
   onClose,
   userId = null,
-  fetchEmployee = () => {},
+  fetchEmployee = () => { },
   formData = {},
-  setFormData = () => {},
+  setFormData = () => { },
 }) {
   const dispatch = useDispatch();
   const employeeDetails = useSelector((state) => state.employeeData);
@@ -44,10 +44,9 @@ export default function EmployeeStepperForm({
 
   const [isBack, setIsBack] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [role, setRole] = useState(null);
   const [mode, setMode] = useState(!userId ? "create" : "update");
-  // if (activeStep > 3) {
-  //   fetchEmployee();
-  // }
+  const [completedSteps, setCompletedSteps] = useState({});
 
   const handleNext = () => {
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -74,8 +73,8 @@ export default function EmployeeStepperForm({
           const response = await createEmployeeApi(data);
           if (response?.data) {
             setEmpId(response?.data?.data?.userId);
+            setRole(response?.data?.data?.roledata);
 
-            // setFormData((prev) => ({ ...prev, personalInfo: plainData }));
             dispatch(
               addEmployeeDataInfo({
                 type,
@@ -141,7 +140,7 @@ export default function EmployeeStepperForm({
         }
       }
     } else if (mode === "update") {
-      data.append("userId", userId === null ? empId : userId);
+      data.append("userId", !userId ? empId : userId);
       if (activeStep === 0) {
         await handleDispatchAction(
           plainData,
@@ -233,6 +232,9 @@ export default function EmployeeStepperForm({
     try {
       const response = await getEmployeeByIdApi(id);
       const data = response?.data?.data;
+      if (data) {
+        setRole(data?.roleDetails?.role);
+      }
 
       const personalDetails = {
         role: data?.role,
@@ -325,6 +327,7 @@ export default function EmployeeStepperForm({
             }
             userId={userId}
             isLoading={isLoading}
+            role={role}
           />
         );
       case 2:
@@ -366,16 +369,29 @@ export default function EmployeeStepperForm({
 
   useEffect(() => {
     setMode(!userId ? "create" : "update");
-    if (userId){
+    if (userId) {
       fetchEmployeeById(userId);
     }
   }, [userId]);
 
   useEffect(() => {
-  if (isBack) {
-    setMode("update");
-  }
-}, [isBack]);
+    if (isBack) {
+      setMode("update");
+    }
+  }, [isBack]);
+
+  useEffect(() => {
+    if (employeeDetails?.employeeDetails) {
+      const newCompletedSteps = {};
+
+      if (employeeDetails?.employeeDetails?.personalDetails) newCompletedSteps[0] = true;
+      if (employeeDetails?.employeeDetails?.teamAndSkillDetails) newCompletedSteps[1] = true;
+      if (employeeDetails?.employeeDetails?.settingDetails) newCompletedSteps[2] = true;
+      if (employeeDetails?.employeeDetails?.bankDetails) newCompletedSteps[3] = true;
+
+      setCompletedSteps(newCompletedSteps);
+    }
+  }, [employeeDetails]);
 
   return (
     <Dialog
@@ -413,8 +429,8 @@ export default function EmployeeStepperForm({
             }}
           >
             <Stepper activeStep={activeStep} alternativeLabel>
-              {steps.map((label) => (
-                <Step key={label}>
+              {steps.map((label, index) => (
+                <Step key={label} completed={!!completedSteps[index]}>
                   <StepLabel>
                     <Typography sx={{ fontSize: "14px" }}>{label}</Typography>
                   </StepLabel>

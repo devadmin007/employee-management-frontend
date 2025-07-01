@@ -4,6 +4,9 @@ import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import CommonInput from "../CommonInput";
 import settingSchema from "@/schemas/setttingSchema";
+import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import dayjs from 'dayjs';
 
 const SettingTab = ({
   onBack,
@@ -73,47 +76,66 @@ const SettingTab = ({
       <form onSubmit={handleSubmit(handleFormSubmit)}>
         <Stack spacing={2}>
           <Grid container spacing={3}>
-            <Grid item size={{ xs: 12, md: 6 }}>
-              <Controller
-                name="joiningDate"
-                control={control}
-                render={({ field }) => (
-                  <CommonInput
-                    {...field}
-                    fullWidth
-                    label="Joining Date"
-                    variant="outlined"
-                    type="date"
-                    InputLabelProps={{
-                      shrink: true,
-                    }}
-                    error={!!errors.joiningDate}
-                    helperText={errors.joiningDate?.message}
-                  />
-                )}
-              />
-            </Grid>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <Grid item size={{ xs: 12, md: 6 }}>
+                <Controller
+                  name="joiningDate"
+                  control={control}
+                  render={({ field }) => (
+                    <DatePicker
+                      label="Joining Date"
+                      format="DD/MM/YYYY"
+                      value={field.value ? dayjs(field.value) : null}
+                      onChange={(date) => {
+                        if (date) {
+                          const formattedDate = date.format('YYYY-MM-DD');
+                          field.onChange(formattedDate);
+                        } else {
+                          field.onChange(null);
+                        }
+                      }}
+                      slotProps={{
+                        textField: {
+                          fullWidth: true,
+                          error: !!errors.joiningDate,
+                          helperText: errors.joiningDate?.message,
+                        },
+                      }}
+                    />
+                  )}
+                />
+              </Grid>
+              {/* </LocalizationProvider> */}
 
-            <Grid item size={{ xs: 12, md: 6 }}>
-              <Controller
-                name="probationDate"
-                control={control}
-                render={({ field }) => (
-                  <CommonInput
-                    {...field}
-                    fullWidth
-                    label="Probation Date"
-                    variant="outlined"
-                    type="date"
-                    InputLabelProps={{
-                      shrink: true,
-                    }}
-                    error={!!errors.probationDate}
-                    helperText={errors.probationDate?.message}
-                  />
-                )}
-              />
-            </Grid>
+              <Grid item size={{ xs: 12, md: 6 }}>
+                <Controller
+                  name="probationDate"
+                  control={control}
+                  render={({ field }) => (
+                    <DatePicker
+                      label="Probation Date"
+                      format="DD/MM/YYYY"
+                      value={field.value ? dayjs(field.value) : null}
+                      onChange={(date) => {
+                        if (date) {
+                          const formattedDate = date.format('YYYY-MM-DD');
+                          field.onChange(formattedDate);
+                        } else {
+                          field.onChange(null);
+                        }
+                      }}
+                      slotProps={{
+                        textField: {
+                          fullWidth: true,
+                          error: !!errors.probationDate,
+                          helperText: errors.probationDate?.message,
+                        },
+                      }}
+                    />
+                  )}
+                />
+              </Grid>
+            </LocalizationProvider>
 
             <Grid item size={{ xs: 12, md: 6 }}>
               <Controller
@@ -217,8 +239,8 @@ const SettingTab = ({
                     fullWidth
                     label="Previous Experience (Yrs)"
                     variant="outlined"
-                     onChange={(e) => {
-                      field?.onChange(e.target.value.replace(/[^0-9]/g, '').slice(0,4));
+                    onChange={(e) => {
+                      field?.onChange(e.target.value.replace(/[^0-9]/g, '').slice(0, 4));
                     }}
                     error={!!errors.previousExperience}
                     helperText={errors.previousExperience?.message}
