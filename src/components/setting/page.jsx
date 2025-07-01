@@ -24,7 +24,7 @@ const SettingTab = ({
     defaultValues: {
       joiningDate: defaultValues?.joiningDate || "",
       probationDate: defaultValues?.probationDate || "",
-      relieivingDate: defaultValues?.relieivingDate || "",
+      // relieivingDate: defaultValues?.relieivingDate || "",
       currentSalary: defaultValues?.currentSalary || "",
       panNo: defaultValues?.panNo || "",
       pfNo: defaultValues?.pfNo || "",
@@ -51,7 +51,8 @@ const SettingTab = ({
     if (userId && defaultValues) {
       setValue("joiningDate", defaultValues?.joiningDate || "-"),
         setValue("probationDate", defaultValues?.probationDate || "-"),
-        setValue("relieivingDate", defaultValues?.relieivingDate || ""),
+        // setValue("relieivingDate", defaultValues?.relieivingDate || ""),
+        setValue("currentSalary", defaultValues?.currentSalary || ""),
         setValue("panNo", defaultValues?.panNo || "-"),
         setValue("pfNo", defaultValues?.pfNo || "-"),
         setValue("uanDetail", defaultValues?.uanDetail || "-"),
@@ -124,6 +125,9 @@ const SettingTab = ({
                     fullWidth
                     label="Current Salary"
                     variant="outlined"
+                    onChange={(e) => {
+                      field?.onChange(e.target.value.replace(/[^0-9]/g, ''));
+                    }}
                     error={!!errors.currentSalary}
                     helperText={errors.currentSalary?.message}
                   />
@@ -148,7 +152,7 @@ const SettingTab = ({
               />
             </Grid>
 
-            <Grid item size={{ xs: 12, md: 6 }}>
+            {/* <Grid item size={{ xs: 12, md: 6 }}>
               <Controller
                 name="relieivingDate"
                 control={control}
@@ -167,7 +171,7 @@ const SettingTab = ({
                   />
                 )}
               />
-            </Grid>
+            </Grid> */}
 
             <Grid item size={{ xs: 12, md: 6 }}>
               <Controller
@@ -213,6 +217,9 @@ const SettingTab = ({
                     fullWidth
                     label="Previous Experience (Yrs)"
                     variant="outlined"
+                     onChange={(e) => {
+                      field?.onChange(e.target.value.replace(/[^0-9]/g, '').slice(0,4));
+                    }}
                     error={!!errors.previousExperience}
                     helperText={errors.previousExperience?.message}
                   />

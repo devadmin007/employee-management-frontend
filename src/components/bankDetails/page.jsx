@@ -13,7 +13,6 @@ const BankDetailsTab = ({
   userId = null,
   isLoading,
 }) => {
-
   const {
     control,
     handleSubmit,

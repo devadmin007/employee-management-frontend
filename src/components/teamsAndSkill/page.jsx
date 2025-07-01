@@ -25,9 +25,6 @@ const TeamsAndSkillTab = ({
   const [teamList, setTeamList] = useState([]);
   const [skillList, setSkillList] = useState([]);
 
-  console.log("defaultvalue 28",defaultValues);
-  
-
   const {
     setValue,
     handleSubmit,

@@ -32,11 +32,10 @@ export default function EmployeeStepperForm({
   open,
   onClose,
   userId = null,
-  fetchEmployee = () => { },
+  fetchEmployee = () => {},
   formData = {},
-  setFormData = () => { }
+  setFormData = () => {},
 }) {
-
   const dispatch = useDispatch();
   const employeeDetails = useSelector((state) => state.employeeData);
 
@@ -45,13 +44,10 @@ export default function EmployeeStepperForm({
 
   const [isBack, setIsBack] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  // const [formData, setFormData] = useState({});
-
-  let mode = !userId ? "create" : "update";
-  if (activeStep > 3) {
-    fetchEmployee();
-  }
-
+  const [mode, setMode] = useState(!userId ? "create" : "update");
+  // if (activeStep > 3) {
+  //   fetchEmployee();
+  // }
 
   const handleNext = () => {
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -59,7 +55,6 @@ export default function EmployeeStepperForm({
 
   const handleBack = () => {
     setIsBack(true);
-    mode = "update";
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
   };
 
@@ -274,39 +269,30 @@ export default function EmployeeStepperForm({
         currentSalary: data?.userDetails?.currentSalary || "",
       };
 
-      const bankDetails = data?.bankDetails || {};
+      const bankDetails = {
+        accountNumber: data?.userDetails?.bankDetails?.accountNumber || "",
+        branchName: data?.userDetails?.bankDetails?.branchName || "",
+        ifscCode: data?.userDetails?.bankDetails?.ifscCode || "",
+      };
 
-      dispatch(
-        addEmployeeDataInfo({
-          type: "personalInfo",
-          personalDetail: personalDetails,
-        })
-      );
-      dispatch(
-        addEmployeeDataInfo({
-          type: "teamAndSkillInfo",
-          teamAndSkillDetail: teamAndSkillDetails,
-        })
-      );
-      dispatch(
-        addEmployeeDataInfo({
-          type: "settingInfo",
-          settingDetail: settingDetails,
-        })
-      );
-      dispatch(
-        addEmployeeDataInfo({
-          type: "bankInfo",
-          bankDetail: bankDetails,
-        })
-      );
+      const dataSections = [
+        { type: "personalInfo", key: "personalDetail", data: personalDetails },
+        { type: "teamAndSkillInfo", key: "teamAndSkillDetail", data: teamAndSkillDetails },
+        { type: "settingInfo", key: "settingDetail", data: settingDetails },
+        { type: "bankInfo", key: "bankDetail", data: bankDetails },
+      ];
+
+      // Dispatch all actions in one loop
+      dataSections.forEach(({ type, key, data }) => {
+        dispatch(addEmployeeDataInfo({ type, [key]: data }));
+      });
 
       setFormData({
-        "personalDetail": personalDetails,
-        "teamAndSkillDetail": teamAndSkillDetails,
-        "settingDetail": settingDetails,
-        "bankDetail": bankDetails,
-      })
+        personalDetail: personalDetails,
+        teamAndSkillDetail: teamAndSkillDetails,
+        settingDetail: settingDetails,
+        bankDetail: bankDetails,
+      });
     } catch (error) {
       console.log("error", error);
     }
@@ -379,9 +365,17 @@ export default function EmployeeStepperForm({
   };
 
   useEffect(() => {
-    if (!userId) return;
-    fetchEmployeeById(userId);
+    setMode(!userId ? "create" : "update");
+    if (userId){
+      fetchEmployeeById(userId);
+    }
   }, [userId]);
+
+  useEffect(() => {
+  if (isBack) {
+    setMode("update");
+  }
+}, [isBack]);
 
   return (
     <Dialog
