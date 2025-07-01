@@ -263,6 +263,13 @@ const SignUP = () => {
             >
               sign up
             </Button>
+            <Typography sx={{ marginTop: "10px" }}>Or</Typography>
+            <Typography
+              sx={{ color: "blue", cursor: "pointer", marginTop: "10px" }}
+              onClick={() => router.push("/login")}
+            >
+              Login
+            </Typography>
           </Box>
         </form>
       </SignupContainer>

@@ -233,47 +233,102 @@ const Page = () => {
     },
     { field: "comments", headerName: "Notes", flex: 1, minWidth: 140 },
 
-    {
+    // {
+    //   field: "actions",
+    //   headerName: "Actions",
+    //   width: 120,
+    //   sortable: false,
+    //   renderCell: (params) => {
+    //     const status = params.row.status;
+    //     const isActionAllowed =
+    //       status === "PENDING" || user?.role !== "EMPLOYEE"; // Only allow delete/edit if PENDING or user is not EMPLOYEE
+
+    //     if (!isActionAllowed) {
+    //       return <Typography sx={{ pl: 4 }}>-</Typography>;
+    //     }
+
+    //     return (
+    //       <Stack direction="row" spacing={1}>
+    //         <Tooltip title="Edit Leave">
+    //           <IconButton
+    //             color="primary"
+    //             onClick={() =>
+    //               handleClickOpenDialogForFormToEditTeam(params?.id)
+    //             }
+    //             size="small"
+    //           >
+    //             <EditIcon sx={{ color: "#1976D2" }} />
+    //           </IconButton>
+    //         </Tooltip>
+    //         <Tooltip title="Cancel Leave">
+    //           <IconButton
+    //             color="error"
+    //             onClick={() => handleClickOpenDialog(params?.id)}
+    //             size="small"
+    //           >
+    //             <DeleteIcon sx={{ color: "#d32f2f" }} />
+    //           </IconButton>
+    //         </Tooltip>
+    //       </Stack>
+    //     );
+    //   },
+    // },
+  ];
+
+  if (user?.role !== "ADMIN") {
+    columns.push({
       field: "actions",
       headerName: "Actions",
       width: 120,
       sortable: false,
       renderCell: (params) => {
         const status = params.row.status;
-        const isActionAllowed =
-          status === "PENDING" || user?.role !== "EMPLOYEE"; // Only allow delete/edit if PENDING or user is not EMPLOYEE
+        const isEmployee = user?.role === "EMPLOYEE";
+        const isHRorPM =
+          user?.role === "HR" || user?.role === "PROJECT_MANAGER";
 
-        if (!isActionAllowed) {
+        // EMPLOYEE: can edit/delete only if status is PENDING
+        if (isEmployee) {
+          if (status !== "PENDING") {
+            return <Typography sx={{ pl: 4 }}>-</Typography>;
+          }
+
+          return (
+            <Stack direction="row" spacing={1}>
+              <Tooltip title="Edit Leave">
+                <IconButton
+                  color="primary"
+                  onClick={() =>
+                    handleClickOpenDialogForFormToEditTeam(params?.id)
+                  }
+                  size="small"
+                >
+                  <EditIcon sx={{ color: "#1976D2" }} />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Cancel Leave">
+                <IconButton
+                  color="error"
+                  onClick={() => handleClickOpenDialog(params?.id)}
+                  size="small"
+                >
+                  <DeleteIcon sx={{ color: "#d32f2f" }} />
+                </IconButton>
+              </Tooltip>
+            </Stack>
+          );
+        }
+
+        // HR or PM: no edit/delete access — show dash
+        if (isHRorPM) {
           return <Typography sx={{ pl: 4 }}>-</Typography>;
         }
 
-        return (
-          <Stack direction="row" spacing={1}>
-            <Tooltip title="Edit Leave">
-              <IconButton
-                color="primary"
-                onClick={() =>
-                  handleClickOpenDialogForFormToEditTeam(params?.id)
-                }
-                size="small"
-              >
-                <EditIcon sx={{ color: "#1976D2" }} />
-              </IconButton>
-            </Tooltip>
-            <Tooltip title="Cancel Leave">
-              <IconButton
-                color="error"
-                onClick={() => handleClickOpenDialog(params?.id)}
-                size="small"
-              >
-                <DeleteIcon sx={{ color: "#d32f2f" }} />
-              </IconButton>
-            </Tooltip>
-          </Stack>
-        );
+        // Default for safety — no actions
+        return null;
       },
-    },
-  ];
+    });
+  }
 
   const getLeave = async () => {
     setIsLoading(true);
@@ -438,7 +493,7 @@ const Page = () => {
               <Select
                 label="Status"
                 value={statusFilter}
-                sx={{ minWidth:'100px' }}
+                sx={{ minWidth: "100px" }}
                 onChange={(e) => {
                   setStatusFilter(e.target.value);
                   setPage(1);
