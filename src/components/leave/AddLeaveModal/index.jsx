@@ -29,7 +29,6 @@ dayjs.extend(isSameOrBefore);
 dayjs.extend(isSameOrAfter);
 
 const AddLeave = ({ open, onClose, getLeave, editData, setUpdateId }) => {
-  console.log(editData);
   const {
     register,
     handleSubmit,
@@ -50,7 +49,6 @@ const AddLeave = ({ open, onClose, getLeave, editData, setUpdateId }) => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [dateRange, setDateRange] = useState([]);
-  const [date, setDate] = useState({});
 
   const startDate = watch("startDate");
   const endDate = watch("endDate");
@@ -65,18 +63,13 @@ const AddLeave = ({ open, onClose, getLeave, editData, setUpdateId }) => {
     return date.format("DD/MM/YYYY (dddd)");
   };
 
-  // Effect to populate form when editData is provided
   useEffect(() => {
     if (editData && open) {
-      // Set the date and leave type from editData
       const editDate = dayjs(editData.date);
-
       setValue("startDate", editDate);
       setValue("endDate", editDate);
       setValue("notes", editData.comments || "");
 
-      // Set the date range types for the edit date - do this after a small delay
-      // to ensure the dateRange effect has run
       setTimeout(() => {
         const dateRangeTypes = {
           [editDate.format("YYYY-MM-DD")]: editData.leave_type,
@@ -107,7 +100,6 @@ const AddLeave = ({ open, onClose, getLeave, editData, setUpdateId }) => {
 
         setDateRange(dates);
 
-        // If we're editing, preserve the existing leave type
         if (editData) {
           const editDateStr = dayjs(editData.date).format("YYYY-MM-DD");
           const updatedTypes = {};
@@ -122,7 +114,6 @@ const AddLeave = ({ open, onClose, getLeave, editData, setUpdateId }) => {
 
           setValue("dateRangeTypes", updatedTypes, { shouldDirty: true });
         } else {
-          // For new leaves, use the existing logic
           const currentTypes = getValues("dateRangeTypes") || {};
           const updatedTypes = {};
 
@@ -155,14 +146,12 @@ const AddLeave = ({ open, onClose, getLeave, editData, setUpdateId }) => {
   const onSubmit = async (data) => {
     const finalTypes = { ...data.dateRangeTypes };
 
-    // Ensure each non-weekend date has a type, defaulting to "FULL_DAY"
     dateRange.forEach((date) => {
       if (!isWeekend(date) && !finalTypes[date]) {
         finalTypes[date] = "FULL_DAY";
       }
     });
 
-    // ✅ Exclude empty and WEEKEND leave types
     const leaveData = Object.entries(finalTypes)
       .filter(([_, type]) => type !== "" && type !== "WEEKEND")
       .map(([date, leave_type]) => ({
@@ -210,9 +199,10 @@ const AddLeave = ({ open, onClose, getLeave, editData, setUpdateId }) => {
                 render={({ field }) => (
                   <DatePicker
                     label="Start Date"
+                    format="DD/MM/YYYY"
                     value={field.value}
                     onChange={(date) => field.onChange(date)}
-                    disablePast={!editData} // Allow past dates when editing
+                    disablePast={!editData}
                     slotProps={{
                       textField: {
                         fullWidth: true,
@@ -240,9 +230,10 @@ const AddLeave = ({ open, onClose, getLeave, editData, setUpdateId }) => {
                 render={({ field }) => (
                   <DatePicker
                     label="End Date"
+                    format="DD/MM/YYYY"
                     value={field.value}
                     onChange={(date) => field.onChange(date)}
-                    disablePast={!editData} // Allow past dates when editing
+                    disablePast={!editData}
                     slotProps={{
                       textField: {
                         fullWidth: true,
@@ -265,7 +256,6 @@ const AddLeave = ({ open, onClose, getLeave, editData, setUpdateId }) => {
               <Grid container spacing={2}>
                 {dateRange.map((date) => {
                   const isWeekendDate = isWeekend(date);
-
                   return (
                     <Grid item xs={12} sm={6} md={4} key={date}>
                       <Paper
@@ -293,9 +283,7 @@ const AddLeave = ({ open, onClose, getLeave, editData, setUpdateId }) => {
                         </Typography>
 
                         <FormControl fullWidth size="small" margin="dense">
-                          <InputLabel id={`label-${date}`}>
-                            {/* Leave Type */}
-                          </InputLabel>
+                          <InputLabel id={`label-${date}`}></InputLabel>
                           <Controller
                             name={`dateRangeTypes.${date}`}
                             control={control}
@@ -304,7 +292,6 @@ const AddLeave = ({ open, onClose, getLeave, editData, setUpdateId }) => {
                               <Select
                                 {...field}
                                 labelId={`label-${date}`}
-                                // label="Leave Type"
                                 disabled={isWeekendDate}
                                 value={field.value || ""}
                                 onChange={(e) => field.onChange(e.target.value)}
@@ -313,7 +300,7 @@ const AddLeave = ({ open, onClose, getLeave, editData, setUpdateId }) => {
                                   if (!selected) return "Select Leave Type";
                                   const labels = {
                                     FULL_DAY: "FULL_DAY",
-                                    FIRST_HALF: " FIRST_HALF",
+                                    FIRST_HALF: "FIRST_HALF",
                                     SECOND_HALF: "SECOND_HALF",
                                     WEEKEND: "WEEKEND - Not Available",
                                   };

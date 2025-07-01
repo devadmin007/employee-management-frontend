@@ -563,3 +563,13 @@ export const approveLeave = async (id, payload) => {
   }
   return result;
 };
+
+export const getFetchedUserDetailsApi = async (id) => {
+  let result;
+  try {
+    result = await axiosInstanceApi.get(`/fetched-userdetails/${id}`);
+  } catch (e) {
+    result = e;
+  }
+  return result;
+};

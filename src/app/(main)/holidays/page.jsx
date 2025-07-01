@@ -84,8 +84,8 @@ const Page = () => {
       renderCell: (params) => {
         const date = new Date(params.value);
         return (
-          <Typography sx={{  my: 2 }}>
-            {date.toLocaleDateString()}
+          <Typography sx={{ my: 2 }}>
+            {date.toLocaleDateString("en-GB")}
           </Typography>
         );
       },

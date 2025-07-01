@@ -4,6 +4,7 @@
 
 import React, { useEffect, useState } from "react";
 import {
+  Box,
   Button,
   FormControl,
   IconButton,
@@ -31,6 +32,10 @@ import {
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import { Chip } from "@mui/material";
+import { Grid, useMediaQuery, useTheme } from "@mui/material";
+import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import dayjs from "dayjs";
 
 const Page = () => {
   const user = useSelector((state) => state.auth.userData);
@@ -58,6 +63,8 @@ const Page = () => {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const isActionAllowed = user?.role !== "EMPLOYEE" || status === "PENDING";
 
   useEffect(() => {
@@ -102,7 +109,7 @@ const Page = () => {
         const date = new Date(params.value);
         return (
           <Typography sx={{ textAlign: "center", my: 2 }}>
-            {date.toLocaleDateString()}
+            {date.toLocaleDateString("en-GB")}
           </Typography>
         );
       },
@@ -117,7 +124,7 @@ const Page = () => {
         const date = new Date(params.value);
         return (
           <Typography sx={{ textAlign: "center", my: 2 }}>
-            {date.toLocaleDateString()}
+            {date.toLocaleDateString("en-GB")}
           </Typography>
         );
       },
@@ -422,75 +429,96 @@ const Page = () => {
   };
 
   const leaveFilters = (
-    <Stack sx={{ my:2 }} direction="row" spacing={2} alignItems="center" flexWrap="wrap" >
-      <FormControl size="small" sx={{ width: 180 }}>
-        <InputLabel>Status</InputLabel>
-        <Select
-          label="Status"
-          value={statusFilter}
-          onChange={(e) => {
-            setStatusFilter(e.target.value);
-            setPage(1);
-          }}
-        >
-          <MenuItem value="">All</MenuItem>
-          <MenuItem value="PENDING">Pending</MenuItem>
-          <MenuItem value="APPROVED">Approved</MenuItem>
-          <MenuItem value="REJECT">Reject</MenuItem>
-        </Select>
-      </FormControl>
+    <Box sx={{ mt: 2, width: "100%" }}>
+      <LocalizationProvider dateAdapter={AdapterDayjs}>
+        <Grid container spacing={2}>
+          <Grid item xs={12} sm={6} md={3}>
+            <FormControl size="small" fullWidth>
+              <InputLabel>Status</InputLabel>
+              <Select
+                label="Status"
+                value={statusFilter}
+                sx={{ minWidth:'100px' }}
+                onChange={(e) => {
+                  setStatusFilter(e.target.value);
+                  setPage(1);
+                }}
+              >
+                <MenuItem value="">All</MenuItem>
+                <MenuItem value="PENDING">Pending</MenuItem>
+                <MenuItem value="APPROVED">Approved</MenuItem>
+                <MenuItem value="REJECT">Reject</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
 
-      <TextField
-        type="date"
-        size="small"
-        label="Start Date"
-        InputLabelProps={{ shrink: true }}
-        value={startDate}
-        onChange={(e) => {
-          setStartDate(e.target.value);
-          setPage(1);
-        }}
-      />
+          <Grid item xs={12} sm={6} md={3}>
+            <DatePicker
+              label="Start Date"
+              format="DD/MM/YYYY"
+              value={startDate ? dayjs(startDate) : null}
+              onChange={(date) => {
+                setStartDate(date ? date.format("YYYY-MM-DD") : "");
+                setPage(1);
+              }}
+              slotProps={{
+                textField: {
+                  fullWidth: true,
+                  size: "small",
+                },
+              }}
+            />
+          </Grid>
 
-      <TextField
-        type="date"
-        size="small"
-        label="End Date"
-        InputLabelProps={{ shrink: true }}
-        value={endDate}
-        onChange={(e) => {
-          setEndDate(e.target.value);
-          setPage(1);
-        }}
-      />
+          <Grid item xs={12} sm={6} md={3}>
+            <DatePicker
+              label="End Date"
+              format="DD/MM/YYYY"
+              value={endDate ? dayjs(endDate) : null}
+              onChange={(date) => {
+                setEndDate(date ? date.format("YYYY-MM-DD") : "");
+                setPage(1);
+              }}
+              slotProps={{
+                textField: {
+                  fullWidth: true,
+                  size: "small",
+                },
+              }}
+            />
+          </Grid>
 
-      <Tooltip title="Clear Filters">
-        <Button
-          onClick={() => {
-            setStatusFilter("");
-            setStartDate("");
-            setEndDate("");
-            setSearch("");
-            setPage(1);
-          }}
-          variant="contained"
-          sx={{
-            minWidth: 120,
-            height: 40,
-            fontSize: 16,
-            textTransform: "none",
-            background:
-              "linear-gradient(90deg, rgb(239, 131, 29) 0%, rgb(245, 134, 55) 27%, rgb(244, 121, 56) 100%)",
-            "&:hover": {
-              background:
-                "linear-gradient(90deg, rgb(229, 121, 19) 0%, rgb(235, 124, 45) 27%, rgb(234, 111, 46) 100%)",
-            },
-          }}
-        >
-          Clear Filter
-        </Button>
-      </Tooltip>
-    </Stack>
+          <Grid item xs={12} sm={6} md={3}>
+            <Tooltip title="Clear Filters">
+              <Button
+                onClick={() => {
+                  setStatusFilter("");
+                  setStartDate("");
+                  setEndDate("");
+                  setSearch("");
+                  setPage(1);
+                }}
+                variant="contained"
+                fullWidth
+                sx={{
+                  height: 40,
+                  fontSize: 16,
+                  textTransform: "none",
+                  background:
+                    "linear-gradient(90deg, rgb(239, 131, 29) 0%, rgb(245, 134, 55) 27%, rgb(244, 121, 56) 100%)",
+                  "&:hover": {
+                    background:
+                      "linear-gradient(90deg, rgb(229, 121, 19) 0%, rgb(235, 124, 45) 27%, rgb(234, 111, 46) 100%)",
+                  },
+                }}
+              >
+                Clear Filter
+              </Button>
+            </Tooltip>
+          </Grid>
+        </Grid>
+      </LocalizationProvider>
+    </Box>
   );
 
   return (
