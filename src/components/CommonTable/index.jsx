@@ -1,3 +1,4 @@
+// CommonTable.jsx
 import React, { useState, useEffect } from "react";
 import {
   Box,
@@ -12,7 +13,6 @@ import { DataGrid } from "@mui/x-data-grid";
 import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";
 import CommonPagination from "../CommonPagination";
-import { useSelector } from "react-redux";
 
 const CommonTable = ({
   rows,
@@ -38,13 +38,10 @@ const CommonTable = ({
   rowsPerPageOptions = [5, 10, 25, 50],
   totalRows = 0,
   currentPageRows = 0,
-  filterComponent = null, // ✅ NEW PROP
+  filterComponent = null,
 }) => {
   const [localSearchValue, setLocalSearchValue] = useState(searchValue);
   const [searchTimer, setSearchTimer] = useState(null);
-
-  const roleId = useSelector((state) => state?.auth?.userData?.role);
-  console.log("ROLE ID:", roleId);
 
   useEffect(() => {
     setLocalSearchValue(searchValue);
@@ -54,14 +51,10 @@ const CommonTable = ({
     const value = event.target.value;
     setLocalSearchValue(value);
 
-    if (searchTimer) {
-      clearTimeout(searchTimer);
-    }
+    if (searchTimer) clearTimeout(searchTimer);
 
     const newTimer = setTimeout(() => {
-      if (onSearchChange) {
-        onSearchChange(value);
-      }
+      if (onSearchChange) onSearchChange(value);
     }, searchDelay);
 
     setSearchTimer(newTimer);
@@ -69,19 +62,13 @@ const CommonTable = ({
 
   const handleClearSearch = () => {
     setLocalSearchValue("");
-    if (searchTimer) {
-      clearTimeout(searchTimer);
-    }
-    if (onSearchChange) {
-      onSearchChange("");
-    }
+    if (searchTimer) clearTimeout(searchTimer);
+    if (onSearchChange) onSearchChange("");
   };
 
   useEffect(() => {
     return () => {
-      if (searchTimer) {
-        clearTimeout(searchTimer);
-      }
+      if (searchTimer) clearTimeout(searchTimer);
     };
   }, [searchTimer]);
 
@@ -121,11 +108,7 @@ const CommonTable = ({
                 placeholder={searchPlaceholder}
                 value={localSearchValue}
                 onChange={handleSearchChange}
-                sx={{
-                  "& .MuiOutlinedInput-root": {
-                    borderRadius: 2,
-                  },
-                }}
+                sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
@@ -150,7 +133,6 @@ const CommonTable = ({
           )}
 
           {showActionButton &&
-            roleId !== "ADMIN" &&
             (actionButton || (
               <Box sx={{ width: { xs: "100%", sm: "auto" } }}>
                 <Button
@@ -176,7 +158,6 @@ const CommonTable = ({
             ))}
         </Stack>
 
-        {/* ✅ Filter section below search */}
         {filterComponent && (
           <Box sx={{ mt: 2, width: "100%" }}>{filterComponent}</Box>
         )}
@@ -190,12 +171,8 @@ const CommonTable = ({
           loading={loading}
           sx={{
             border: 0,
-            "& .MuiDataGrid-cell:focus": {
-              outline: "none",
-            },
-            "& .MuiDataGrid-row:hover": {
-              backgroundColor: "action.hover",
-            },
+            "& .MuiDataGrid-cell:focus": { outline: "none" },
+            "& .MuiDataGrid-row:hover": { backgroundColor: "action.hover" },
           }}
           disableColumnFilter
           disableColumnMenu
@@ -205,7 +182,7 @@ const CommonTable = ({
           localeText={{
             noRowsLabel: noDataMessage,
             noResultsOverlayLabel: localSearchValue
-              ? `No results found for "${localSearchValue}"`
+              ? `No results for "${localSearchValue}"`
               : noDataMessage,
           }}
         />
@@ -225,13 +202,7 @@ const CommonTable = ({
       )}
 
       {rows?.length === 0 && !loading && (
-        <Box
-          sx={{
-            textAlign: "center",
-            py: 4,
-            color: "text.secondary",
-          }}
-        >
+        <Box sx={{ textAlign: "center", py: 4, color: "text.secondary" }}>
           <Typography variant="body1">
             {localSearchValue
               ? `No results found for "${localSearchValue}"`

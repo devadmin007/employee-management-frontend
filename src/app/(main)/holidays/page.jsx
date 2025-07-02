@@ -34,7 +34,7 @@ import { useSelector } from "react-redux";
 
 const Page = () => {
   const user = useSelector((state) => state.auth.userData);
-  const isAdminOrHR = user?.role === "ADMIN" || user?.role === "HR";
+  const isAdminOrHR = ["ADMIN", "HR"].includes(user?.role?.toUpperCase());
 
   const [open, setOpen] = useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
@@ -77,7 +77,7 @@ const Page = () => {
     },
     { field: "label", headerName: "Holiday", flex: 1, minWidth: 140 },
     {
-      field: "createdAt",
+      field: "date",
       headerName: "Date",
       flex: 1,
       minWidth: 140,
@@ -128,7 +128,7 @@ const Page = () => {
 
   useEffect(() => {
     getHoliday();
-  }, [page, search, limit]);
+  }, [page, limit, search]);
 
   const getHoliday = async () => {
     setIsLoading(true);
