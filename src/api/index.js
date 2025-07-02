@@ -408,7 +408,9 @@ export const createHolidayApi = async (payload) => {
 export const getAllHolidayApi = async (page, limit, search) => {
   let result;
   try {
-    result = await axiosInstanceApi.get(`/holidays?pagination=false`);
+    result = await axiosInstanceApi.get(
+      `/holidays?page=${page}&itemsPerPage=${limit}${search && `&search=${search}`}&pagination=true`
+    );
   } catch (e) {
     result = e;
   }
