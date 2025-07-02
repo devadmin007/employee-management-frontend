@@ -41,7 +41,7 @@ const Header = () => {
 
   useEffect(() => {
     fetchedDetails();
-  }, [id]);
+  }, []);
 
   const fetchedDetails = async () => {
     try {

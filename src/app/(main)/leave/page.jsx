@@ -99,7 +99,7 @@ const Page = () => {
         return <Typography>{(page - 1) * limit + rowIndex + 1}</Typography>;
       },
     },
-    { field: "employee_full_name", headerName: "Name", flex: 1, minWidth: 140 },
+    { field: "employeefullName", headerName: "Name", flex: 1, minWidth: 140 },
     {
       field: "createdAt",
       headerName: "Requested Date",
@@ -115,8 +115,8 @@ const Page = () => {
       },
     },
     {
-      field: "date",
-      headerName: "Leave Date",
+      field: "startDate",
+      headerName: "Start Leave Date",
       flex: 1,
       minWidth: 140,
 
@@ -131,8 +131,55 @@ const Page = () => {
     },
 
     {
-      field: "leave_type",
-      headerName: "Leave Type",
+      field: "start_leave_type",
+      headerName: "Start Leave Type",
+      flex: 1,
+      minWidth: 140,
+      renderCell: (params) => {
+        const type = params.value?.toUpperCase(); // Ensure it's uppercase
+        let chipProps = {
+          label: type,
+          variant: "outlined",
+          sx: { fontWeight: 600, width: "120px" },
+        };
+
+        switch (type) {
+          case "FULL_DAY":
+            chipProps.color = "error"; // red
+            break;
+          case "FIRST_HALF":
+            chipProps.color = "warning"; // orange
+            break;
+          case "SECOND_HALF":
+            chipProps.color = "info"; // blue
+            break;
+          default:
+            chipProps.color = "default";
+            chipProps.label = type || "-";
+        }
+
+        return <Chip {...chipProps} />;
+      },
+    },
+     {
+      field: "endDate",
+      headerName: "End Leave Date",
+      flex: 1,
+      minWidth: 140,
+
+      renderCell: (params) => {
+        const date = new Date(params.value);
+        return (
+          <Typography sx={{ textAlign: "center", my: 2 }}>
+            {date.toLocaleDateString("en-GB")}
+          </Typography>
+        );
+      },
+    },
+
+    {
+      field: "end_leave_type",
+      headerName: "End Leave Type",
       flex: 1,
       minWidth: 140,
       renderCell: (params) => {
@@ -226,7 +273,7 @@ const Page = () => {
     },
 
     {
-      field: "approver_full_name",
+      field: "approverfullName",
       headerName: "Approver",
       flex: 1,
       minWidth: 140,
