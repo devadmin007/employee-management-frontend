@@ -477,23 +477,37 @@ const AddLeave = ({ open, onClose, getLeave, editData, setUpdateId }) => {
   }, [open, reset]);
 
   const onSubmit = async (data) => {
-    const start = dayjs(data.startDate).format("YYYY-MM-DD");
-    const end = dayjs(data.endDate).format("YYYY-MM-DD");
+    const start = dayjs(data.startDate);
+    const end = dayjs(data.endDate);
+    const dateRangeTypes = data.dateRangeTypes || {};
 
-    const start_leave_type = isWeekend(start)
-      ? "WEEKEND"
-      : data.dateRangeTypes[start];
+    let totalDays = 0;
+    let current = start;
 
-    const end_leave_type = isWeekend(end)
-      ? "WEEKEND"
-      : data.dateRangeTypes[end];
+    while (current.isSameOrBefore(end, "day")) {
+      const dateStr = current.format("YYYY-MM-DD");
+
+      if (!isWeekend(dateStr)) {
+        const type = dateRangeTypes[dateStr] || "FULL_DAY";
+        if (type === "FULL_DAY") totalDays += 1;
+        else if (type === "FIRST_HALF" || type === "SECOND_HALF")
+          totalDays += 0.5;
+      }
+
+      current = current.add(1, "day");
+    }
 
     const payload = {
-      startDate: start,
-      start_leave_type,
-      endDate: end,
-      end_leave_type,
+      startDate: start.format("YYYY-MM-DD"),
+      start_leave_type: isWeekend(start)
+        ? "WEEKEND"
+        : dateRangeTypes[start.format("YYYY-MM-DD")],
+      endDate: end.format("YYYY-MM-DD"),
+      end_leave_type: isWeekend(end)
+        ? "WEEKEND"
+        : dateRangeTypes[end.format("YYYY-MM-DD")],
       comments: data.notes,
+      totalDays, // ✅ Added totalDays
     };
 
     try {

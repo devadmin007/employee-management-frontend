@@ -255,7 +255,7 @@ const Header = () => {
               </Typography>{" "}
               <Typography>
                 <strong>Leave Details:</strong>{" "}
-                {userData?.data?.userDetails?.leaveDetails?.leave}
+                {userData?.data?.leaveDetail?.leave}
               </Typography>{" "}
               {/* Add more fields if needed */}
             </Stack>

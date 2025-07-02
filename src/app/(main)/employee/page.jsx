@@ -53,6 +53,17 @@ const Page = () => {
     { field: "firstName", headerName: "First Name", flex: 1, minWidth: 140 },
     { field: "lastName", headerName: "Last Name", flex: 1, minWidth: 140 },
     { field: "role", headerName: "role", flex: 1, minWidth: 140 },
+    { field: "totalLeave", headerName: "Total Leave", flex: 1, minWidth: 140 },
+    {
+      field: "usedLeave",
+      headerName: "Used Leave",
+      flex: 1,
+      minWidth: 140,
+      renderCell: (params) => {
+        return <span>{params.value ?? 0}</span>; // Show 0 if value is null or undefined
+      },
+    },
+
     {
       field: "actions",
       headerName: "Actions",
@@ -88,9 +99,9 @@ const Page = () => {
   const handleClickOpen = () => {
     dispatch(clearEmployeeData());
     setEmployeeId("");
-    setFormData({})
+    setFormData({});
     setOpen(true);
-  }
+  };
   const handleClose = () => {
     setOpen(false);
   };
