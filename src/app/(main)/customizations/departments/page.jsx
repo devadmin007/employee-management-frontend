@@ -81,7 +81,11 @@ const Page = () => {
       minWidth: 140,
       renderCell: (params) => {
         const date = new Date(params.value);
-        return <Typography sx={{my:2 }}>{moment(date).format("DD/MM/YYYY")}</Typography>;
+        return (
+          <Typography sx={{ my: 2 }}>
+            {moment(date).format("DD/MM/YYYY")}
+          </Typography>
+        );
       },
     },
     {
@@ -236,9 +240,7 @@ const Page = () => {
 
   const updateDepartmentData = async (data) => {
     if (data.department.trim() === originalDepartmentValue.trim()) {
-      toast.warning(
-        "No changes detected."
-      );
+      toast.warning("No changes detected.");
       return;
     }
     setIsUpdating(true);
@@ -266,7 +268,7 @@ const Page = () => {
       <CommonTable
         rows={rows}
         columns={columns}
-        count={totalPages} // Total pages for pagination
+        count={totalPages}
         page={page}
         onPageChange={handlePageChange}
         onSearchChange={handleSearchChange}
@@ -274,17 +276,16 @@ const Page = () => {
         loading={isLoading}
         title="Department Management"
         searchPlaceholder="Search Department..."
-        noDataMessage="No department found"
-        showSearch={true}
-        showActionButton={true}
+        noDataMessage=""
+        showSearch
+        showActionButton
         actionButtonText="Add Department"
         onActionClick={handleClickOpen}
-        // Pagination props
         rowsPerPage={limit}
         onRowsPerPageChange={handleRowsPerPageChange}
-        showRowsPerPage={true}
+        showRowsPerPage
         rowsPerPageOptions={[5, 10, 25, 50]}
-        totalRows={totalCount} // Total records count
+        totalRows={totalCount}
         currentPageRows={rows?.length}
       />
 

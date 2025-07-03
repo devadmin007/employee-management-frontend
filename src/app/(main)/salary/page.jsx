@@ -110,14 +110,14 @@ const Page = () => {
       let result;
 
       if (roleId === "ADMIN" || roleId === "HR") {
-        result = await getAllSalaryApi(page, limit, search); 
+        result = await getAllSalaryApi(page, limit, search);
       } else {
         result = await getAllSalaryApi(page, limit, search, userId);
       }
 
       if (result?.data?.status === "success") {
         setRows(result.data.data.data);
-        const totalCount = result.data.data.totalCount;
+        const totalCount = result.data.data?.pagination?.totalCount;
         setTotalCount(totalCount);
         setTotalPages(Math.ceil(totalCount / limit));
       }
@@ -148,7 +148,7 @@ const Page = () => {
       <CommonTable
         rows={rows}
         columns={columns}
-        count={totalPages}
+        count={totalCount}
         page={page}
         onPageChange={handlePageChange}
         onSearchChange={handleSearchChange}
@@ -173,8 +173,8 @@ const Page = () => {
         aria-describedby="alert-dialog-description"
         PaperProps={{
           sx: {
-            width: "450px", // or any desired width
-            maxWidth: "90%", // optional: responsive fallback
+            width: "450px",
+            maxWidth: "90%",
           },
         }}
       >

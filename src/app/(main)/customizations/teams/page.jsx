@@ -285,7 +285,6 @@ const Page = () => {
         totalRows={totalCount}
         currentPageRows={rows?.length}
       />
-
       {/* Create Dialog */}
       <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
         <form onSubmit={handleSubmit(onSubmit)}>

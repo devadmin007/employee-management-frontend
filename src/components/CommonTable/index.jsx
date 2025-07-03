@@ -8,6 +8,7 @@ import {
   Typography,
   Button,
   Stack,
+  CircularProgress,
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import SearchIcon from "@mui/icons-material/Search";
@@ -74,6 +75,20 @@ const CommonTable = ({
 
   const shouldShowPagination = count > 1 || (showRowsPerPage && totalRows > 0);
 
+  const CustomGridLoader = () => {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          py: 4,
+        }}
+      >
+        <CircularProgress size={40} sx={{ color: "#F47B38" }} />
+      </Box>
+    );
+  };
   return (
     <Box>
       <Paper
@@ -81,7 +96,7 @@ const CommonTable = ({
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          mb: 2,
+          mb: 1,
           flexWrap: "wrap",
           gap: 2,
           padding: 2,
@@ -158,34 +173,44 @@ const CommonTable = ({
             ))}
         </Stack>
 
-        {filterComponent && (
-          <Box sx={{ mt: 2, width: "100%" }}>{filterComponent}</Box>
-        )}
+        {filterComponent && <Box sx={{ width: "100%" }}>{filterComponent}</Box>}
       </Paper>
 
-      <Paper sx={{ width: "100%", p: 2 }}>
-        <DataGrid
-          getRowId={(row) => row._id}
-          rows={rows}
-          columns={columns}
-          loading={loading}
-          sx={{
-            border: 0,
-            "& .MuiDataGrid-cell:focus": { outline: "none" },
-            "& .MuiDataGrid-row:hover": { backgroundColor: "action.hover" },
-          }}
-          disableColumnFilter
-          disableColumnMenu
-          disableRowSelectionOnClick
-          hideFooterPagination
-          hideFooter
-          localeText={{
-            noRowsLabel: noDataMessage,
-            noResultsOverlayLabel: localSearchValue
-              ? `No results for "${localSearchValue}"`
-              : noDataMessage,
-          }}
-        />
+      <Paper sx={{ width: "100%", p: 2, minHeight: 300 }}>
+        {loading ? (
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              minHeight: 250,
+            }}
+          >
+            <CircularProgress size={40} sx={{ color: "#F47B38" }} />
+          </Box>
+        ) : (
+          <DataGrid
+            getRowId={(row) => row._id}
+            rows={rows}
+            columns={columns}
+            sx={{
+              border: 0,
+              "& .MuiDataGrid-cell:focus": { outline: "none" },
+              "& .MuiDataGrid-row:hover": { backgroundColor: "action.hover" },
+              maxHeight: "290px",
+              overflow: "auto",
+            }}
+            disableColumnFilter
+            disableColumnMenu
+            disableRowSelectionOnClick
+            localeText={{
+              noRowsLabel: noDataMessage,
+              noResultsOverlayLabel: localSearchValue
+                ? `No results for "${localSearchValue}"`
+                : noDataMessage,
+            }}
+          />
+        )}
       </Paper>
 
       {shouldShowPagination && (

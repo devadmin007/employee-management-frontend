@@ -269,25 +269,24 @@ const Page = () => {
       <CommonTable
         rows={rows}
         columns={columns}
-        count={totalPages} // Total pages for pagination
+        count={totalPages}
         page={page}
         onPageChange={handlePageChange}
         onSearchChange={handleSearchChange}
         searchValue={search}
         loading={isLoading}
         title="Designation Management"
-        searchPlaceholder="Search DEsignations..."
+        searchPlaceholder="Search Designations..."
         noDataMessage="No designations found"
-        showSearch={true}
-        showActionButton={true}
+        showSearch
+        showActionButton
         actionButtonText="Add Designation"
         onActionClick={handleClickOpen}
-        // Pagination props
         rowsPerPage={limit}
         onRowsPerPageChange={handleRowsPerPageChange}
-        showRowsPerPage={true}
+        showRowsPerPage
         rowsPerPageOptions={[5, 10, 25, 50]}
-        totalRows={totalCount} // Total records count
+        totalRows={totalCount}
         currentPageRows={rows?.length}
       />
 

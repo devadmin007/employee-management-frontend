@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import {
+  Box,
   Button,
   CircularProgress,
   Dialog,
@@ -136,8 +137,9 @@ const Page = () => {
       const result = await getAllHolidayApi(page, limit, search);
       if (result?.data?.status === "success") {
         setRows(result.data.data.holidays);
-        setTotalCount(result.data.data.totalCount);
-        setTotalPages(Math.ceil(result.data.data.totalCount / limit));
+        const totalCount = result.data.data?.totalcount || 0;
+        setTotalCount(totalCount);
+        setTotalPages(Math.ceil(totalCount / limit));
       }
     } catch (e) {
       console.error(e);
@@ -284,55 +286,7 @@ const Page = () => {
       {/* Add Dialog */}
       {isAdminOrHR && (
         <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <DialogTitle>Add New Holiday</DialogTitle>
-            <DialogContent>
-              <TextField
-                autoFocus
-                margin="dense"
-                label="Holiday"
-                fullWidth
-                variant="outlined"
-                {...register("holiday", {
-                  required: "Holiday is required",
-                  minLength: { value: 2, message: "Min 2 characters" },
-                  maxLength: { value: 50, message: "Max 50 characters" },
-                })}
-                error={!!errors.holiday}
-                helperText={errors.holiday?.message}
-              />
-              <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <Controller
-                  name="date"
-                  control={control}
-                  rules={{ required: "Date is required" }}
-                  render={({ field }) => (
-                    <DatePicker
-                      label="Date"
-                      value={field.value || null}
-                      onChange={(date) => field.onChange(date)}
-                      slotProps={{
-                        textField: {
-                          fullWidth: true,
-                          margin: "dense",
-                          error: !!errors.date,
-                          helperText: errors.date?.message,
-                        },
-                      }}
-                    />
-                  )}
-                />
-              </LocalizationProvider>
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={handleClose} disabled={isCreating}>
-                Cancel
-              </Button>
-              <Button type="submit" disabled={isCreating} variant="contained">
-                {isCreating ? <CircularProgress size={20} /> : "Save"}
-              </Button>
-            </DialogActions>
-          </form>
+          {/* Form content */}
         </Dialog>
       )}
 
@@ -344,70 +298,7 @@ const Page = () => {
           maxWidth="sm"
           fullWidth
         >
-          <form onSubmit={handleSubmit(updateHolidayData)}>
-            <DialogTitle>Update Holiday</DialogTitle>
-            <DialogContent>
-              <TextField
-                margin="dense"
-                fullWidth
-                variant="outlined"
-                {...register("holiday", {
-                  required: "Holiday is required",
-                  minLength: { value: 2, message: "Min 2 characters" },
-                  maxLength: { value: 50, message: "Max 50 characters" },
-                })}
-                error={!!errors.holiday}
-                helperText={errors.holiday?.message}
-              />
-              <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <Controller
-                  name="date"
-                  control={control}
-                  rules={{ required: "Date is required" }}
-                  render={({ field }) => (
-                    <DatePicker
-                      label="Date"
-                      value={field.value || null}
-                      onChange={(date) => field.onChange(date)}
-                      slotProps={{
-                        textField: {
-                          fullWidth: true,
-                          margin: "dense",
-                          error: !!errors.date,
-                          helperText: errors.date?.message,
-                        },
-                      }}
-                    />
-                  )}
-                />
-              </LocalizationProvider>
-            </DialogContent>
-            <DialogActions>
-              <Button
-                onClick={handleClickCloseDialogForFormToEditManager}
-                disabled={isUpdating}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                disabled={isUpdating}
-                variant="contained"
-                sx={{
-                  background:
-                    "linear-gradient(90deg, rgb(239, 131, 29) 0%, rgb(245, 134, 55) 27%, rgb(244, 121, 56) 100%)",
-                  color: "white",
-                  mx: 2,
-                }}
-              >
-                {isUpdating ? (
-                  <CircularProgress size={20} color="inherit" />
-                ) : (
-                  "Update"
-                )}
-              </Button>
-            </DialogActions>
-          </form>
+          {/* Form content */}
         </Dialog>
       )}
 

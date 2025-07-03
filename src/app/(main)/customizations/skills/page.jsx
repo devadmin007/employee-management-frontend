@@ -80,7 +80,11 @@ const Page = () => {
       minWidth: 140,
       renderCell: (params) => {
         const date = new Date(params.value);
-        return <Typography sx={{my:2 }}>{date.toLocaleDateString("en-GB")}</Typography>;
+        return (
+          <Typography sx={{ my: 2 }}>
+            {date.toLocaleDateString("en-GB")}
+          </Typography>
+        );
       },
     },
     {
@@ -233,9 +237,7 @@ const Page = () => {
   const updateSkillData = async (data) => {
     // Check if the data has actually changed
     if (data.skill.trim() === originalSkillValue.trim()) {
-      toast.warning(
-        "No changes detected."
-      );
+      toast.warning("No changes detected.");
       return;
     }
 
@@ -275,14 +277,15 @@ const Page = () => {
         showActionButton={true}
         actionButtonText="Add Skills"
         onActionClick={handleClickOpen}
-        // Pagination props
         rowsPerPage={limit}
         onRowsPerPageChange={handleRowsPerPageChange}
         showRowsPerPage={true}
         rowsPerPageOptions={[5, 10, 25, 50]}
-        totalRows={totalCount} // Total records count
+        totalRows={totalCount}
         currentPageRows={rows?.length}
       />
+
+      {/* Dialogs remain the same */}
 
       {/* Create Dialog */}
       <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>

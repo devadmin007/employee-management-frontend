@@ -6,6 +6,7 @@ import React, { useEffect, useState } from "react";
 import {
   Box,
   Button,
+  CircularProgress,
   FormControl,
   IconButton,
   InputLabel,
@@ -161,7 +162,7 @@ const Page = () => {
         return <Chip {...chipProps} />;
       },
     },
-     {
+    {
       field: "endDate",
       headerName: "End Leave Date",
       flex: 1,
@@ -183,7 +184,7 @@ const Page = () => {
       flex: 1,
       minWidth: 140,
       renderCell: (params) => {
-        const type = params.value?.toUpperCase(); // Ensure it's uppercase
+        const type = params.value?.toUpperCase();
         let chipProps = {
           label: type,
           variant: "outlined",
@@ -334,7 +335,6 @@ const Page = () => {
         const isHRorPM =
           user?.role === "HR" || user?.role === "PROJECT_MANAGER";
 
-        // EMPLOYEE: can edit/delete only if status is PENDING
         if (isEmployee) {
           if (status !== "PENDING") {
             return <Typography sx={{ pl: 4 }}>-</Typography>;
@@ -366,12 +366,10 @@ const Page = () => {
           );
         }
 
-        // HR or PM: no edit/delete access — show dash
         if (isHRorPM) {
           return <Typography sx={{ pl: 4 }}>-</Typography>;
         }
 
-        // Default for safety — no actions
         return null;
       },
     });
@@ -392,13 +390,13 @@ const Page = () => {
         search,
         roleFilter,
         statusFilter,
-        startDate && endDate ? startDate : "", // only pass if both present
+        startDate && endDate ? startDate : "",
         startDate && endDate ? endDate : ""
       );
 
       if (result?.data?.status === "success") {
         setRows(result.data.data.data);
-        const totalCount = result.data.data.totalCount;
+        const totalCount = result.data.data?.pagination?.totalCount || 0;
         setTotalCount(totalCount);
         setTotalPages(Math.ceil(totalCount / limit));
       }
@@ -531,7 +529,7 @@ const Page = () => {
   };
 
   const leaveFilters = (
-    <Box sx={{ mt: 2, width: "100%" }}>
+    <Box sx={{  width: "100%" }}>
       <LocalizationProvider dateAdapter={AdapterDayjs}>
         <Grid container spacing={2}>
           <Grid item xs={12} sm={6} md={3}>
@@ -623,50 +621,50 @@ const Page = () => {
     </Box>
   );
 
-  return (
-    <Stack sx={{ p: 4 }}>
-      <CommonTable
-        rows={rows}
-        columns={columns}
-        count={totalPages} // Total pages for pagination
-        page={page}
-        onPageChange={handlePageChange}
-        onSearchChange={handleSearchChange}
-        searchValue={search}
-        loading={isLoading}
-        title="Leave Management"
-        searchPlaceholder="Search Name..."
-        noDataMessage=""
-        showSearch={true}
-        showActionButton={true}
-        actionButtonText="Apply Leave"
-        onActionClick={handleClickOpen}
-        // Pagination props
-        rowsPerPage={limit}
-        onRowsPerPageChange={handleRowsPerPageChange}
-        showRowsPerPage={true}
-        rowsPerPageOptions={[5, 10, 25, 50]}
-        totalRows={totalCount} // Total records count
-        currentPageRows={rows?.length}
-        filterComponent={leaveFilters}
-      />
+ return (
+  <Stack sx={{ p: 4 }}>
+    <CommonTable
+      rows={rows}
+      columns={columns}
+      count={totalPages}
+      page={page}
+      onPageChange={handlePageChange}
+      onSearchChange={handleSearchChange}
+      searchValue={search}
+      loading={isLoading} // This controls the internal loader of CommonTable
+      title="Leave Management"
+      searchPlaceholder="Search Name..."
+      noDataMessage=""
+      showSearch
+      showActionButton
+      actionButtonText="Apply Leave"
+      onActionClick={handleClickOpen}
+      rowsPerPage={limit}
+      onRowsPerPageChange={handleRowsPerPageChange}
+      showRowsPerPage
+      rowsPerPageOptions={[5, 10, 25, 50]}
+      totalRows={totalCount}
+      currentPageRows={rows?.length}
+      filterComponent={leaveFilters}
+    />
 
-      <AddLeave
-        open={openAddLeaveModal}
-        onClose={onCloseAddLeaveModal}
-        getLeave={getLeave}
-        editData={editData}
-        setUpdateId={setUpdateId}
-      />
+    <AddLeave
+      open={openAddLeaveModal}
+      onClose={onCloseAddLeaveModal}
+      getLeave={getLeave}
+      editData={editData}
+      setUpdateId={setUpdateId}
+    />
 
-      <CommonDeleteModal
-        onClose={handleCloseDeleteDialog}
-        open={openDeleteDialog}
-        isLoading={isDeleting}
-        onClick={onDelete}
-      />
-    </Stack>
-  );
+    <CommonDeleteModal
+      onClose={handleCloseDeleteDialog}
+      open={openDeleteDialog}
+      isLoading={isDeleting}
+      onClick={onDelete}
+    />
+  </Stack>
+);
+
 };
 
 export default Page;

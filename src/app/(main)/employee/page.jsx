@@ -126,7 +126,6 @@ const Page = () => {
       }
     } catch (error) {
       console.error("Failed to employee", error);
-      // toast.error("Failed to fetch skills");
     } finally {
       setIsLoading(false);
     }
@@ -220,7 +219,7 @@ const Page = () => {
               alignItems="center"
               height="300px"
             >
-              <CircularProgress />
+              <CircularProgress sx={{ color:'#F47B38' }} />
             </Box>
           ) : rows.length > 0 ? (
             <DataGrid
@@ -290,11 +289,33 @@ const Page = () => {
             count={Math.ceil(totalRows / limit)}
             onChange={(e, value) => setPage(value)}
             color="primary"
+            variant="outlined"
             shape="rounded"
-            showFirstButton
-            showLastButton
-            siblingCount={1}
-            boundaryCount={1}
+            sx={{
+            "& .MuiPaginationItem-root": {
+              fontSize: "14px",
+              fontWeight: 500,
+              minWidth: "32px",
+              height: "32px",
+            },
+            "& .MuiPaginationItem-page": {
+              "&:hover": {
+                backgroundColor: "primary.light",
+                color: "white",
+              },
+            },
+            "& .Mui-selected": {
+              backgroundColor: "primary.main !important",
+              color: "white",
+              "&:hover": {
+                backgroundColor: "primary.dark !important",
+              },
+            },
+          }}
+            // showFirstButton
+            // showLastButton
+            // siblingCount={1}
+            // boundaryCount={1}
           />
         </Paper>
       </Box>
