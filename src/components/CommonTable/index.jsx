@@ -96,7 +96,7 @@ const CommonTable = ({
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          mb: 1,
+          mb: 2,
           flexWrap: "wrap",
           gap: 2,
           padding: 2,
@@ -203,6 +203,8 @@ const CommonTable = ({
             disableColumnFilter
             disableColumnMenu
             disableRowSelectionOnClick
+            hideFooterPagination 
+            hideFooter
             localeText={{
               noRowsLabel: noDataMessage,
               noResultsOverlayLabel: localSearchValue
