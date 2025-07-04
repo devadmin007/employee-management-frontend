@@ -17,6 +17,9 @@ import { Stack, InputAdornment, IconButton } from "@mui/material";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import { useAuth } from "@/hooks/useAuth";
+import ForgotPassword from "@/components/forgotpassword/page";
+import Page from "@/components/forgotpassword/page";
+import ForgotPasswordDialog from "@/components/forgotpassword/page";
 
 const loginSchema = yup.object().shape({
   email: yup.string().required("Required"),
@@ -56,16 +59,18 @@ const Login = () => {
   const dispatch = useDispatch();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [forgotPassword, setForgotDialogOpen] = useState(false);
+
+  const onClose = () => {
+    setForgotDialogOpen(false);
+  };
 
   const {
     control,
     handleSubmit,
     formState: { errors },
   } = useForm({
-    defaultValues: {
-      email: "",
-      password: "",
-    },
+    defaultValues: { email: "", password: "" },
     resolver: yupResolver(loginSchema),
   });
 
@@ -88,126 +93,145 @@ const Login = () => {
   return (
     <SignupMainContainer>
       <SignupContainer>
-        <Typography
-          sx={{
-            fontWeight: 600,
-            textAlign: "center",
-            fontSize: {
-              xs: "24px",
-              sm: "28px",
-              md: "32px",
-            },
-          }}
-        >
-          Login
-        </Typography>
-
-        <Typography
-          sx={{
-            mt: 1,
-            fontWeight: 200,
-            fontSize: {
-              xs: "12px",
-              sm: "14px",
-              md: "16px",
-            },
-            textAlign: "center",
-          }}
-        >
-          Welcome user, please login to continue
-        </Typography>
-
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <Box sx={{ my: 3 }}>
-            <Box sx={{ mt: 1, width: "100%" }}>
-              <Typography variant="subtitle1">Email</Typography>
-              <Controller
-                name="email"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    variant="outlined"
-                    placeholder="Enter Email"
-                    fullWidth
-                    error={Boolean(errors.email)}
-                    helperText={errors.email?.message}
-                  />
-                )}
-              />
-
-              <Typography variant="subtitle1" sx={{ mt: 2 }}>
-                Password
-              </Typography>
-              <Controller
-                name="password"
-                control={control}
-                defaultValue=""
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    placeholder="Enter Password"
-                    type={showPassword ? "text" : "password"}
-                    variant="outlined"
-                    fullWidth
-                    error={Boolean(errors.password)}
-                    helperText={errors.password?.message}
-                    InputProps={{
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          <IconButton
-                            onClick={() => setShowPassword((prev) => !prev)}
-                            edge="end"
-                          >
-                            {showPassword ? <VisibilityOff /> : <Visibility />}
-                          </IconButton>
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
-                )}
-              />
-            </Box>
-
-            <Stack
-              direction={"row"}
-              spacing={1}
-              mt={2}
-              alignItems={"center"}
-              justifyContent={"center"}
-            >
-              <Typography>Don't have account?</Typography>
-              <Typography
-                sx={{ color: "blue", cursor: "pointer" }}
-                onClick={() => router.push("/signup")}
-              >
-                Signup
-              </Typography>
-            </Stack>
-          </Box>
-
-          <Box sx={{ textAlign: "center" }}>
-            <Button
-              disabled={isLoading}
-              type="submit"
-              variant="contained"
+        {forgotPassword ? (
+          <ForgotPasswordDialog open={forgotPassword} onClose={onClose} />
+        ) : (
+          <>
+            <Typography
               sx={{
-                width: "100%",
-                height: "45px",
-                fontSize: {
-                  xs: 14,
-                  sm: 16,
-                  md: 18,
-                },
-                background:
-                  "linear-gradient(90deg, rgb(239, 131, 29) 0%, rgb(245, 134, 55) 27%, rgb(244, 121, 56) 100%)",
-                textTransform: "none",
+                fontWeight: 600,
+                textAlign: "center",
+                fontSize: { xs: "24px", sm: "28px", md: "32px" },
               }}
             >
-              {isLoading ? "Logging in..." : "Login"}
-            </Button>
-          </Box>
-        </form>
+              Login
+            </Typography>
+
+            <Typography
+              sx={{
+                mt: 1,
+                fontWeight: 200,
+                fontSize: { xs: "12px", sm: "14px", md: "16px" },
+                textAlign: "center",
+              }}
+            >
+              Welcome user, please login to continue
+            </Typography>
+
+            <form onSubmit={handleSubmit(onSubmit)}>
+              <Box sx={{ my: 3 }}>
+                <Box sx={{ mt: 1, width: "100%" }}>
+                  <Typography variant="subtitle1">Email</Typography>
+                  <Controller
+                    name="email"
+                    control={control}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        variant="outlined"
+                        placeholder="Enter Email"
+                        fullWidth
+                        error={Boolean(errors.email)}
+                        helperText={errors.email?.message}
+                      />
+                    )}
+                  />
+
+                  <Typography variant="subtitle1" sx={{ mt: 2 }}>
+                    Password
+                  </Typography>
+                  <Controller
+                    name="password"
+                    control={control}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        placeholder="Enter Password"
+                        type={showPassword ? "text" : "password"}
+                        variant="outlined"
+                        fullWidth
+                        error={Boolean(errors.password)}
+                        helperText={errors.password?.message}
+                        InputProps={{
+                          endAdornment: (
+                            <InputAdornment position="end">
+                              <IconButton
+                                onClick={() => setShowPassword((prev) => !prev)}
+                                edge="end"
+                              >
+                                {showPassword ? (
+                                  <VisibilityOff />
+                                ) : (
+                                  <Visibility />
+                                )}
+                              </IconButton>
+                            </InputAdornment>
+                          ),
+                        }}
+                      />
+                    )}
+                  />
+                </Box>
+
+                <Stack
+                  direction="row"
+                  spacing={1}
+                  mt={2}
+                  alignItems="center"
+                  justifyContent="center"
+                >
+                  <Typography>Don't have account?</Typography>
+                  <Typography
+                    sx={{ color: "blue", cursor: "pointer" }}
+                    onClick={() => router.push("/signup")}
+                  >
+                    Signup
+                  </Typography>
+                </Stack>
+
+                <Stack
+                  direction="row"
+                  spacing={1}
+                  mt={1}
+                  alignItems="center"
+                  justifyContent="center"
+                >
+                  <Typography>Forgot Your Password?</Typography>
+                  <Typography
+                    sx={{
+                      ml: 1,
+                      textDecoration: "underline",
+                      cursor: "pointer",
+                      color:'blue'
+                    }}
+                    variant="subtitle1"
+                    onClick={() => setForgotDialogOpen(true)}
+                  >
+                    Reset It
+                  </Typography>
+                </Stack>
+              </Box>
+
+              <Box sx={{ textAlign: "center" }}>
+                <Button
+                  disabled={isLoading}
+                  type="submit"
+                  variant="contained"
+                  sx={{
+                    width: "100%",
+                    height: "45px",
+                    fontSize: { xs: 14, sm: 16, md: 18 },
+                    background:
+                      "linear-gradient(90deg, rgb(239, 131, 29) 0%, rgb(245, 134, 55) 27%, rgb(244, 121, 56) 100%)",
+                    textTransform: "none",
+                  }}
+                >
+                  {isLoading ? "Logging in..." : "Login"}
+                </Button>
+              </Box>
+            </form>
+          </>
+        )}
       </SignupContainer>
     </SignupMainContainer>
   );

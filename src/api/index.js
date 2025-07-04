@@ -575,3 +575,23 @@ export const getFetchedUserDetailsApi = async (id) => {
   }
   return result;
 };
+
+export const forgotPassword = async (payload) => {
+  let result;
+  try {
+    result = await axiosInstanceApi.post(`/resetpassword-link`, payload);
+  } catch (e) {
+    result = e;
+  }
+  return result;
+};
+
+export const resetPassword = async (payload) => {
+  let result;
+  try {
+    result = await axiosInstanceApi.post(`/password-reset`, payload);
+  } catch (e) {
+    result = e;
+  }
+  return result;
+};
