@@ -73,7 +73,7 @@ export default function EmployeeStepperForm({
           const response = await createEmployeeApi(data);
           if (response?.data) {
             setEmpId(response?.data?.data?.userId);
-            setRole(response?.data?.data?.roledata);
+            setRole(response?.data?.data?.roledata?.role);
 
             dispatch(
               addEmployeeDataInfo({

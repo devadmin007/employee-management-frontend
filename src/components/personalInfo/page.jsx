@@ -460,6 +460,9 @@ const PersonalInfoTab = ({
                           field.onChange(null);
                         }
                       }}
+                      shouldDisableDate={(date) => {
+                        return date.isAfter(dayjs(), 'day');
+                      }}
                       slotProps={{
                         textField: {
                           fullWidth: true,

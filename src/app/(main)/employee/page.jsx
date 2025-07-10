@@ -20,12 +20,14 @@ import { DataGrid } from "@mui/x-data-grid";
 import SearchIcon from "@mui/icons-material/Search";
 
 import EmployeeDialogContent from "@/components/employeeDialogContent/page";
-import { fetchAllEmployeeDetails } from "@/api";
+import { deleteEmployeeApi, fetchAllEmployeeDetails } from "@/api";
 import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { toast } from "react-toastify";
 import DebaunceInput from "@/utils/DebaunceInput";
 import { useDispatch } from "react-redux";
 import { clearEmployeeData } from "@/redux/slice/employeeDataSlice";
+import CommonDeleteModal from "@/components/CommonDelete";
 
 const Page = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -37,7 +39,19 @@ const Page = () => {
   const [rows, setRows] = useState([]);
   const [totalRows, setTotalRows] = useState(0);
   const [formData, setFormData] = useState({});
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [deleteId, setDeleteId] = useState([]);
+  const [isDeleting, setIsDeleting] = useState(false);
   const dispatch = useDispatch();
+
+  const handleClickOpenDialog = (id) => {
+    setDeleteId(id);
+    setOpenDeleteDialog(true);
+  };
+
+  const handleCloseDeleteDialog = () => {
+    setOpenDeleteDialog(false);
+  };
 
   const columns = [
     {
@@ -78,6 +92,14 @@ const Page = () => {
                 onClick={() => handleEditClick(params.row)}
               >
                 <EditIcon />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Delete Employee">
+              <IconButton
+                color="error"
+                onClick={() => handleClickOpenDialog(params?.id)}
+              >
+                <DeleteIcon sx={{ color: "#d32f2f" }} />
               </IconButton>
             </Tooltip>
           </Stack>
@@ -129,6 +151,25 @@ const Page = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const onDelete = async () => {
+    setIsDeleting(true);
+    try {
+      const result = await deleteEmployeeApi(deleteId);
+      console.log("res", result);
+
+      if (result?.data?.status === "success") {
+        toast.success(result?.data?.message || "Employee deleted successfully");
+        fetchEmployee();
+      }
+    } catch (e) {
+      console.log(e);
+      toast.error("Failed to delete Employee");
+    } finally {
+      setIsDeleting(false);
+    }
+    handleCloseDeleteDialog();
   };
 
   useEffect(() => {
@@ -219,7 +260,7 @@ const Page = () => {
               alignItems="center"
               height="300px"
             >
-              <CircularProgress sx={{ color:'#F47B38' }} />
+              <CircularProgress sx={{ color: '#F47B38' }} />
             </Box>
           ) : rows.length > 0 ? (
             <DataGrid
@@ -292,33 +333,42 @@ const Page = () => {
             variant="outlined"
             shape="rounded"
             sx={{
-            "& .MuiPaginationItem-root": {
-              fontSize: "14px",
-              fontWeight: 500,
-              minWidth: "32px",
-              height: "32px",
-            },
-            "& .MuiPaginationItem-page": {
-              "&:hover": {
-                backgroundColor: "primary.light",
+              "& .MuiPaginationItem-root": {
+                fontSize: "14px",
+                fontWeight: 500,
+                minWidth: "32px",
+                height: "32px",
+              },
+              "& .MuiPaginationItem-page": {
+                "&:hover": {
+                  backgroundColor: "primary.light",
+                  color: "white",
+                },
+              },
+              "& .Mui-selected": {
+                backgroundColor: "primary.main !important",
                 color: "white",
+                "&:hover": {
+                  backgroundColor: "primary.dark !important",
+                },
               },
-            },
-            "& .Mui-selected": {
-              backgroundColor: "primary.main !important",
-              color: "white",
-              "&:hover": {
-                backgroundColor: "primary.dark !important",
-              },
-            },
-          }}
-            // showFirstButton
-            // showLastButton
-            // siblingCount={1}
-            // boundaryCount={1}
+            }}
+          // showFirstButton
+          // showLastButton
+          // siblingCount={1}
+          // boundaryCount={1}
           />
         </Paper>
       </Box>
+
+      {openDeleteDialog && (
+        <CommonDeleteModal
+          onClose={handleCloseDeleteDialog}
+          open={openDeleteDialog}
+          isLoading={isDeleting}
+          onClick={onDelete}
+        />
+      )}
     </Stack>
   );
 };

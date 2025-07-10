@@ -52,14 +52,14 @@ const SettingTab = ({
 
   useEffect(() => {
     if (userId && defaultValues) {
-      setValue("joiningDate", defaultValues?.joiningDate || "-"),
-        setValue("probationDate", defaultValues?.probationDate || "-"),
+      setValue("joiningDate", defaultValues?.joiningDate || ""),
+        setValue("probationDate", defaultValues?.probationDate || ""),
         // setValue("relieivingDate", defaultValues?.relieivingDate || ""),
         setValue("currentSalary", defaultValues?.currentSalary || ""),
-        setValue("panNo", defaultValues?.panNo || "-"),
-        setValue("pfNo", defaultValues?.pfNo || "-"),
-        setValue("uanDetail", defaultValues?.uanDetail || "-"),
-        setValue("previousExperience", defaultValues?.previousExperience || "-")
+        setValue("panNo", defaultValues?.panNo || ""),
+        setValue("pfNo", defaultValues?.pfNo || ""),
+        setValue("uanDetail", defaultValues?.uanDetail || ""),
+        setValue("previousExperience", defaultValues?.previousExperience || "")
     }
   }, [userId, defaultValues])
 

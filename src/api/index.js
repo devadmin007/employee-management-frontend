@@ -595,3 +595,13 @@ export const resetPassword = async (payload) => {
   }
   return result;
 };
+
+export const deleteEmployeeApi = async (id) => {
+  let result;
+  try {
+    result = await axiosInstanceApi.delete(`/user-delete/${id}`);
+  } catch (e) {
+    result = e;
+  }
+  return result;
+};

@@ -19,7 +19,6 @@ const settingSchema = yup.object().shape({
     }),
   currentSalary: yup
     .string()
-    .required("Current Salary is required")
     .matches(/^\d+$/, "Salary must contain only numbers"),
   panNo: yup
     .string()
