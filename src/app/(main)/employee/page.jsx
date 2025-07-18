@@ -28,6 +28,8 @@ import DebaunceInput from "@/utils/DebaunceInput";
 import { useDispatch } from "react-redux";
 import { clearEmployeeData } from "@/redux/slice/employeeDataSlice";
 import CommonDeleteModal from "@/components/CommonDelete";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import { useRouter } from "next/navigation";
 
 const Page = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -43,6 +45,7 @@ const Page = () => {
   const [deleteId, setDeleteId] = useState([]);
   const [isDeleting, setIsDeleting] = useState(false);
   const dispatch = useDispatch();
+  const router = useRouter();
 
   const handleClickOpenDialog = (id) => {
     setDeleteId(id);
@@ -81,11 +84,19 @@ const Page = () => {
     {
       field: "actions",
       headerName: "Actions",
-      width: 100,
+      minWidth: 140,
       sortable: false,
       renderCell: (params) => {
         return (
           <Stack direction="row" spacing={1}>
+            <Tooltip title="View Employee">
+              <IconButton
+                size="small"
+                onClick={() => router.push(`/employee/${params?.id}`)}
+              >
+                <VisibilityIcon fontSize="small" sx={{ color: "#757575" }} />
+              </IconButton>
+            </Tooltip>
             <Tooltip title="Edit Employee">
               <IconButton
                 color="primary"
