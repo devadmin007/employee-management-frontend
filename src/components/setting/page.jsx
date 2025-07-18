@@ -24,6 +24,7 @@ const SettingTab = ({
     formState: { errors },
   } = useForm({
     resolver: yupResolver(settingSchema),
+    mode: "onChange",
     defaultValues: {
       joiningDate: defaultValues?.joiningDate || "",
       probationDate: defaultValues?.probationDate || "",
@@ -44,7 +45,7 @@ const SettingTab = ({
     });
     formData.append("step", 3);
 
-    console.log("Form data:", Object.fromEntries(formData));
+    // console.log("Form data:", Object.fromEntries(formData));
     if (onSubmit) {
       onSubmit(formData);
     }
@@ -240,7 +241,7 @@ const SettingTab = ({
                     label="Previous Experience (Yrs)"
                     variant="outlined"
                     onChange={(e) => {
-                      field?.onChange(e.target.value.replace(/[^0-9]/g, '').slice(0, 4));
+                      field?.onChange(e.target.value.replace(/[^0-9]/g, '').slice(0, 2));
                     }}
                     error={!!errors.previousExperience}
                     helperText={errors.previousExperience?.message}
@@ -260,7 +261,7 @@ const SettingTab = ({
               borderColor: "divider",
             }}
           >
-            <Button variant="outlined" onClick={onBack}>
+            <Button variant="outlined" onClick={() => onBack()}>
               Back
             </Button>
             <Button

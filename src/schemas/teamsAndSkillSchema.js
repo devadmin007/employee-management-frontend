@@ -1,11 +1,13 @@
 import * as yup from "yup";
 
 const teamsAndSkillSchema = (role) => yup.object().shape({
-  managerId: role !== "EMPLOYEE" 
-    ? yup.string().optional()
-    : yup.string().required("Manager is required"),
+  // managerId: role !== "EMPLOYEE" 
+  //   ? yup.string().optional()
+  //   : yup.string().required("Manager is required"),
+   managerId: yup.string().nullable(), 
   designationId: yup.string().required("Designation is required"),
-  teamId: yup.string().required("Team Name is required"),
+  // teamId: yup.string().required("Team Name is required"),
+   teamId: yup.string().nullable(), // n
   department: yup.string().required("Department is required"),
   primarySkills: yup
     .array()

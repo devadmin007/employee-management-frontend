@@ -98,7 +98,7 @@ const PersonalInfoTab = ({
     });
     formData.append("step", 1);
 
-    console.log("Form data:", Object.fromEntries(formData));
+    // console.log("Form data:", Object.fromEntries(formData));
     if (onSubmit) {
       onSubmit(formData);
     }
@@ -706,7 +706,7 @@ const PersonalInfoTab = ({
               borderColor: "divider",
             }}
           >
-            <Button variant="outlined" onClick={onBack}>
+            <Button variant="outlined" onClick={() => onBack()}>
               Back
             </Button>
             <Button

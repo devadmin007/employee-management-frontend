@@ -41,6 +41,7 @@ export default function EmployeeStepperForm({
 
   const [activeStep, setActiveStep] = useState(0);
   const [empId, setEmpId] = useState(null);
+  const [allowClose, setAllowClose] = useState(false);
 
   const [isBack, setIsBack] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -55,6 +56,23 @@ export default function EmployeeStepperForm({
   const handleBack = () => {
     setIsBack(true);
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
+  };
+
+  const handleCloseModal = (event, reason) => {
+    if (allowClose || reason === "escapeKeyDown") {
+      onClose();
+      setAllowClose(false);
+    }
+  };
+
+  const handleBackButton = () => {
+    setAllowClose(true);
+    handleBack();
+  };
+
+  const handleSuccessModalClose = () => {
+    setAllowClose(true);
+    onClose();
   };
 
   const onSubmit = async (data) => {
@@ -359,7 +377,7 @@ export default function EmployeeStepperForm({
       default:
         return (
           <SuccessModal
-            onClose={onClose}
+            onClose={handleSuccessModalClose}
             setActiveStep={setActiveStep}
             fetchEmployee={fetchEmployee}
           />
@@ -396,7 +414,7 @@ export default function EmployeeStepperForm({
   return (
     <Dialog
       open={open}
-      onClose={onClose}
+      onClose={handleCloseModal}
       PaperProps={{
         sx: {
           width: "900px",
