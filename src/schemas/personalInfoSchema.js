@@ -8,7 +8,7 @@ const personalInfoSchema = yup.object().shape({
       if (!value) return false;
       if (typeof value === "string") return true;
       if (value instanceof File) {
-        return value.size <= 2000000;
+        return value.size <= 5000000;
       }
       return true;
     })

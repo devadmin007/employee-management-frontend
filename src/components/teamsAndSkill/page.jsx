@@ -81,8 +81,6 @@ const TeamsAndSkillTab = ({
 
     formData.append("step", 2);
 
-    // console.log("FormData entries:", Object.fromEntries(formData));
-
     if (onSubmit) {
       onSubmit(formData);
     }
@@ -161,8 +159,8 @@ const TeamsAndSkillTab = ({
   useEffect(() => {
     if (userId && defaultValues) {
       setValue("managerId", defaultValues?.managerId || ""),
-      setValue("designationId", defaultValues?.designationId || ""),
-      setValue("teamId", defaultValues?.teamId || "")
+        setValue("designationId", defaultValues?.designationId || ""),
+        setValue("teamId", defaultValues?.teamId || "")
     }
   }, [userId, defaultValues]);
 
@@ -371,16 +369,40 @@ const TeamsAndSkillTab = ({
                     helperText={errors.primarySkills?.message}
                   />
                 )}
-                renderTags={(value, getTagProps) =>
-                  value.map((option, index) => (
-                    <Chip
-                      key={option._id}
-                      label={option.label}
-                      deleteIcon={<CancelIcon />}
-                      {...getTagProps({ index })}
-                    />
-                  ))
-                }
+                renderTags={(value, getTagProps) => {
+                  const maxTags = 2;
+                  const tagCount = value.length;
+
+                  return (
+                    <Box
+                      sx={{
+                        display: "flex",
+                        flexWrap: "wrap",
+                        gap: 0.5,
+                      }}
+                    >
+                      {value.slice(0, maxTags).map((option, index) => (
+                        <Chip
+                          key={option._id}
+                          label={option.label}
+                          deleteIcon={<CancelIcon />}
+                          {...getTagProps({ index })}
+                        />
+                      ))}
+                      {tagCount > maxTags && (
+                        <Chip
+                          label={`+${tagCount - maxTags}`}
+                          sx={{
+                            backgroundColor: "transparent",
+                            color: "text.secondary",
+                            border: "1px dashed",
+                            borderColor: "divider",
+                          }}
+                        />
+                      )}
+                    </Box>
+                  );
+                }}
               />
             </Grid>
 
@@ -400,16 +422,40 @@ const TeamsAndSkillTab = ({
                     helperText={errors.secondarySkills?.message}
                   />
                 )}
-                renderTags={(value, getTagProps) =>
-                  value.map((option, index) => (
-                    <Chip
-                      key={option._id}
-                      label={option.label}
-                      deleteIcon={<CancelIcon />}
-                      {...getTagProps({ index })}
-                    />
-                  ))
-                }
+                renderTags={(value, getTagProps) => {
+                  const maxTags = 2;
+                  const tagCount = value.length;
+
+                  return (
+                    <Box
+                      sx={{
+                        display: "flex",
+                        flexWrap: "wrap",
+                        gap: 0.5,
+                      }}
+                    >
+                      {value.slice(0, maxTags).map((option, index) => (
+                        <Chip
+                          key={option._id}
+                          label={option.label}
+                          deleteIcon={<CancelIcon />}
+                          {...getTagProps({ index })}
+                        />
+                      ))}
+                      {tagCount > maxTags && (
+                        <Chip
+                          label={`+${tagCount - maxTags}`}
+                          sx={{
+                            backgroundColor: "transparent",
+                            color: "text.secondary",
+                            border: "1px dashed",
+                            borderColor: "divider",
+                          }}
+                        />
+                      )}
+                    </Box>
+                  );
+                }}
               />
             </Grid>
           </Grid>
@@ -424,7 +470,7 @@ const TeamsAndSkillTab = ({
               borderColor: "divider",
             }}
           >
-            <Button variant="outlined" onClick={onBack}>
+            <Button variant="outlined" onClick={() => onBack()}>
               Back
             </Button>
             <Button

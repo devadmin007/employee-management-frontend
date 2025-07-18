@@ -19,7 +19,12 @@ const settingSchema = yup.object().shape({
     }),
   currentSalary: yup
     .string()
-    .matches(/^\d+$/, "Salary must contain only numbers"),
+    .nullable()
+    .test(
+      "is-numeric",
+      "Salary must contain only numbers",
+      (value) => !value || /^\d+$/.test(value)
+    ),
   panNo: yup
     .string()
     .required("PAN Number is required")
@@ -38,10 +43,13 @@ const settingSchema = yup.object().shape({
   pfNo: yup
     .string()
     .nullable()
-    .matches(
-      /^[A-Za-z0-9]+$/,
-      "PF Number can only contain letters and numbers"
-    ),
+    .test(
+      "is-alphanumeric",
+      "PF Number can only contain letters and numbers",
+      (value) => !value || /^[A-Za-z0-9]+$/.test(value)
+    )
+    .min(8, "PF Number must be at least 8 characters")
+    .max(22, "PF Number must be at most 22 characters"),
   previousExperience: yup
     .string()
     .nullable()

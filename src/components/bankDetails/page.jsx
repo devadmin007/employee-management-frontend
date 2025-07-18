@@ -20,6 +20,7 @@ const BankDetailsTab = ({
     formState: { errors },
   } = useForm({
     resolver: yupResolver(bankSchema),
+    mode: "onChange",
     defaultValues: {
       bankDetails: extractBankDetails(defaultValues),
     },
@@ -122,7 +123,7 @@ const BankDetailsTab = ({
               borderColor: "divider",
             }}
           >
-            <Button variant="outlined" onClick={onBack}>
+            <Button variant="outlined" onClick={() => onBack()}>
               Back
             </Button>
             <Button
