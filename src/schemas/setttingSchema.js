@@ -51,7 +51,14 @@ const settingSchema = yup.object().shape({
   previousExperience: yup
     .string()
     .nullable()
-    .matches(/^\d*\.?\d+$/, "Experience must be a number (in years)"),
+    .test(
+      "valid-experience",
+      "Experience must be a number (e.g. 2 or 2.5 years)",
+      (value) => {
+        if (!value) return true;
+        return /^\d*\.?\d+$/.test(value);
+      }
+    ),
 });
 
 export default settingSchema;

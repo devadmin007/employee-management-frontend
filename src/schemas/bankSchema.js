@@ -4,34 +4,42 @@ const bankSchema = yup.object().shape({
   bankDetails: yup.object().shape({
     accountNumber: yup
       .string()
-      .required("Account Number is required")
-      .matches(/^\d{9,18}$/, "Account Number must be 9-18 digits")
       .test(
-        "no-spaces",
-        "Account Number cannot contain spaces",
-        (value) => !/\s/.test(value)
+        "account-number-format",
+        "Must be 9-18 digits without spaces",
+        (value) => {
+          if (value && value.trim().length > 0) {
+            return /^\d{9,18}$/.test(value) && !/\s/.test(value);
+          }
+          return true; 
+        }
       ),
     ifscCode: yup
       .string()
-      .required("IFSC Code is required")
-      .matches(
-        /^[A-Z]{4}0[A-Z0-9]{6}$/,
-        "Invalid IFSC Code (e.g., SBIN0001234)"
-      )
-      .uppercase()
       .test(
-        "no-spaces",
-        "IFSC Code cannot contain spaces",
-        (value) => !/\s/.test(value)
+        "ifsc-format",
+        "Must be in format (e.g., SBIN0001234) without spaces",
+        (value) => {
+          if (value && value.trim().length > 0) {
+            return (
+              /^[A-Z]{4}0[A-Z0-9]{6}$/.test(value.toUpperCase()) &&
+              !/\s/.test(value)
+            );
+          }
+          return true;
+        }
       ),
     branchName: yup
       .string()
-      .required("Branch Name is required")
-      .min(3, "Branch Name must be at least 3 characters")
-      .max(50, "Branch Name cannot exceed 50 characters")
-      .matches(
-        /^[a-zA-Z\s\-']+$/,
-        "Branch Name can only contain letters, spaces, hyphens, and apostrophes"
+      .test(
+        "branch-name-format",
+        "Only letters, spaces, hyphens, and apostrophes allowed",
+        (value) => {
+          if (value && value.trim().length > 0) {
+            return /^[a-zA-Z\s\-']+$/.test(value);
+          }
+          return true;
+        }
       ),
   }),
 });

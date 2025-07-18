@@ -45,7 +45,6 @@ const SettingTab = ({
     });
     formData.append("step", 3);
 
-    // console.log("Form data:", Object.fromEntries(formData));
     if (onSubmit) {
       onSubmit(formData);
     }
@@ -241,7 +240,13 @@ const SettingTab = ({
                     label="Previous Experience (Yrs)"
                     variant="outlined"
                     onChange={(e) => {
-                      field?.onChange(e.target.value.replace(/[^0-9]/g, '').slice(0, 2));
+                      const value = e.target.value
+                        .replace(/[^0-9.]/g, '')
+                        .replace(/(\..*)\./g, '$1')
+                        .replace(/^(\d+\.\d{1}).*/g, '$1')
+                        .slice(0, 5);
+
+                      field.onChange(value);
                     }}
                     error={!!errors.previousExperience}
                     helperText={errors.previousExperience?.message}

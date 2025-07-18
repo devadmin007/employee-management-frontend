@@ -251,11 +251,11 @@ const UserProfile = ({ params }) => {
                                         },
                                         {
                                             primary: "PF Number",
-                                            secondary: userData?.userDetails?.pfNo ?? "-",
+                                            secondary: userData?.userDetails?.pfNo || "-",
                                         },
                                         {
                                             primary: "UAN Detail",
-                                            secondary: userData?.userDetails?.uanDetail ?? "-",
+                                            secondary: userData?.userDetails?.uanDetail || "-",
                                         },
                                     ].map((item, index, array) => (
                                         <React.Fragment key={index}>
@@ -402,15 +402,15 @@ const UserProfile = ({ params }) => {
                                     {[
                                         {
                                             primary: "Account Number",
-                                            secondary: userData?.userDetails?.bankDetails?.accountNumber,
+                                            secondary: userData?.userDetails?.bankDetails?.accountNumber || "-",
                                         },
                                         {
                                             primary: "IFSC Code",
-                                            secondary: userData?.userDetails?.bankDetails?.ifscCode,
+                                            secondary: userData?.userDetails?.bankDetails?.ifscCode || "-",
                                         },
                                         {
                                             primary: "Branch Name",
-                                            secondary: userData?.userDetails?.bankDetails?.branchName,
+                                            secondary: userData?.userDetails?.bankDetails?.branchName || "-",
                                         },
                                     ].map((item, index, array) => (
                                         <React.Fragment key={index}>

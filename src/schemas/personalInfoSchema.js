@@ -39,8 +39,11 @@ const personalInfoSchema = yup.object().shape({
     .matches(/^[0-9]{10}$/, "Phone Number must be 10 digits"),
   personalNumber: yup
     .string()
-    .required("Emergency Mobile is required")
-    .matches(/^[0-9]{10}$/, "Emergency Mobile must be 10 digits"),
+    .test("valid-mobile", "Mobile must be exactly 10 digits", (value) => {
+      if (!value) return true;
+
+      return /^[0-9]{10}$/.test(value);
+    }),
   dateOfBirth: yup
     .string()
     .required("Date of birth is required")
