@@ -47,9 +47,7 @@ const settingSchema = yup.object().shape({
       "is-alphanumeric",
       "PF Number can only contain letters and numbers",
       (value) => !value || /^[A-Za-z0-9]+$/.test(value)
-    )
-    .min(8, "PF Number must be at least 8 characters")
-    .max(22, "PF Number must be at most 22 characters"),
+    ),
   previousExperience: yup
     .string()
     .nullable()
