@@ -148,7 +148,7 @@ const Page = () => {
       <CommonTable
         rows={rows}
         columns={columns}
-        count={totalCount}
+        count={totalPages}
         page={page}
         onPageChange={handlePageChange}
         onSearchChange={handleSearchChange}
