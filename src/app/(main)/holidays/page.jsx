@@ -181,7 +181,7 @@ const Page = () => {
     try {
       const result = await getHolidayByIdApi(id);
       const holidayData = result.data.data.holiday;
-      setValue("holiday", holidayData.label);
+      setValue("label", holidayData.label);
       setValue("date", dayjs(holidayData.date));
       setOriginalHolidayValue(holidayData.label);
     } catch (e) {
@@ -234,13 +234,13 @@ const Page = () => {
   };
 
   const updateHolidayData = async (data) => {
-    if (data.holiday.trim() === originalHolidayValue.trim()) {
+    if (data.label.trim() === originalHolidayValue.trim()) {
       toast.warning("No changes detected.");
       return;
     }
 
     setIsUpdating(true);
-    const payload = { label: data.label, date: data.date };
+    const payload = { label: data.label, date: dayjs(data.date).format("YYYY-MM-DD") };
 
     try {
       const result = await updateHolidayApi(updateId, payload);
@@ -367,7 +367,7 @@ const Page = () => {
           maxWidth="sm"
           fullWidth
         >
-          <form onSubmit={updateHolidayData()}>
+          <form onSubmit={handleSubmit(updateHolidayData)}>
             <DialogTitle>Edit Holiday</DialogTitle>
 
             <DialogContent>
@@ -396,6 +396,7 @@ const Page = () => {
                         margin="dense"
                         variant="outlined"
                         error={!!errors.label}
+                        InputLabelProps={{ shrink: true }}   // ✅ important line
                         helperText={errors.label?.message}
                       />
                     )}
@@ -410,9 +411,8 @@ const Page = () => {
                       <DatePicker
                         label="Holiday Date"
                         format="DD/MM/YYYY"
-                        value={field.value}
+                        value={field.value ? dayjs(field.value) : null}   // ✅ ensure correct format
                         onChange={(date) => field.onChange(date)}
-                        // disablePast={!editData}
                         slotProps={{
                           textField: {
                             fullWidth: true,
@@ -427,23 +427,7 @@ const Page = () => {
                 </Stack>
               </LocalizationProvider>
 
-              {/* Notes */}
-              <TextField
-                margin="dense"
-                label="Notes"
-                fullWidth
-                multiline
-                rows={3}
-                variant="outlined"
-                {...register("notes", {
-                  maxLength: {
-                    value: 300,
-                    message: "Notes must be less than 300 characters",
-                  },
-                })}
-                error={!!errors.notes}
-                helperText={errors.notes?.message}
-              />
+             
             </DialogContent>
 
             <DialogActions>
@@ -464,7 +448,7 @@ const Page = () => {
                   color: "white",
                 }}
               >
-                {isLoading ? (
+                {isUpdating ? (
                   <CircularProgress size={20} color="inherit" />
                 ) : (
                   "Update"
@@ -490,286 +474,3 @@ const Page = () => {
 };
 
 export default Page;
-
-// 'use client'
-// import {
-//   Dialog,
-//   DialogTitle,
-//   DialogContent,
-//   DialogActions,
-//   Button,
-//   CircularProgress,
-//   TextField,
-//   Stack,
-// } from "@mui/material";
-// import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-// import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-// import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-// import { Controller, useForm } from "react-hook-form";
-// import dayjs from "dayjs";
-// import { toast } from "react-toastify";
-// import React, { useState } from "react";
-
-
-// const Page = ({
-//   isAdminOrHR,
-//   openDialog,
-//   setOpenDialog,
-//   openUpdateDialog,
-//   setOpenUpdateDialog,
-//   selectedHoliday,
-//   onCreateHoliday,
-//   onUpdateHoliday,
-// }) => {
-//   const {
-//     handleSubmit,
-//     control,
-//     setValue,
-//     reset,
-//     formState: { errors },
-//   } = useForm({
-//     defaultValues: { label: "", date: null },
-//   });
-
-//   const [isLoading, setIsLoading] = useState(false);
-//   const [isUpdating, setIsUpdating] = useState(false);
-
-//   // --- Handlers ---
-//   const handleCloseAddDialog = () => {
-//     setOpenDialog(false);
-//     reset();
-//   };
-
-//   const handleCloseEditDialog = () => {
-//     setOpenUpdateDialog(false);
-//     reset();
-//   };
-
-//   const handleOpenEditDialog = (holidayData) => {
-//     setValue("label", holidayData.label);
-//     setValue("date", dayjs(holidayData.date));
-//     setOpenUpdateDialog(true);
-//   };
-
-//   const addHoliday = async (data) => {
-//     try {
-//       setIsLoading(true);
-//       await onCreateHoliday({
-//         ...data,
-//         date: dayjs(data.date).format("YYYY-MM-DD"),
-//       });
-//       toast.success("Holiday added successfully");
-//       handleCloseAddDialog();
-//     } catch (error) {
-//       toast.error(error?.message || "Failed to add holiday");
-//     } finally {
-//       setIsLoading(false);
-//     }
-//   };
-
-//   const updateHolidayData = async (data) => {
-//     try {
-//       setIsUpdating(true);
-//       const formattedData = {
-//         ...data,
-//         date: dayjs(data.date).format("YYYY-MM-DD"),
-//       };
-//       await onUpdateHoliday(formattedData);
-//       toast.success("Holiday updated successfully");
-//       handleCloseEditDialog();
-//     } catch (error) {
-//       toast.error(error?.message || "Failed to update holiday");
-//     } finally {
-//       setIsUpdating(false);
-//     }
-//   };
-
-//   return (
-//     <>
-//       {/* ------------------ Add Holiday Dialog ------------------ */}
-//       {isAdminOrHR && (
-//         <Dialog
-//           open={openDialog}
-//           onClose={handleCloseAddDialog}
-//           maxWidth="sm"
-//           fullWidth
-//         >
-//           <form onSubmit={handleSubmit(addHoliday)}>
-//             <DialogTitle>Add Holiday</DialogTitle>
-
-//             <DialogContent>
-//               <LocalizationProvider dateAdapter={AdapterDayjs}>
-//                 <Stack spacing={3} sx={{ my: 2 }}>
-//                   {/* Holiday Label */}
-//                   <Controller
-//                     name="label"
-//                     control={control}
-//                     rules={{
-//                       required: "Holiday label is required",
-//                       minLength: {
-//                         value: 2,
-//                         message: "Label must be at least 2 characters",
-//                       },
-//                       maxLength: {
-//                         value: 50,
-//                         message: "Label must be less than 50 characters",
-//                       },
-//                     }}
-//                     render={({ field }) => (
-//                       <TextField
-//                         {...field}
-//                         label="Holiday Label"
-//                         fullWidth
-//                         variant="outlined"
-//                         error={!!errors.label}
-//                         helperText={errors.label?.message}
-//                       />
-//                     )}
-//                   />
-
-//                   {/* Holiday Date */}
-//                   <Controller
-//                     name="date"
-//                     control={control}
-//                     rules={{ required: "Date is required" }}
-//                     render={({ field }) => (
-//                       <DatePicker
-//                         label="Holiday Date"
-//                         format="DD/MM/YYYY"
-//                         value={field.value}
-//                         onChange={(date) => field.onChange(date)}
-//                         disablePast
-//                         slotProps={{
-//                           textField: {
-//                             fullWidth: true,
-//                             error: !!errors.date,
-//                             helperText: errors.date?.message,
-//                           },
-//                         }}
-//                       />
-//                     )}
-//                   />
-//                 </Stack>
-//               </LocalizationProvider>
-//             </DialogContent>
-
-//             <DialogActions>
-//               <Button onClick={handleCloseAddDialog} disabled={isLoading}>
-//                 Cancel
-//               </Button>
-//               <Button
-//                 type="submit"
-//                 variant="contained"
-//                 disabled={isLoading}
-//                 sx={{
-//                   background:
-//                     "linear-gradient(90deg, rgb(239,131,29) 0%, rgb(244,121,56) 100%)",
-//                   color: "white",
-//                 }}
-//               >
-//                 {isLoading ? (
-//                   <CircularProgress size={20} color="inherit" />
-//                 ) : (
-//                   "Save"
-//                 )}
-//               </Button>
-//             </DialogActions>
-//           </form>
-//         </Dialog>
-//       )}
-
-//       {/* ------------------ Edit Holiday Dialog ------------------ */}
-//       {isAdminOrHR && (
-//         <Dialog
-//           open={openUpdateDialog}
-//           onClose={handleCloseEditDialog}
-//           maxWidth="sm"
-//           fullWidth
-//         >
-//           <form onSubmit={handleSubmit(updateHolidayData)}>
-//             <DialogTitle>Edit Holiday</DialogTitle>
-
-//             <DialogContent>
-//               <LocalizationProvider dateAdapter={AdapterDayjs}>
-//                 <Stack spacing={3} sx={{ my: 2 }}>
-//                   {/* Holiday Label */}
-//                   <Controller
-//                     name="label"
-//                     control={control}
-//                     rules={{
-//                       required: "Holiday label is required",
-//                       minLength: {
-//                         value: 2,
-//                         message: "Label must be at least 2 characters",
-//                       },
-//                       maxLength: {
-//                         value: 50,
-//                         message: "Label must be less than 50 characters",
-//                       },
-//                     }}
-//                     render={({ field }) => (
-//                       <TextField
-//                         {...field}
-//                         label="Holiday Label"
-//                         fullWidth
-//                         variant="outlined"
-//                         error={!!errors.label}
-//                         helperText={errors.label?.message}
-//                       />
-//                     )}
-//                   />
-
-//                   {/* Holiday Date */}
-//                   <Controller
-//                     name="date"
-//                     control={control}
-//                     rules={{ required: "Date is required" }}
-//                     render={({ field }) => (
-//                       <DatePicker
-//                         label="Holiday Date"
-//                         format="DD/MM/YYYY"
-//                         value={field.value}
-//                         onChange={(date) => field.onChange(date)}
-//                         slotProps={{
-//                           textField: {
-//                             fullWidth: true,
-//                             error: !!errors.date,
-//                             helperText: errors.date?.message,
-//                           },
-//                         }}
-//                       />
-//                     )}
-//                   />
-//                 </Stack>
-//               </LocalizationProvider>
-//             </DialogContent>
-
-//             <DialogActions>
-//               <Button onClick={handleCloseEditDialog} disabled={isUpdating}>
-//                 Cancel
-//               </Button>
-//               <Button
-//                 type="submit"
-//                 variant="contained"
-//                 disabled={isUpdating}
-//                 sx={{
-//                   background:
-//                     "linear-gradient(90deg, rgb(239,131,29) 0%, rgb(244,121,56) 100%)",
-//                   color: "white",
-//                 }}
-//               >
-//                 {isUpdating ? (
-//                   <CircularProgress size={20} color="inherit" />
-//                 ) : (
-//                   "Update"
-//                 )}
-//               </Button>
-//             </DialogActions>
-//           </form>
-//         </Dialog>
-//       )}
-//     </>
-//   );
-// };
-
-// export default Page;
