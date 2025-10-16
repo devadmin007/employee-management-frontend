@@ -80,7 +80,7 @@ const personalInfoSchema = yup.object().shape({
         (val) =>
           val &&
           val.replace(/\D/g, "").length >= 4 &&
-          val.replace(/\D/g, "").length <= 10
+          val.replace(/\D/g, "").length <= 7
       ),
     country: yup
       .string()
